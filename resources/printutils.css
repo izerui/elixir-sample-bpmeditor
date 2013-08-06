@@ -1,0 +1,10 @@
+@namespace printutils "printutils.*";
+
+printutils|PrintDialog { 
+  padding-top: 10; 
+  padding-left: 10; 
+  padding-right: 10; 
+  padding-bottom: 10; 
+} 
+
+

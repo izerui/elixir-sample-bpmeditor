@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<ibm:NodeSkinBase xmlns="http://ns.adobe.com/mxml/2009"
+        xmlns:mx="library://ns.adobe.com/flex/mx"
+        xmlns:s="library://ns.adobe.com/flex/spark"  
+        xmlns:ibm="http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010"
+        xmlns:bpmn="bpm.graphic.icons.*">
+  
+  <Metadata>
+    [HostComponent("bpm.graphic.TextAnnotation")]
+  </Metadata> 
+  
+  <ibm:states>
+    <s:State name="normal" />
+    <s:State name="selected" stateGroups="Selected"/>
+    <s:State name="normalAndShowsCaret" stateGroups="ShowsCaret"/>
+    <s:State name="selectedAndShowsCaret" stateGroups="Selected,ShowsCaret"/>
+    <s:State name="active"/>
+    <s:State name="done"/>
+  </ibm:states>
+  
+  <s:Group id="base">
+    <s:filters>
+      <s:GlowFilter includeIn="ShowsCaret" color="{caretColor}" alpha="0.8" blurX="8" blurY="8">
+      </s:GlowFilter>
+    </s:filters>    
+   
+    <s:Path scaleX="{hostComponent.bracketOnRight ? -1 : 1}" height="100%" right="{hostComponent.bracketOnRight ? 0 : Number.NaN}">
+      <s:data>M 15 0 L 0 0 L 0 30 L 15 30</s:data>
+      <s:stroke><s:SolidColorStroke weight="1" color="0x808080" /></s:stroke>
+    </s:Path>
+    
+    <s:Group id="labelsGroup" verticalCenter="0" left="5" right="5">
+      <s:Group>
+        <s:Label top="10" bottom="10" id="labelElement" text="{hostComponent.label}" maxWidth="200" textAlign="{hostComponent.bracketOnRight ? 'right' : 'left'}" color="{color}" fontSize="12"/>
+      </s:Group>
+    </s:Group>
+    
+  </s:Group>
+  
+</ibm:NodeSkinBase>

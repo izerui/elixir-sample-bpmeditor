@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>HPool.as</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre><span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptpackage">package</span> bpm.graphic
+<span class="ActionScriptBracket/Brace">{</span>
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.HPool;
+  
+  <span class="ActionScriptReserved">public</span> class HPool extends com.ibm.ilog.elixir.diagram.HPool
+  <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> HPool()
+    <span class="ActionScriptBracket/Brace">{</span>
+      super();
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Collapses or expands the subgraph and invalidates the current skin state.</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * <p>The HPool skin provided in this sample was created with</span>
+<span class="ActionScriptASDoc">     * the intention to not allow a lane to be collapsed.</span>
+<span class="ActionScriptASDoc">     * </p></span>
+<span class="ActionScriptASDoc">     * @default false</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> collapsed(value:Boolean):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptComment">// no-op</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> collapsed():Boolean
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+  <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body></html>

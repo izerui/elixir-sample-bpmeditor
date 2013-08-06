@@ -1,0 +1,321 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>DemoUtil.as</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre><span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Y31,5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptpackage">package</span>
+<span class="ActionScriptBracket/Brace">{</span>
+  <span class="ActionScriptReserved">import</span> flash.events.<span class="ActionScriptMetadata">Event</span>;
+  <span class="ActionScriptReserved">import</span> flash.events.HTTPStatusEvent;
+  <span class="ActionScriptReserved">import</span> flash.events.IOErrorEvent;
+  <span class="ActionScriptReserved">import</span> flash.events.ProgressEvent;
+  <span class="ActionScriptReserved">import</span> flash.events.SecurityErrorEvent;
+  <span class="ActionScriptReserved">import</span> flash.net.URLRequest;
+  <span class="ActionScriptReserved">import</span> flash.net.URLStream;
+  <span class="ActionScriptReserved">import</span> flash.utils.ByteArray;
+  
+  <span class="ActionScriptReserved">import</span> mx.controls.Alert;
+  <span class="ActionScriptReserved">import</span> mx.core.FlexGlobals;
+  <span class="ActionScriptReserved">import</span> mx.resources.IResourceManager;
+  <span class="ActionScriptReserved">import</span> mx.resources.ResourceManager;
+  
+  <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">   * This class contains a set of utility methods that can be used in samples.</span>
+<span class="ActionScriptASDoc">   */</span>
+  <span class="ActionScriptReserved">public</span> class DemoUtil
+  <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptComment">/* For DEBUG when running over http. For instance, the help text of BPMMonitor </span>
+<span class="ActionScriptComment">     can be binded to it. </span>
+<span class="ActionScriptComment">    [Bindable] </span>
+<span class="ActionScriptComment">    public static var debugString:String = "";</span>
+<span class="ActionScriptComment">    */</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * This method builds an absolute path to the given URL which is relative</span>
+<span class="ActionScriptASDoc">     * to the application. To do that, we get the url of the application,</span>
+<span class="ActionScriptASDoc">     * remove the application's name from it and finally append the given url.</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * @param url The URL relative to the application to transform into</span>
+<span class="ActionScriptASDoc">     *            an absolute URL.</span>
+<span class="ActionScriptASDoc">     * @return The absolute URL.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> getAbsolutePathTo(url:String):String
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptvar">var</span> absUrl:String = <span class="ActionScriptReserved">new</span> String(url);
+      
+      <span class="ActionScriptComment">// get the url of the application</span>
+      <span class="ActionScriptvar">var</span> s:String = FlexGlobals.topLevelApplication.url;
+      
+      <span class="ActionScriptComment">// get the index of the last / or \ in the application url</span>
+      <span class="ActionScriptvar">var</span> index:int = Math.max(s.lastIndexOf(<span class="ActionScriptString">"\\"</span>), s.lastIndexOf(<span class="ActionScriptString">"/"</span>));
+      
+      <span class="ActionScriptComment">// remove the application name from the absolute url and append the relative url</span>
+      <span class="ActionScriptReserved">if</span> (index != -1) absUrl = s.substr(0, index + 1) + url;        
+      
+      <span class="ActionScriptReserved">return</span> absUrl;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+   <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Asynchronously loads a file using the locale-dependent relative path of a fileName </span>
+<span class="ActionScriptASDoc">     * (for instance, en_us/influenza.sbml, ja_JP/project.idpr).</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * The method iterates over the locales of the localeChain in their order of</span>
+<span class="ActionScriptASDoc">     * priority and tries to open a stream using the relative path obtained by </span>
+<span class="ActionScriptASDoc">     * concatenating the locale name and the fileName (with path separator). </span>
+<span class="ActionScriptASDoc">     * If this succeeds, the loadFunction is called with the localized relative </span>
+<span class="ActionScriptASDoc">     * path as argument. Otherwise, it tries the next locale. </span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * If the file is not found for any of the locales in the locale chain, it</span>
+<span class="ActionScriptASDoc">     * falls back to the en_US locale.</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * This utility is intended for demos that package their data files in directories</span>
+<span class="ActionScriptASDoc">     * such as src/data/en_US. It can be used in both cases: when translations in other</span>
+<span class="ActionScriptASDoc">     * languages (japanese...) are provided, or only the English variant is provided.</span>
+<span class="ActionScriptASDoc">     * In the latter case, this allows for instance a given IBM geographical entity</span>
+<span class="ActionScriptASDoc">     * to add a translation without needing to modify the code of the demo. </span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * Error feedback: an optional errorHandler function taking a String argument can </span>
+<span class="ActionScriptASDoc">     * be passed. If passed, it is called in case the file is not found for any of the </span>
+<span class="ActionScriptASDoc">     * locales including for the en_US fallback locale. For convenience, the fileName </span>
+<span class="ActionScriptASDoc">     * is passed to it.</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * @param fileName The name of the file to be loaded.</span>
+<span class="ActionScriptASDoc">     * @param loadFunction A function taking a String argument. When a file with the</span>
+<span class="ActionScriptASDoc">     *    given fileName is found in the localized directory, this function is</span>
+<span class="ActionScriptASDoc">     *    called with the localized relative path of the file as argument.</span>
+<span class="ActionScriptASDoc">     * @param resourceManager The resource manager. </span>
+<span class="ActionScriptASDoc">     * @param errorHandler An optional function taking a String argument. If this </span>
+<span class="ActionScriptASDoc">     *    argument is passed, the function is called (fileName being passed to it)</span>
+<span class="ActionScriptASDoc">     *    if the data file has not been found for any of the locales in the locale</span>
+<span class="ActionScriptASDoc">     *    chain, including for the fallback case en_US.</span>
+<span class="ActionScriptASDoc">     * @param fallbackToEnUs Optional boolean argument indicating whether</span>
+<span class="ActionScriptASDoc">     *    it should try with en_US locale in case not found for any other. </span>
+<span class="ActionScriptASDoc">     * @param fallbackErrorHandler Optional boolean argument. If true, and if </span>
+<span class="ActionScriptASDoc">     *    a custom errorHandler is not passed, a default error handler is used,</span>
+<span class="ActionScriptASDoc">     *    which calls Alert.show with a message informing that the given file name</span>
+<span class="ActionScriptASDoc">     *    has not been found. If false, and if no custom errorHandler is passed,</span>
+<span class="ActionScriptASDoc">     *    the loading fails silently.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> asyncLoadLocalized(fileName:String, 
+                                              loadFunction:Function,
+                                              resourceManager:IResourceManager,
+                                              errorHandler:Function = <span class="ActionScriptReserved">null</span>,
+                                              fallbackToEnUs:Boolean = <span class="ActionScriptReserved">true</span>,
+                                              fallbackErrorHandler:Boolean = <span class="ActionScriptReserved">true</span>) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptComment">/* Elixir 3.0 used to have code such as:</span>
+<span class="ActionScriptComment">      if (resourceManager.localeChain.indexOf("ja_JP") != -1) {</span>
+<span class="ActionScriptComment">      return "ja_JP/" + fileName;</span>
+<span class="ActionScriptComment">      } else {</span>
+<span class="ActionScriptComment">      return "en_US/" + fileName;</span>
+<span class="ActionScriptComment">      }</span>
+<span class="ActionScriptComment">      */</span>
+      <span class="ActionScriptComment">// On the other side, Elixir Diagram 3.0 used to only have the en_US </span>
+      <span class="ActionScriptComment">// data file and the loading code did not care about the locale.</span>
+      <span class="ActionScriptComment">// To support data files for both ja and en, and at the same time to </span>
+      <span class="ActionScriptComment">// ease the addition of other translations, let's try the locales</span>
+      <span class="ActionScriptComment">// in the localChain one by one.</span>
+      
+      <span class="ActionScriptComment">// debugString = ""; // For debug</span>
+      
+      <span class="ActionScriptvar">var</span> locales:Array = resourceManager.localeChain;
+      
+      <span class="ActionScriptComment">/* For DEBUG. </span>
+<span class="ActionScriptComment">      locales = new Array();</span>
+<span class="ActionScriptComment">      locales.push("hahaHihiNonExistingLocale");</span>
+<span class="ActionScriptComment">      locales.push("ru_RU");</span>
+<span class="ActionScriptComment">      locales.push("en_US");</span>
+<span class="ActionScriptComment">      */</span>
+      
+      <span class="ActionScriptReserved">if</span> (locales == <span class="ActionScriptReserved">null</span>) <span class="ActionScriptComment">// does not happen in practice</span>
+        locales = <span class="ActionScriptReserved">new</span> Array();
+      
+      <span class="ActionScriptReserved">if</span> (errorHandler == <span class="ActionScriptReserved">null</span> && fallbackErrorHandler)
+        errorHandler = defaultAsyncLoadLocalized;
+      
+      tryLocalizedRelPath(fileName, loadFunction, locales, 0, errorHandler, fallbackToEnUs);
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Asynchronously checks whether a file exists with a relative path constructed</span>
+<span class="ActionScriptASDoc">     * from the locale with the provided localeCounter in the array of locales.</span>
+<span class="ActionScriptASDoc">     * If not found, recursively calls itself with an incremented localeCounter.</span>
+<span class="ActionScriptASDoc">     * If file does not exist for any of the locales, the errorHandler function is </span>
+<span class="ActionScriptASDoc">     * called and fileName is passed as argument.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> tryLocalizedRelPath(fileName:String, 
+                                                loadFunction:Function,
+                                                locales:Array, 
+                                                localeCounter:int,
+                                                errorHandler:Function = <span class="ActionScriptReserved">null</span>,
+                                                fallbackToEnUs:Boolean = <span class="ActionScriptReserved">true</span>) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptComment">// Some explanations about this code. Testing the behavior of URLStream.load</span>
+      <span class="ActionScriptComment">// with several browsers (Chrome 11, Firefox 4.0, IE8) has shown different behaviors</span>
+      <span class="ActionScriptComment">// for each, in particular when attempting to load a non-existant URL. </span>
+      <span class="ActionScriptComment">// And for each browser the behavior is different depending on running over http</span>
+      <span class="ActionScriptComment">// or locally. This code aims to cope with all different behaviors.</span>
+      
+      <span class="ActionScriptReserved">if</span> (localeCounter &gt;= locales.length) <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">if</span> (!fallbackToEnUs && errorHandler != <span class="ActionScriptReserved">null</span>) <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptComment">// the data file has not been found for any of the locales in the</span>
+          <span class="ActionScriptComment">// locale chain</span>
+          errorHandler(fileName);  
+        <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (fallbackToEnUs) <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptComment">// Fallback to en_US locale if not found for any locale in the locale chain.</span>
+          <span class="ActionScriptComment">// (in case en_US happens to not be already in the locale chain).</span>
+          <span class="ActionScriptComment">// debug("okay, fallback to en_US");</span>
+          loadFunction(getLocalizedRelPath(<span class="ActionScriptString">"en_US"</span>, fileName));
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">// all locales have been checked, error case has been treated, we are done</span>
+        <span class="ActionScriptReserved">return</span>; 
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptvar">var</span> localizedRelPath:String = getLocalizedRelPath(locales<span class="ActionScriptBracket/Brace">[</span>localeCounter<span class="ActionScriptBracket/Brace">]</span>, fileName);
+      
+      <span class="ActionScriptvar">var</span> urlStream:URLStream = <span class="ActionScriptReserved">new</span> URLStream();
+
+      <span class="ActionScriptvar">var</span> progressEventCounter:int = 0; <span class="ActionScriptComment">// init</span>
+      
+      urlStream.addEventListener(<span class="ActionScriptMetadata">Event</span>.OPEN, fileFoundHandler);
+      urlStream.addEventListener(ProgressEvent.PROGRESS, fileFoundHandler);
+      urlStream.addEventListener(<span class="ActionScriptMetadata">Event</span>.COMPLETE, fileFoundHandler);
+      <span class="ActionScriptComment">// Necessary for IE8+FP10.3, where we get a "progress" event with bytesAvailable > 0</span>
+      <span class="ActionScriptComment">// even for a non-existing URL !!!!!......</span>
+      <span class="ActionScriptComment">// urlStream.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);</span>
+      urlStream.addEventListener(IOErrorEvent.IO_ERROR, fileNotFoundHandler);
+      <span class="ActionScriptComment">// Necessary for Chrome </span>
+      urlStream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, fileNotFoundHandler);
+      
+      try <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// debug("stream.load for " + localizedRelPath);</span>
+        urlStream.load(<span class="ActionScriptReserved">new</span> URLRequest(localizedRelPath));
+      <span class="ActionScriptBracket/Brace">}</span> catch (err:*) <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// debug("exception, calling fileNotFoundHandler");</span>
+        fileNotFoundHandlerImpl(urlStream);
+      <span class="ActionScriptBracket/Brace">}</span> 
+      
+      <span class="ActionScriptfunction">function</span> fileFoundHandler(event:Event) : <span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> stream:URLStream = event.target as URLStream;
+        
+        <span class="ActionScriptComment">/*</span>
+<span class="ActionScriptComment">        debug("fileFoundHandler, e.type: " + event.type + </span>
+<span class="ActionScriptComment">              " stream.bytesAvailable: " + stream.bytesAvailable + </span>
+<span class="ActionScriptComment">              " progressEventCounter: " + progressEventCounter); </span>
+<span class="ActionScriptComment">        */</span>
+        
+        <span class="ActionScriptComment">// for complete event we don't need to check anything</span>
+        <span class="ActionScriptComment">// but we try to not wait until complete, for speed reasons (avoid downloading the entire file)</span>
+        <span class="ActionScriptReserved">if</span> (event.type == ProgressEvent.PROGRESS || event.type == <span class="ActionScriptMetadata">Event</span>.OPEN) <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptvar">var</span> bytesAvailable:uint = stream.bytesAvailable;
+          <span class="ActionScriptReserved">if</span> (bytesAvailable == 0) <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// At least with IE8+FlashPlayer 10.3, URLStream.load fires</span>
+            <span class="ActionScriptComment">// an event "open" for a file that does not exist, and fires the</span>
+            <span class="ActionScriptComment">// error event only after that (while Firefox for instance raises directly</span>
+            <span class="ActionScriptComment">// the error event). Hence, for IE's sake, we must skip the open event</span>
+            <span class="ActionScriptComment">// with no bytesAvailable.</span>
+            <span class="ActionScriptComment">// debug("   skipping, because 0 bytes available");</span>
+            <span class="ActionScriptReserved">return</span>;
+          <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">if</span> (event.type == ProgressEvent.PROGRESS) <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptComment">/* For DEBUG</span>
+<span class="ActionScriptComment">          var bytes:ByteArray = new ByteArray();</span>
+<span class="ActionScriptComment">          stream.readBytes(bytes, 0, bytesAvailable);</span>
+<span class="ActionScriptComment">          debug("byteArray: " + bytes.toString());</span>
+<span class="ActionScriptComment">          */</span>
+          
+          progressEventCounter++;
+          <span class="ActionScriptReserved">if</span> (progressEventCounter == 1) <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// Skip the first progress event, because with IE(8) we get one progress event </span>
+            <span class="ActionScriptComment">// even for an inexisting URL. The bytes available in this casea are:</span>
+            <span class="ActionScriptComment">// <h1>Page not found: /dojo-diagrammer-oldrepo/src/samples/linkdecorations/bin-debug/hahaHihi/ApplicationProcess.idfl</h1></span>
+            <span class="ActionScriptComment">// (but this can vary according to servers).</span>
+            <span class="ActionScriptComment">// debug("   skipping, because it's the first event of type progress so unreliable (IE8 case)");</span>
+            <span class="ActionScriptReserved">return</span>; 
+          <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">// debug("  okay, now fileFoundHandler calls loadFunction for " + localizedRelPath);</span>
+        <span class="ActionScriptReserved">if</span> (stream) <span class="ActionScriptBracket/Brace">{</span>
+          try <span class="ActionScriptBracket/Brace">{</span>
+            stream.close();
+          <span class="ActionScriptBracket/Brace">}</span> catch (err:*) <span class="ActionScriptBracket/Brace">{</span> 
+          <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        loadFunction(localizedRelPath);
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptfunction">function</span> fileFoundHandlerImpl(locRelPath:String, stream:URLStream) : <span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// debug("fileFoundHandlerImpl calls loadFunction for " + localizedRelPath + " stream: " + stream);</span>
+        <span class="ActionScriptReserved">if</span> (stream) <span class="ActionScriptBracket/Brace">{</span>
+          try <span class="ActionScriptBracket/Brace">{</span>
+            stream.close();
+          <span class="ActionScriptBracket/Brace">}</span> catch (err:*) <span class="ActionScriptBracket/Brace">{</span> 
+          <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        loadFunction(locRelPath);
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptfunction">function</span> fileNotFoundHandler(event:Event) : <span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// debug("fileNotFoundHandler for " + localizedRelPath + ", launching tryLocalizedRelPath for next locale");</span>
+        <span class="ActionScriptvar">var</span> stream:URLStream = event.target as URLStream;
+        fileNotFoundHandlerImpl(stream);
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptfunction">function</span> fileNotFoundHandlerImpl(stream:URLStream) : <span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// debug("fileNotFoundHandler for " + localizedRelPath + ", launching tryLocalizedRelPath for next locale");</span>
+        <span class="ActionScriptReserved">if</span> (stream) <span class="ActionScriptBracket/Brace">{</span>
+          try <span class="ActionScriptBracket/Brace">{</span>
+            stream.close();
+          <span class="ActionScriptBracket/Brace">}</span> catch (err:*) <span class="ActionScriptBracket/Brace">{</span> 
+            <span class="ActionScriptComment">// In some cases (Chrome 11), urlStream.load throws an exception when </span>
+            <span class="ActionScriptComment">// the file is not found, and trying to close the stream throws itself </span>
+            <span class="ActionScriptComment">// another exception. Hence the silent catch.</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        tryLocalizedRelPath(fileName, loadFunction, locales, localeCounter + 1, errorHandler, fallbackToEnUs);
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptfunction">function</span> httpStatusHandler(event:HTTPStatusEvent):<span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// debug("httpStatusHandler, status: " + event.status);</span>
+        <span class="ActionScriptvar">var</span> stream:URLStream = event.target as URLStream;
+        <span class="ActionScriptComment">// Note that depending on browser, FlashPlayer may not be able to provide the correct status</span>
+        <span class="ActionScriptComment">// and provides instead the value 0.</span>
+        <span class="ActionScriptComment">// See Adobe bug FP-721 "URLLoader - HttpStatusEvent should return a valid http status code and not 0"</span>
+        <span class="ActionScriptReserved">if</span> (event.status &gt;= 400) <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptComment">// >= 400 includes "4xx Client Error" and (probably useless in practice) "5xx Server Error".</span>
+          <span class="ActionScriptComment">// debug(" httpStatusHandler calls fileNotFoundHandler");</span>
+          fileNotFoundHandlerImpl(stream); 
+        <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptComment">/* For DEBUG</span>
+<span class="ActionScriptComment">    private static function debug(str:String) : void</span>
+<span class="ActionScriptComment">    {</span>
+<span class="ActionScriptComment">      trace(str);</span>
+<span class="ActionScriptComment">      debugString += (str + "\n");</span>
+<span class="ActionScriptComment">    }</span>
+<span class="ActionScriptComment">    */</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Constructs the localized relative path of a given fileName.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> getLocalizedRelPath(locale:String, fileName:String) : String 
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">return</span> locale + <span class="ActionScriptString">"/"</span> + fileName;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> defaultAsyncLoadLocalized(fileName:String) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      Alert.show(ResourceManager.getInstance().getString(<span class="ActionScriptString">"elixirsamplebar_enterprise"</span>, <span class="ActionScriptString">"demoutil.fileNotFound"</span>, <span class="ActionScriptBracket/Brace">[</span>fileName<span class="ActionScriptBracket/Brace">]</span>));
+    <span class="ActionScriptBracket/Brace">}</span>
+  <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body></html>

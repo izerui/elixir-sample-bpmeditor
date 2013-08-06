@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+        xmlns:s="library://ns.adobe.com/flex/spark" 
+        xmlns:mx="library://ns.adobe.com/flex/mx">
+  <!-- host component -->
+  <fx:Metadata>
+    [HostComponent("spark.components.ToggleButton")]
+  </fx:Metadata>
+  
+  <!-- states -->
+  <s:states>
+    <s:State name="disabledAndSelected" stateGroups="Selected"/>
+    <s:State name="downAndSelected" stateGroups="Selected"/>
+    <s:State name="overAndSelected" stateGroups="Selected,Over"/>
+    <s:State name="upAndSelected" stateGroups="Selected"/>
+    <s:State name="disabled" stateGroups="Normal"/>
+    <s:State name="down" stateGroups="Normal"/>
+    <s:State name="over" stateGroups="Normal,Over"/>
+    <s:State name="up" stateGroups="Normal"/>
+  </s:states>
+  
+  <s:Rect width="100%" height="100%">
+    <s:fill>
+      <s:SolidColor 
+        color.disabledAndSelected="0xEEEEEE"
+        color.overAndSelected="0xEEEEEE"
+        color.upAndSelected="0xEEEEEE"
+        color.over="0xEEEEEE"
+        color="white"
+        />
+    </s:fill>
+    <s:stroke>
+      <s:SolidColorStroke weight="2" color="white" color.Over="0xEEEEEE" />
+    </s:stroke>
+  </s:Rect>
+  
+  <s:HGroup verticalAlign="middle" gap="4" paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2">
+    <mx:SWFLoader id="swfAsset" source="@Embed('assets/question.png')"
+                  cacheAsBitmap="true" width="100%" height="100%" />
+    <s:Label id="labelDisplay" buttonMode="true"
+             textAlign="center"
+             verticalAlign="middle"
+             maxDisplayedLines="1"
+             horizontalCenter="0" verticalCenter="1"
+             left="1" right="1">
+    </s:Label>    
+  </s:HGroup>
+</s:Skin>

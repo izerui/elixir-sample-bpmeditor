@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<s:Skin xmlns="http://ns.adobe.com/mxml/2009"
+        xmlns:s="library://ns.adobe.com/flex/spark"
+ >
+
+  <Metadata>
+    [HostComponent("bpm.graphic.icons.BPMNIcon")]
+  </Metadata>
+
+  <s:Group>
+    <s:Ellipse left="0" top="0" width="18" height="18">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.closedStrokeColor}" caps="none"/></s:stroke>
+      <s:fill><s:SolidColor color="{hostComponent.fillColor}" alpha="{hostComponent.filled ? 1 : 0}"/></s:fill>
+    </s:Ellipse>
+    <s:Path data="M 9.23 0.23 L 9.23 2.03">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 9.23 15.53 L 9.23 18.23">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 16.43 9.23 L 18.23 9.23">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 2.03 9.23 L 0.23 9.23">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 5.63 2.93 L 4.73 1.13">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 2.93 5.63 L 1.13 4.73">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 12.83 2.93 L 13.73 1.13">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 15.53 5.63 L 17.33 4.73">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 2.93 12.83 L 1.13 13.73">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 5.63 14.63 L 4.73 16.43">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 12.83 14.63 L 13.73 16.43">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 15.53 11.93 L 17.33 12.83">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+    <s:Path data="M 11.03 2.03 L 9.23 9.23 L 14.63 9.23">
+      <s:stroke><s:SolidColorStroke weight="1" color="{hostComponent.openStrokeColor}" caps="none"/></s:stroke>
+    </s:Path>
+  </s:Group>
+
+</s:Skin>

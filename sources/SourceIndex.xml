@@ -1,0 +1,140 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+
+<index>
+ <title>Source of sample bpmeditor</title>
+ <nodes>
+  <node label='src' icon='packageIcon' expanded='true'>
+   <node label='EndEventSkin.mxml' icon='mxmlAppIcon' url='source/EndEventSkin.mxml.html'/>
+   <node label='LoopMarkerSkin.mxml' icon='mxmlAppIcon' url='source/LoopMarkerSkin.mxml.html'/>
+   <node label='OrthogonalPort.as' icon='actionScriptIcon' url='source/OrthogonalPort.as.html'/>
+   <node label='IntermediateEventSkin.mxml' icon='mxmlAppIcon' url='source/IntermediateEventSkin.mxml.html'/>
+   <node selected='true' label='bpmeditor.mxml' icon='mxmlAppIcon' url='source/bpmeditor.mxml.html'/>
+   <node label='VLane.as' icon='actionScriptIcon' url='source/VLane.as.html'/>
+   <node label='VPoolSkin.mxml' icon='mxmlAppIcon' url='source/VPoolSkin.mxml.html'/>
+   <node label='BorderlessListSkin.mxml' icon='mxmlAppIcon' url='source/BorderlessListSkin.mxml.html'/>
+   <node label='LinkTriggerSkin.mxml' icon='mxmlAppIcon' url='source/LinkTriggerSkin.mxml.html'/>
+   <node label='IntermediateEvent.as' icon='actionScriptIcon' url='source/IntermediateEvent.as.html'/>
+   <node label='ErrorTriggerSkin.mxml' icon='mxmlAppIcon' url='source/ErrorTriggerSkin.mxml.html'/>
+   <node label='GroupSkin.mxml' icon='mxmlAppIcon' url='source/GroupSkin.mxml.html'/>
+   <node label='CompensationMarkerSkin.mxml' icon='mxmlAppIcon' url='source/CompensationMarkerSkin.mxml.html'/>
+   <node label='Association.as' icon='actionScriptIcon' url='source/Association.as.html'/>
+   <node label='MultipleTriggerSkin.mxml' icon='mxmlAppIcon' url='source/MultipleTriggerSkin.mxml.html'/>
+   <node label='SubProcessMarkerSkin.mxml' icon='mxmlAppIcon' url='source/SubProcessMarkerSkin.mxml.html'/>
+   <node label='MessageTriggerSkin.mxml' icon='mxmlAppIcon' url='source/MessageTriggerSkin.mxml.html'/>
+   <node label='ElixirLinkButtonSkin.mxml' icon='mxmlAppIcon' url='source/ElixirLinkButtonSkin.mxml.html'/>
+   <node label='HLaneSkin.mxml' icon='mxmlAppIcon' url='source/HLaneSkin.mxml.html'/>
+   <node label='AssociationSkin.mxml' icon='mxmlAppIcon' url='source/AssociationSkin.mxml.html'/>
+   <node label='CancelTriggerSkin.mxml' icon='mxmlAppIcon' url='source/CancelTriggerSkin.mxml.html'/>
+   <node label='DiagramMenuFactory.as' icon='actionScriptIcon' url='source/DiagramMenuFactory.as.html'/>
+   <node label='Group.as' icon='actionScriptIcon' url='source/Group.as.html'/>
+   <node label='CompensationTriggerSkin.mxml' icon='mxmlAppIcon' url='source/CompensationTriggerSkin.mxml.html'/>
+   <node label='TextAnnotationAdorner.as' icon='actionScriptIcon' url='source/TextAnnotationAdorner.as.html'/>
+   <node label='SequenceFlow.as' icon='actionScriptIcon' url='source/SequenceFlow.as.html'/>
+   <node label='XMLSerializer.as' icon='actionScriptIcon' url='source/XMLSerializer.as.html'/>
+   <node label='LinkDecorationDoneSkin.mxml' icon='mxmlAppIcon' url='source/LinkDecorationDoneSkin.mxml.html'/>
+   <node label='Task.as' icon='actionScriptIcon' url='source/Task.as.html'/>
+   <node label='Activity.as' icon='actionScriptIcon' url='source/Activity.as.html'/>
+   <node label='MessageFlow.as' icon='actionScriptIcon' url='source/MessageFlow.as.html'/>
+   <node label='StartEvent.as' icon='actionScriptIcon' url='source/StartEvent.as.html'/>
+   <node label='EventMarkerSkin.mxml' icon='mxmlAppIcon' url='source/EventMarkerSkin.mxml.html'/>
+   <node label='EndEvent.as' icon='actionScriptIcon' url='source/EndEvent.as.html'/>
+   <node label='TaskSkin.mxml' icon='mxmlAppIcon' url='source/TaskSkin.mxml.html'/>
+   <node label='StartEventSkin.mxml' icon='mxmlAppIcon' url='source/StartEventSkin.mxml.html'/>
+   <node label='AdHocMarkerSkin.mxml' icon='mxmlAppIcon' url='source/AdHocMarkerSkin.mxml.html'/>
+   <node label='Event.as' icon='actionScriptIcon' url='source/Event.as.html'/>
+   <node label='SubProcessSkin.mxml' icon='mxmlAppIcon' url='source/SubProcessSkin.mxml.html'/>
+   <node label='SubProcess.as' icon='actionScriptIcon' url='source/SubProcess.as.html'/>
+   <node label='HPoolAdorner.as' icon='actionScriptIcon' url='source/HPoolAdorner.as.html'/>
+   <node label='HPoolSkin.mxml' icon='mxmlAppIcon' url='source/HPoolSkin.mxml.html'/>
+   <node label='RuleTriggerSkin.mxml' icon='mxmlAppIcon' url='source/RuleTriggerSkin.mxml.html'/>
+   <node label='HLane.as' icon='actionScriptIcon' url='source/HLane.as.html'/>
+   <node label='ConnectingObject.as' icon='actionScriptIcon' url='source/ConnectingObject.as.html'/>
+   <node label='PrintDialog.mxml' icon='mxmlAppIcon' url='source/PrintDialog.mxml.html'/>
+   <node label='Artifact.as' icon='actionScriptIcon' url='source/Artifact.as.html'/>
+   <node label='DataObject.as' icon='actionScriptIcon' url='source/DataObject.as.html'/>
+   <node label='GatewaySkin.mxml' icon='mxmlAppIcon' url='source/GatewaySkin.mxml.html'/>
+   <node label='FlowObject.as' icon='actionScriptIcon' url='source/FlowObject.as.html'/>
+   <node label='SequenceFlowSkin.mxml' icon='mxmlAppIcon' url='source/SequenceFlowSkin.mxml.html'/>
+   <node label='VPoolAdorner.as' icon='actionScriptIcon' url='source/VPoolAdorner.as.html'/>
+   <node label='DataObjectSkin.mxml' icon='mxmlAppIcon' url='source/DataObjectSkin.mxml.html'/>
+   <node label='LinkDecorationMessageActiveSkin.mxml' icon='mxmlAppIcon' url='source/LinkDecorationMessageActiveSkin.mxml.html'/>
+   <node label='ComplexMarkerSkin.mxml' icon='mxmlAppIcon' url='source/ComplexMarkerSkin.mxml.html'/>
+   <node label='Gateway.as' icon='actionScriptIcon' url='source/Gateway.as.html'/>
+   <node label='TimerTriggerSkin.mxml' icon='mxmlAppIcon' url='source/TimerTriggerSkin.mxml.html'/>
+   <node label='ANDMarkerSkin.mxml' icon='mxmlAppIcon' url='source/ANDMarkerSkin.mxml.html'/>
+   <node label='HPool.as' icon='actionScriptIcon' url='source/HPool.as.html'/>
+   <node label='ToggleButtonLinkSkin.mxml' icon='mxmlAppIcon' url='source/ToggleButtonLinkSkin.mxml.html'/>
+   <node label='VLaneSkin.mxml' icon='mxmlAppIcon' url='source/VLaneSkin.mxml.html'/>
+   <node label='TerminateTriggerSkin.mxml' icon='mxmlAppIcon' url='source/TerminateTriggerSkin.mxml.html'/>
+   <node label='XORMarkerSkin.mxml' icon='mxmlAppIcon' url='source/XORMarkerSkin.mxml.html'/>
+   <node label='MessageFlowSkin.mxml' icon='mxmlAppIcon' url='source/MessageFlowSkin.mxml.html'/>
+   <node label='ElixirLinkButton.as' icon='actionScriptIcon' url='source/ElixirLinkButton.as.html'/>
+   <node label='ORMarkerSkin.mxml' icon='mxmlAppIcon' url='source/ORMarkerSkin.mxml.html'/>
+   <node label='UndoManager.as' icon='actionScriptIcon' url='source/UndoManager.as.html'/>
+   <node label='TextAnnotationSkin.mxml' icon='mxmlAppIcon' url='source/TextAnnotationSkin.mxml.html'/>
+   <node label='LinkDecorationActiveSkin.mxml' icon='mxmlAppIcon' url='source/LinkDecorationActiveSkin.mxml.html'/>
+   <node label='EmptySkin.mxml' icon='mxmlAppIcon' url='source/EmptySkin.mxml.html'/>
+   <node label='DemoUtil.as' icon='actionScriptIcon' url='source/DemoUtil.as.html'/>
+   <node label='TextAnnotation.as' icon='actionScriptIcon' url='source/TextAnnotation.as.html'/>
+   <node label='BPMNIcon.as' icon='actionScriptIcon' url='source/BPMNIcon.as.html'/>
+   <node label='VPool.as' icon='actionScriptIcon' url='source/VPool.as.html'/>
+   <node label='ElixirSampleBar.mxml' icon='mxmlAppIcon' url='source/ElixirSampleBar.mxml.html'/>
+   <node label='MultipleInstanceMarkerSkin.mxml' icon='mxmlAppIcon' url='source/MultipleInstanceMarkerSkin.mxml.html'/>
+  </node>
+  <node label='resources' icon='packageIcon'>
+   <node label='redo.png' url='source/resources/redo.png'/>
+   <node label='sendbackward.png' url='source/resources/sendbackward.png'/>
+   <node label='alignbottom.png' url='source/resources/alignbottom.png'/>
+   <node label='open.png' url='source/resources/open.png'/>
+   <node label='bringforward.png' url='source/resources/bringforward.png'/>
+   <node label='layoutsel.png' url='source/resources/layoutsel.png'/>
+   <node label='bringtofront.png' url='source/resources/bringtofront.png'/>
+   <node label='unzoom.png' url='source/resources/unzoom.png'/>
+   <node label='elixir.png' url='source/resources/elixir.png'/>
+   <node label='alignleft.png' url='source/resources/alignleft.png'/>
+   <node label='alignhcenter.png' url='source/resources/alignhcenter.png'/>
+   <node label='undo.png' url='source/resources/undo.png'/>
+   <node label='print.png' url='source/resources/print.png'/>
+   <node label='bannerbg_long.png' url='source/resources/bannerbg_long.png'/>
+   <node label='ungroup.png' url='source/resources/ungroup.png'/>
+   <node label='aligntop.png' url='source/resources/aligntop.png'/>
+   <node label='cut.png' url='source/resources/cut.png'/>
+   <node label='resetzoom.png' url='source/resources/resetzoom.png'/>
+   <node label='group.png' url='source/resources/group.png'/>
+   <node label='save.png' url='source/resources/save.png'/>
+   <node label='elixirsample.css' icon='cssIcon' url='source/resources/elixirsample.css.html'/>
+   <node label='paste.png' url='source/resources/paste.png'/>
+  <node label='en_US' icon='packageIcon'>
+   <node label='bpmeditor.properties' url='source/resources/en_US/bpmeditor.properties.html'/>
+   <node label='printutils.properties' url='source/resources/en_US/printutils.properties.html'/>
+   <node label='elixirsamplebar_enterprise.properties' url='source/resources/en_US/elixirsamplebar_enterprise.properties.html'/>
+  </node>
+   <node label='copy.png' url='source/resources/copy.png'/>
+   <node label='ibm_1px.png' url='source/resources/ibm_1px.png'/>
+  <node label='ja_JP' icon='packageIcon'>
+   <node label='bpmeditor.properties' url='source/resources/ja_JP/bpmeditor.properties.html'/>
+   <node label='printutils.properties' url='source/resources/ja_JP/printutils.properties.html'/>
+   <node label='elixirsamplebar_enterprise.properties' url='source/resources/ja_JP/elixirsamplebar_enterprise.properties.html'/>
+  </node>
+   <node label='zoomfit.png' url='source/resources/zoomfit.png'/>
+   <node label='showgrid.png' url='source/resources/showgrid.png'/>
+   <node label='banner_sep.png' url='source/resources/banner_sep.png'/>
+   <node label='layout.png' url='source/resources/layout.png'/>
+   <node label='bpmgraphic.css' icon='cssIcon' url='source/resources/bpmgraphic.css.html'/>
+   <node label='alignvcenter.png' url='source/resources/alignvcenter.png'/>
+   <node label='viewotherdemos.png' url='source/resources/viewotherdemos.png'/>
+   <node label='download.png' url='source/resources/download.png'/>
+   <node label='alignright.png' url='source/resources/alignright.png'/>
+   <node label='new.png' url='source/resources/new.png'/>
+   <node label='printutils.css' icon='cssIcon' url='source/resources/printutils.css.html'/>
+   <node label='zoom.png' url='source/resources/zoom.png'/>
+   <node label='sendtoback.png' url='source/resources/sendtoback.png'/>
+  </node>
+  <node label='data' icon='packageIcon'>
+  <node label='en_US' icon='packageIcon'>
+   <node label='doctor.idfl' url='source/data/en_US/doctor.idfl.html'/>
+   <node label='tap.idfl' url='source/data/en_US/tap.idfl.html'/>
+  </node>
+  </node>
+ </nodes>
+</index>

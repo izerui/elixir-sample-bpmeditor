@@ -1,0 +1,464 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>bpmeditor.properties</title>
+ </head>
+ <body>
+  <pre>
+##############################################################
+# This file contains the properties for the BPM editor sample
+##############################################################
+
+# NLS_ENCODING=UTF-8
+# NLS_MESSAGEFORMAT_NONE
+
+# Sample application title
+bpmeditor.application.title=BPM エディター
+
+# The two following properties are used by the sample launcher
+# Name as displayed by Sample launcher
+bpmeditorsample.application.name=BPM エディター
+# Description as displayed by Sample launcher
+bpmeditorsample.application.description=BPM エディターのサンプルでは、IBM ILOG Elixir Enterprise を使用してビジネス・プロセス・ダイアグラム・エディターを作成する方法を示します。
+
+#
+# Help
+#
+# Help panel title
+bpmeditor.help.title=ヘルプ
+# Hover help of Help button
+bpmeditor.help.tooltip = ヘルプ・ウィンドウを表示または非表示にする場合にクリックします。
+
+# Help panel contents
+bpmeditor.help.text = BPM エディターのサンプルでは、IBM ILOG Elixir Enterprise を使用して\
+ビジネス・プロセス・ダイアグラム・エディターを作成する方法を示します。\n\
+\n\
+ビジネス・プロセス・ダイアグラムの作成を開始するには、BPM エレメントをパレットから作業域にドラッグ・アンド・ドロップします。\n\
+2 つのエレメント間のリンクを作成するには、赤い三角形の接続ポイントを最初のエレメント側から 2 番目のエレメントの接続ポイントまでドラッグします。\n\
+\n\
+エレメントのテキストを編集するには、そのテキストをダブルクリックします。\n\
+\n\
+サンプル・ダイアグラム・ファイルは samples/bpmeditor/data ディレクトリーに入っています。\n\
+\n\
+ダイアグラムにフォーカスがあるときに、以下のホット・キーを使用できます。\n\
+削除またはバックスペース: 選択済みのオブジェクトを削除します。\n\
+Ctrl キー +「a」: すべてのオブジェクトを選択します。\n\
+Ctrl キー +「c」: 選択済みのオブジェクトをコピーします。\n\
+Ctrl キー +「g」: 選択済みのオブジェクトをサブプロセスとしてグループ化します。\n\
+Ctrl キー +「j」: 選択済みの 2 つのノード間にリンクを作成します。\n\
+Ctrl キー +「u」: 選択済みのサブプロセスからその親グラフにすべてのオブジェクトを移動して、サブプロセスを削除します。\n\
+Ctrl キー +「v」: コピーしたオブジェクトを貼り付けます。\n\
+Ctrl キー +「x」: 選択済みオブジェクトを切り取ります。\n\
+F7: ダイアグラム内のオブジェクトでのキーボード・ナビゲーションを有効にします。F7 を 1 回押すと、ナビゲーションがノード全体を循環するように設定されます。 \
+F7 をもう 1 回押すと、ナビゲーションが選択済みノードからこのノードに接続するリンクに進むように設定されます。\n\
+F8: ダイアグラム内のキーボード・ナビゲーションを無効にします。\n\
+矢印キー: キーボード・ナビゲーションが有効になっている場合、矢印キーを使用してオブジェクト間でフォーカスおよび選択を移動することができます。 \
+シフト・キーを押しながら矢印キーを押すと、選択済みのノードが移動します。\n\
+矢印キー: キーボード・ナビゲーションが無効になっている場合、矢印キーを使用してダイアグラムを水平または垂直に移動したり、選択済みオブジェクトを移動したりすることができます。\n\
+Ctrl + 「+」キー: ズームインします。\n\
+Ctrl + 「-」キー: ズームアウトします。\n\
+\n\
+オブジェクトのパレットにフォーカスがある場合は、以下のようになります。\n\
+矢印キー: パレット内のノードを選択します。\n\
+ENTER またはスペース: 選択済みオブジェクトをダイアグラムに作成します。\n\
+シフト +「+」キー: パネルの領域を大きくします。\n\
+シフト +「-」キー: パネルの領域を小さくします。\n\
+\n\
+プロパティー・パネルまたはヘルプ・パネルにフォーカスがある場合は、以下のようになります。\n\
+シフト +「+」キー: パネルの領域を大きくします。\n\
+シフト +「-」キー: パネルの領域を小さくします。
+# tooltip of the "New" button
+bpmeditor.new.tooltip = 新規ダイアグラム
+
+# tooltip of the "Open" button
+bpmeditor.open.tooltip = XML ファイルを開く
+
+# tooltip of the "Save" button
+bpmeditor.save.tooltip = XML ファイルに保存
+
+# tooltip of the "Print Diagram" button
+bpmeditor.print.tooltip = 現在のダイアグラムを印刷
+
+# tooltip of the "zoom in" button
+bpmeditor.zoomin.tooltip = ズームイン
+
+# tooltip of the "zoom out" button
+bpmeditor.zoomout.tooltip = ズームアウト
+
+# tooltip of the "show all" button
+bpmeditor.showall.tooltip = すべて表示
+# tooltip of the "reset zoom" button
+bpmeditor.resetzoom.tooltip = ズームのリセット
+
+# tooltip of the "show grid" button
+bpmeditor.showgrid.tooltip = グリッドの非表示/表示
+
+# tooltip of the "layout all" button
+bpmeditor.layout.tooltip = すべてをレイアウト
+
+# tooltip of the "layout selected subgraph" button
+bpmeditor.layoutsel.tooltip = 選択済みサブグラフのレイアウト
+
+# tooltip of the "cut" button
+bpmeditor.cut.tooltip = 選択済みオブジェクトの切り取り
+
+# tooltip of the "copy" button
+bpmeditor.copy.tooltip = 選択済みオブジェクトのコピー
+
+# tooltip of the "paste" button
+bpmeditor.paste.tooltip = クリップボードからオブジェクトを貼り付け
+
+# tooltip of the "undo" button
+bpmeditor.undo.tooltip = 元に戻す
+
+# tooltip of the "redo" button
+bpmeditor.redo.tooltip = やり直す
+
+# tooltip of the "group" button
+bpmeditor.group.tooltip = 選択済みオブジェクトをサブプロセスにグループ化
+
+# tooltip of the "Ungroup" button
+bpmeditor.ungroup.tooltip = 選択済みサブプロセスのグループ化を解除
+
+# tooltip of the button which allows to bring an object forward
+bpmeditor.bringForward.tooltip = 前方へ移動
+
+# tooltip of the button which allows to bring an object to the front
+bpmeditor.bringToFront.tooltip = 前面に移動
+# tooltip of the button which allows to send an object backward
+bpmeditor.sendBackward.tooltip = 後方へ移動
+# tooltip of the button which allows to send an object to the back
+bpmeditor.sendToBack.tooltip = 背面に移動
+# tooltip of the button which allows to align the left sides of nodes
+bpmeditor.alignLeft.tooltip = 左寄せ
+# tooltip of the button which allows to align the horizontal centers of nodes
+bpmeditor.alignHorizontalCenter.tooltip = 左右中央揃え
+# tooltip of the button which allows to align the right sides of nodes
+bpmeditor.alignRight.tooltip = 右寄せ
+# tooltip of the button which allows to align the top sides of nodes
+bpmeditor.alignTop.tooltip = 上寄せ
+# tooltip of the button which allows to align the vertical centers of nodes
+bpmeditor.alignVerticalCenter.tooltip = 上下中央揃え
+# tooltip of the button which allows to align the bottom sides of nodes
+bpmeditor.alignBottom.tooltip = 下寄せ
+
+# default label of the editing buffer
+bpmeditor.default.buffer.title = (名前なし)
+
+# title of the alert box popped when the user click the Open button
+# while the current diagram is modified
+bpmeditor.diagramModified.title = ダイアグラムが変更されました
+# text of the alert box popped when the user click the Open button
+# while the current diagram is modified
+bpmeditor.diagramModified.text = 現在のダイアグラムが変更されました。変更をすべて破棄してもよろしいですか?
+
+# default file name used when saving an unnamed process
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.defaultFileName = process.idfl
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# description of the file filter for IBM ILOG Elixir Enterprise XML files
+bpmeditor.filefilter.bpm = IBM ILOG Elixir Enterprise (ダイアグラム) ファイル (*.idfl)
+
+# description of the file filter for all files
+bpmeditor.filefilter.all = すべてのファイル (*.*)
+
+# error message: not an IBM ILOG Elixir Enterprise (Diagram) XML file
+bpmeditor.error.not_a_diagram_file = このファイルには、有効な IBM ILOG Elixir Enterprise ダイアグラムが含まれていないようです。
+
+# label of the "Layout All" button
+bpmeditor.layoutbutton.label = すべてをレイアウト
+
+# title of the BPMN elements palette
+bpmeditor.elements.palette.title = BPM エレメント
+
+# label of the Tasks category in the palette
+bpmeditor.tasks.category.label = タスク
+
+# label of the Start Events category in the palette
+bpmeditor.startevents.category.label = 開始イベント
+
+# label of the End Events category in the palette
+bpmeditor.endevents.category.label = 終了イベント
+
+# label of the Intermediate Events category in the palette
+bpmeditor.intermediateevents.category.label = 中間イベント
+
+# label of the Gateways category in the palette
+bpmeditor.gateways.category.label = ゲートウェイ
+
+# label of the Subprocesses category in the palette
+bpmeditor.subprocesses.category.label = サブプロセス
+# label of the Pools/Lanes category in the palette
+bpmeditor.poolslanes.category.label = プール/レーン
+
+# label of the Links category in the palette
+bpmeditor.links.category.label = リンク
+
+# label of the Artifacts category in the palette
+bpmeditor.artifacts.category.label = 成果物
+# label of the different types of Tasks in the palette
+bpmeditor.task.default.label = タスク
+bpmeditor.task.looping.label = ループ・タスク
+bpmeditor.task.multiinstance.label = マルチインスタンス・タスク
+bpmeditor.task.compensation.label = 補正タスク
+
+# label of the different types of Start Events in the palette
+bpmeditor.startevent.default.label = 開始
+bpmeditor.startevent.message.label = メッセージ開始
+bpmeditor.startevent.timer.label = タイマー開始
+bpmeditor.startevent.error.label = エラー開始
+bpmeditor.startevent.compensation.label = 補正開始
+bpmeditor.startevent.conditional.label = 条件付き開始
+bpmeditor.startevent.multiple.label = 複数の開始
+
+# label of the different types of End Events in the palette
+bpmeditor.endevent.default.label = 終了
+bpmeditor.endevent.message.label = メッセージ終了
+bpmeditor.endevent.error.label = エラー終了
+bpmeditor.endevent.cancel.label = キャンセル終了
+bpmeditor.endevent.compensation.label = 補正終了
+bpmeditor.endevent.terminate.label = 強制終了
+bpmeditor.endevent.multiple.label = 複数終了
+
+# label of the different types of Intermediate Events in the palette
+bpmeditor.intermediateevent.default.label = 中間
+bpmeditor.intermediateevent.message.label = メッセージ
+bpmeditor.intermediateevent.timer.label = タイマー
+bpmeditor.intermediateevent.error.label = エラー
+bpmeditor.intermediateevent.cancel.label = キャンセル
+bpmeditor.intermediateevent.compensation.label = 補正
+bpmeditor.intermediateevent.conditional.label = 条件付き
+bpmeditor.intermediateevent.link.label = ターゲット・リンク
+bpmeditor.intermediateevent.multiple.label = 複数
+
+# label of the different types of Gateways in the palette
+bpmeditor.gateway.exclusive.label = 排他ゲートウェイ
+bpmeditor.gateway.parallel.label = 並列ゲートウェイ
+bpmeditor.gateway.inclusive.label = 包含ゲートウェイ
+bpmeditor.gateway.complex.label = 複合ゲートウェイ
+
+# label and size of the different types of Subprocesses in the palette
+bpmeditor.subprocess.default.label = サブプロセス
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.subprocess.default.width = 120
+bpmeditor.subprocess.default.height = 120
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+bpmeditor.subprocess.adhoc.label = 臨時サブプロセス
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.subprocess.adhoc.width = 120
+bpmeditor.subprocess.adhoc.height = 120
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# label and size of the Pools and Lanes in the palette
+# Label of horizontal pool
+bpmeditor.hpool.label = 水平プール
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.hpool.width = 120
+bpmeditor.hlane.height = 60
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# Label of vertical pool
+bpmeditor.vpool.label = 垂直プール
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.vpool.height = 120
+bpmeditor.vlane.width = 60
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# Label of Lane
+bpmeditor.lane.label = レーン
+
+# label of the different types of Artifacts in the palette
+bpmeditor.dataobject.label = データ・オブジェクト
+bpmeditor.textannotation.label = テキスト注釈
+bpmeditor.group.label = グループ
+
+# message displayed in the links palette
+bpmeditor.links.palette.message = ダイアグラム内でリンク・ハンドルをドラッグして作成したリンクのタイプを変更するには、以下のリンクを選択します。
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.links.palette.message.maxwidth = 150
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# labels of the different types of links in the palette
+bpmeditor.sequenceflow.label = シーケンス・フロー
+bpmeditor.messageflow.label = メッセージ・フロー
+bpmeditor.association.label = アソシエーション
+
+# format applied to the buffer title when the diagram is modified
+# {0} will be replaced by the current file name
+bpmeditor.modifiedFormat = *{0}
+
+# default width of a newly dropped Subprocess
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.subprocess.drop.width = 200
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default height of a newly dropped Subprocess
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.subprocess.drop.height = 200
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default width of a newly dropped HPool
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.hpool.drop.width = 500
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default height of a newly dropped HLane
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.hlane.drop.height = 100
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default height of a newly dropped VPool
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.vpool.drop.height = 500
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default width of a newly dropped VLane
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.vlane.drop.width = 100
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+#
+# Save diagram alert
+#
+
+# Title of Save Diagram window
+bpmeditor.save.title = ダイアグラムの保存
+
+# Error message displayed when the Diagram file can not be saved
+bpmeditor.save.error = {0} \n\
+ダイアグラムを {1} として保存できませんでした。正しいパスが指定されていること、およびファイルの書き込み権限があることを確認してください。
+
+#
+# Alert box displayed when vertical and horizontal pools are mixed
+# and a graph layout is attempted:
+#
+
+# Title of Mixed Pool Orientations alert
+bpmeditor.mixedpools.title = プールの方向が混合しています
+
+# Error message of Mixed Pool Orientations alert
+bpmeditor.mixedpools.error = ダイアグラムに水平と垂直の両方向のプール/レーンが含まれているため、グラフ・レイアウトを実行できません。
+
+#
+# Popup menu
+# Note that in Flex popup menu labels for custom items
+# must not have the same text as built-in menu items, such as:
+# Delete, Paste, Copy, Cut, Select All. 
+# Refer to Flex ContextMenuItem documentation for the list of
+# reserved menu item captions
+#
+
+# Popup menu entry label to rename an object
+bpmeditor.renameCurrent.label = オブジェクト名の変更
+
+# Popup menu entry label for operation that selects all objects in the Diagram
+bpmeditor.selectall.label = すべてのオブジェクトの選択
+
+# Popup menu entry label for deleting the selected objects
+# This is displayed when the popup menu is opened for multiple selected objects
+bpmeditor.delete.label = 選択済みオブジェクトの削除
+
+# Popup menu entry label for deleting the current selected object
+# This is displayed when popup menu is opened for a single selected object
+bpmeditor.deleteCurrent.label = オブジェクトの削除
+
+# Popup menu entry for cutting the selected objects from the Diagram
+# This is displayed when the popup menu is opened for multiple selected objects
+bpmeditor.cut.label = 選択済みオブジェクトの切り取り
+
+# Popup menu entry for cutting the selected object from the Diagram
+# This is displayed when popup menu is opened for a single selected object
+bpmeditor.cutCurrent.label = オブジェクトの切り取り
+
+# Popup menu entry for copying selected objects 
+# This is displayed when the popup menu is opened for multiple selected objects
+bpmeditor.copy.label = 選択済みオブジェクトのコピー
+
+# Popup menu entry for copying the selected object from the Diagram
+# This is displayed when popup menu is opened for a single selected object
+bpmeditor.copyCurrent.label = オブジェクトのコピー
+
+# Popup menu entry for pasting the objects that are currently in the clipboard
+bpmeditor.paste.label = オブジェクトの貼り付け
+
+# Popup menu entry displayed when subprocesses are selected, which allow to
+# end the joining of the subprocess by moving all its child objects to the
+# parent graph and removing the selected subprocess.
+bpmeditor.ungroup.label = サブプロセスのグループ化の解除
+
+# Popup menu entry displayed when objects are selected, which allow to
+# group the objects inside a Subprocess.
+bpmeditor.groupSubprocess.label = サブプロセスのグループ化
+
+# Popup menu entry allowing to perform the configured layout in the Diagram
+bpmeditor.layout.label = ダイアグラムのレイアウト
+
+# Popup menu entry displayed when subgraphs are selected, which allow to
+# perform layout only in the selected subgraphs.
+bpmeditor.layoutCurrent.label = 選択済みオブジェクトのレイアウト
+
+# Popup menu entry which allows to create a link between two selected nodes
+bpmeditor.connect.label = オブジェクトの接続
+
+#
+# Accelerators
+#
+
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+
+# These keyboard accelerators are used with control key
+
+# Keyboard accelerator to Connect (Create Link) operation
+bpmeditor.connect.accelerator = j
+
+# Keyboard accelerator to Group objects as Subnetwork operation
+bpmeditor.groupAsSubprocess.accelerator = g
+
+# Keyboard accelerator Ungroup subprocess operation
+bpmeditor.ungroup.accelerator = u
+
+#
+# These accelerators are used with shift key
+#
+
+# Keyboard accelerator to allow panel width to increase when it
+# has the focus.
+bpmeditor.dividerincrease.accelerator = +
+
+# Keyboard accelerator to allow panel width to be reduced when it
+# has the focus.
+bpmeditor.dividerreduce.accelerator = -
+
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+  </pre>
+ </body>
+</html>

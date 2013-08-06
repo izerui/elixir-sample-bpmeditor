@@ -1,0 +1,240 @@
+/* CSS file */
+@namespace bpm "bpm.graphic.*";
+@namespace bpmi "bpm.graphic.icons.*";
+@namespace idiag "com.ibm.ilog.elixir.diagram.*";
+@namespace ibm "http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010";
+
+/* Skins */
+
+bpm|Task{
+	skinClass: ClassReference("bpm.graphic.skins.TaskSkin");
+  color: #000000;
+  background-color: #D4F5EA;
+  border-color: #D2D2D2;
+}
+
+bpm|StartEvent{
+	skinClass: ClassReference("bpm.graphic.skins.StartEventSkin");
+  color: #000000;
+}
+
+bpm|EndEvent{
+  skinClass: ClassReference("bpm.graphic.skins.EndEventSkin");
+  color: #000000;
+}
+
+bpm|IntermediateEvent{
+  skinClass: ClassReference("bpm.graphic.skins.IntermediateEventSkin");
+  color: #000000;
+}
+
+bpm|Gateway{
+  skinClass: ClassReference("bpm.graphic.skins.GatewaySkin");
+  color: #000000;
+}
+
+bpm|SequenceFlow{
+  skinClass: ClassReference("bpm.graphic.skins.SequenceFlowSkin");
+}
+
+bpm|MessageFlow{
+  skinClass: ClassReference("bpm.graphic.skins.MessageFlowSkin");
+}
+
+bpm|Association{
+  skinClass: ClassReference("bpm.graphic.skins.AssociationSkin");
+}
+
+bpm|SubProcess{
+	skinClass: ClassReference("bpm.graphic.skins.SubProcessSkin");
+}
+
+bpm|HPool{
+  skinClass: ClassReference("bpm.graphic.skins.HPoolSkin");
+  adornerClass: ClassReference("bpm.graphic.HPoolAdorner");
+  background-color: #F0F0F0;
+  border-color: #A0A0A0;
+  color: #000000;
+}
+
+bpm|HLane{
+  skinClass: ClassReference("bpm.graphic.skins.HLaneSkin");
+  background-color: #ffffff;
+  border-color: #A0A0A0;
+  color: #000000;
+}
+
+bpm|VPool{
+  skinClass: ClassReference("bpm.graphic.skins.VPoolSkin");
+  adornerClass: ClassReference("bpm.graphic.VPoolAdorner");
+  background-color: #F0F0F0;
+  border-color: #A0A0A0;
+  color: #000000;
+}
+
+bpm|VLane{
+  skinClass: ClassReference("bpm.graphic.skins.VLaneSkin");
+  background-color: #ffffff;
+  border-color: #A0A0A0;
+  color: #000000;  
+}
+
+bpm|DataObject{
+  skinClass: ClassReference("bpm.graphic.skins.DataObjectSkin");
+  color: #000000;
+}
+
+bpm|TextAnnotation{
+  skinClass: ClassReference("bpm.graphic.skins.TextAnnotationSkin");
+  color: #000000;
+}
+
+bpm|Group{
+  skinClass: ClassReference("bpm.graphic.skins.GroupSkin");
+  color: #000000;
+}
+
+/* Adorners */
+
+bpm|FlowObject{
+	adornerClass: ClassReference("com.ibm.ilog.elixir.diagram.editor.NodeAdorner");
+}
+
+bpm|Activity{
+  adornerClass: ClassReference("com.ibm.ilog.elixir.diagram.editor.ResizableNodeAdorner");
+}
+
+bpm|ConnectingObject{
+	adornerClass: ClassReference("com.ibm.ilog.elixir.diagram.editor.LinkAdorner");
+}
+
+bpm|TextAnnotation{
+  adornerClass: ClassReference("bpm.graphic.editor.TextAnnotationAdorner");
+}
+
+bpm|Group{
+	adornerClass: ClassReference("com.ibm.ilog.elixir.diagram.editor.ResizableNodeAdorner");
+}
+
+/* Icons */
+
+bpmi|BPMNIcon{
+  skinClass: ClassReference("bpm.graphic.icons.skins.EmptySkin");
+}
+
+bpmi|BPMNIcon.AdHocMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.AdHocMarkerSkin");
+}
+
+bpmi|BPMNIcon.ANDMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.ANDMarkerSkin");
+}
+
+bpmi|BPMNIcon.CancelTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.CancelTriggerSkin");
+}
+
+bpmi|BPMNIcon.CompensationMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.CompensationMarkerSkin");
+}
+
+bpmi|BPMNIcon.CompensationTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.CompensationTriggerSkin");
+}
+
+bpmi|BPMNIcon.ComplexMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.ComplexMarkerSkin");
+}
+
+bpmi|BPMNIcon.ErrorTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.ErrorTriggerSkin");
+}
+
+bpmi|BPMNIcon.EventMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.EventMarkerSkin");
+}
+
+bpmi|BPMNIcon.LinkTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.LinkTriggerSkin");
+}
+
+bpmi|BPMNIcon.LoopMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.LoopMarkerSkin");
+}
+
+bpmi|BPMNIcon.MessageTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.MessageTriggerSkin");
+}
+
+bpmi|BPMNIcon.MultipleInstanceMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.MultipleInstanceMarkerSkin");
+}
+
+bpmi|BPMNIcon.MultipleTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.MultipleTriggerSkin");
+}
+
+bpmi|BPMNIcon.ORMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.ORMarkerSkin");
+}
+
+bpmi|BPMNIcon.RuleTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.RuleTriggerSkin");
+}
+
+bpmi|BPMNIcon.SubProcessMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.SubProcessMarkerSkin");
+}
+
+bpmi|BPMNIcon.TerminateTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.TerminateTriggerSkin");
+}
+
+bpmi|BPMNIcon.TimerTrigger{
+  skinClass: ClassReference("bpm.graphic.icons.skins.TimerTriggerSkin");
+}
+
+bpmi|BPMNIcon.XORMarker{
+  skinClass: ClassReference("bpm.graphic.icons.skins.XORMarkerSkin");
+}
+
+
+
+/* LinkDecoration skins, according to stylename */
+
+ibm|LinkDecoration.SequenceActive{
+  skinClass: ClassReference("bpm.graphic.skins.LinkDecorationActiveSkin");
+}
+
+ibm|LinkDecoration.MessageActive{
+  skinClass: ClassReference("bpm.graphic.skins.LinkDecorationMessageActiveSkin");
+}
+
+
+
+
+
+/* Some default properties */
+
+bpm|SequenceFlow{
+  radius: 8;
+  strokeColor: #808080;
+  strokeWidth: 2;
+  color: #ff0000;
+}
+
+bpm|MessageFlow{
+  radius: 8;
+  strokeColor: #808080;
+  strokeWidth: 2;
+  dash-style: dash;
+  color: #00ff00;
+}
+
+bpm|Association{
+  strokeColor: #808080;
+  strokeWidth: 2;
+  dash-style: dot;
+  color: #0000ff;
+}
+

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<s:Skin xmlns="http://ns.adobe.com/mxml/2009"
+        xmlns:fx="http://ns.adobe.com/mxml/2009"
+        xmlns:mx="library://ns.adobe.com/flex/mx"
+        xmlns:s="library://ns.adobe.com/flex/spark"  
+        xmlns:bpmn="bpm.graphic.icons.*" 
+        xmlns:ilog="http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010">
+
+  <Metadata>
+    [HostComponent("bpm.graphic.SubProcess")]
+  </Metadata> 
+  
+  <Declarations>
+    <s:GlowFilter id="glowFilter" color="0x00FF00" strength="3" blurX="18" blurY="18"/>
+    
+    <s:AnimateFilter id="animateWaitEffect" 
+                     target="{wait}"
+                     repeatCount="0"
+                     duration="250"
+                     repeatBehavior="reverse"
+                     bitmapFilter="{glowFilter}">
+      <s:SimpleMotionPath property="alpha" valueFrom="0" valueTo="1"/>
+    </s:AnimateFilter>
+  </Declarations>  
+  
+  <fx:Script>
+    <![CDATA[      
+       
+      /**
+       *  @private
+       */
+      override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void
+      {      
+        var cr:Number = getStyle("caretColor");
+        if (caretColor != cr) caretColor = cr;
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+      }
+      
+      [Bindable]
+      /**
+       * The color for the caret border of the node.
+       */
+      public var caretColor:uint;
+      
+    ]]> 
+  </fx:Script>
+
+  <s:states>
+    <s:State name="collapsed" stateGroups="Collapsed"/>        
+    <s:State name="normal" stateGroups="Expanded"/>
+    <s:State name="selected" stateGroups="Expanded,Selected"/>   
+    <s:State name="collapsedSelected" stateGroups="Collapsed,Selected"/> 
+    <s:State name="normalAndShowsCaret" stateGroups="Expanded,ShowsCaret"/>
+    <s:State name="collapsedAndShowsCaret" stateGroups="Collapsed,ShowsCaret"/>
+    <s:State name="selectedAndShowsCaret" stateGroups="Expanded,Selected,ShowsCaret"/>
+    <s:State name="collapsedSelectedAndShowsCaret" stateGroups="Collapsed,Selected,ShowsCaret"/>
+    <s:State name="activeCollapsed" stateGroups="Collapsed"/>
+    <s:State name="doneCollapsed" stateGroups="Collapsed"/>
+  </s:states>
+  
+  <Declarations>
+    <mx:Sequence id="collapseSequence"
+                 effectStart="{hostComponent.collapseAnimationStart()}"
+                 effectEnd="{hostComponent.collapseAnimationEnd()}">
+      <s:Fade target="{graphGroup}" alphaTo="0" duration="150"/>
+      <s:Resize target="{main}" 
+                duration="150"/>        
+    </mx:Sequence>  
+    
+    <mx:Sequence id="expandSequence" 
+                 effectStart="{hostComponent.expandAnimationStart()}"
+                 effectEnd="{hostComponent.expandAnimationEnd()}">
+      <s:Resize target="{main}" 
+                duration="150"/>        
+      <s:Fade target="{graphGroup}" alphaTo="1" duration="150"/>
+    </mx:Sequence>    
+  </Declarations>
+
+  <s:transitions>
+    <!-- transition TO state 'collapsed' or 'collapseSequence': 
+     1) fade the graph
+     2) then resize to height=25
+     -->
+    <mx:Transition fromState="*" toState="collapsed" effect="{collapseSequence}" />
+    <mx:Transition fromState="*" toState="collapsedSelected" effect="{collapseSequence}" />
+    
+    <!-- transition FROM state 'collapsed' or 'collapseSequence' : 
+     2) resize from height=25
+     1) fade the graph
+     -->
+    <mx:Transition fromState="collapsed" toState="*" effect="{expandSequence}" />
+    <mx:Transition fromState="collapsedSelected" toState="*" effect="{expandSequence}" />
+
+  </s:transitions>
+  
+  <!-- 
+  the main group containing all parts of the skin and adapted to subgraph's size
+  -->
+  <s:Group id="main" left="0" top="0"
+           width.Expanded="{hostComponent.expandedWidth}"
+           height.Expanded="{hostComponent.expandedHeight}"
+           width.Collapsed="{hostComponent.collapsedWidth}"
+           height.Collapsed="{hostComponent.collapsedHeight}"
+                              >
+ 
+    <s:filters>
+      <s:GlowFilter includeIn="ShowsCaret" color="{caretColor}" alpha="0.8" blurX="8" blurY="8">
+      </s:GlowFilter>
+    </s:filters>    
+
+    <!-- indicators for monitoring status -->
+    <mx:SWFLoader id="wait" top="-16" right="-8" includeIn="activeCollapsed" source="@Embed(source='images/wait.svg')" height="16" width="16"
+                  add="{animateWaitEffect.play()}"
+                  remove="{animateWaitEffect.stop()}"/>
+    <mx:SWFLoader top="-16" right="-8" includeIn="doneCollapsed" source="@Embed(source='images/ok.svg')" height="16" width="16"/>
+   
+    <!-- rectangle surrounding all parts of the skin -->
+    <s:Rect id="border" left="0" top="0" width="100%" height="100%" radiusX="5" radiusY="5">
+      <s:stroke>
+        <mx:SolidColorStroke color.Collapsed="0xACAEAF" color.Expanded="0xC4C4C4" weight="2" />
+      </s:stroke>
+      <s:fill>
+        <mx:SolidColor color.Collapsed="0xCEEDFF" color.Expanded="0xF7F7F7" />
+      </s:fill>
+    </s:Rect>    
+    
+    <s:Group id="markers" bottom="2" horizontalCenter="0" >
+    
+      <s:layout>
+        <s:HorizontalLayout gap="3"/>
+      </s:layout>
+    
+      <!-- button to expand or collapse the subgraph -->
+      <!--
+      <mx:Button width="16" height="16" paddingLeft="0" paddingTop="0" paddingRight="1" paddingBottom="5"
+                           click="{hostComponent.collapsed = !hostComponent.collapsed }"
+                           buttonMode="true"
+                           fontSize="14" fontWeight="bold"
+                           label.Collapsed="+"
+                           label.Expanded="-"
+        />
+      -->
+      <s:Group width="14" height="14"
+                         mouseDown="{hostComponent.collapsed = !hostComponent.collapsed; event.stopPropagation();}">
+        <s:Rect width="14" height="14" bottom="1" radiusX="3" radiusY="3">
+          <s:fill>
+            <mx:SolidColor color="0xd0d0d0"/>
+          </s:fill>
+        </s:Rect>
+        <s:Rect width="8" height="2" horizontalCenter="0" verticalCenter="-1">
+          <s:fill>
+            <mx:SolidColor color="0x404040"/>
+          </s:fill>
+        </s:Rect>
+        <s:Rect width="2" height="8" horizontalCenter="0" verticalCenter="-1" visible.Expanded="false">
+          <s:fill>
+            <mx:SolidColor color="0x404040"/>
+          </s:fill>
+        </s:Rect>
+      </s:Group>
+        
+      <bpmn:BPMNIcon includeInLayout="{hostComponent.adHoc}" visible="{hostComponent.adHoc}"
+                styleName="AdHocMarker" openStrokeColor="0x444444"/>
+    </s:Group>
+
+    <s:Group id="labelElement" left.Expanded="5" top.Expanded="8" fontSize="12"
+            horizontalCenter.Collapsed="0" verticalCenter.Collapsed="-10">
+      <s:Label id="label" text="{hostComponent.label}"  maxWidth="{main.width - 2}" color="0x000000" 
+            textAlign.Collapsed="center" textAlign.Expanded="start"/>
+    </s:Group>
+
+    <!-- group containing the graph -->
+    <!-- IMPORTANT don't use 'includeIn' to control display when state is collapsed
+    because graph parent will be null ( = pbl during link clipping)
+    Instead, let's use visibility
+    -->
+    <s:Group id="graphGroup" left="5" top="{labelElement.height + 10}" right="5" bottom="20" clipAndEnableScrolling="true"
+      visible.Expanded="true" 
+      visible.Collapsed="false" 
+      alpha="1" alpha.Collapsed="0">
+      <s:Rect left="0" top="0" width="100%" height="100%" >
+        <s:fill>
+          <mx:SolidColor color="0xF7F7F7" />
+        </s:fill>
+      </s:Rect>
+      <ilog:Graph id="graph"
+                  left="{hostComponent.graphMarginLeft}"
+                  top="{hostComponent.graphMarginTop}" 
+                  right="{hostComponent.graphMarginRight}" 
+                  bottom="{hostComponent.graphMarginBottom}"
+                  automaticGraphLayout="false"/>
+    </s:Group>
+
+  </s:Group>
+  
+</s:Skin>

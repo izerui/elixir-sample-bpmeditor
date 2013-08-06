@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009"
+             xmlns:mx="library://ns.adobe.com/flex/mx"
+             xmlns:s="library://ns.adobe.com/flex/spark" 
+             xmlns:idiag="http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010">
+  
+  <fx:Metadata>
+    [HostComponent("bpm.graphic.SequenceFlow")]
+  </fx:Metadata> 
+  
+   <fx:Script>
+  <![CDATA[ 
+    /**
+     *  @private
+     */
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void
+    {
+      var cr:Number = getStyle("strokeColor");
+      if (strokeColor != cr)strokeColor = cr;
+      
+      var sw:Number = getStyle("strokeWidth");
+      if (strokeWidth != sw) strokeWidth = sw;
+      
+      var carc:Number = getStyle("caretColor");
+      if (caretColor != carc) caretColor = carc;
+
+      var ccolor:Number = getStyle("color");
+      if (color != ccolor) color = ccolor;      
+      
+      super.updateDisplayList(unscaledWidth, unscaledHeight);
+    }
+    
+    [Bindable]
+    public var strokeColor:uint = 0;
+    
+    [Bindable]
+    public var strokeWidth:Number = 1;
+    
+    [Bindable]
+    public var caretColor:uint = 0;  
+    
+    [Bindable]
+    public var color:uint = 0;      
+  ]]> 
+  </fx:Script>
+
+  
+  <s:states>
+    <s:State name="normal" />
+    <s:State name="selected" stateGroups="Selected"/>
+    <s:State name="normalAndShowsCaret" stateGroups="ShowsCaret"/>
+    <s:State name="selectedAndShowsCaret" stateGroups="Selected,ShowsCaret"/>
+    <s:State name="active" stateGroups="monitoring"/>
+    <s:State name="done" stateGroups="monitoring"/>
+  </s:states>
+  
+  
+  <!-- styling objects to stroke and fill main path and arrows -->
+  <fx:Declarations>
+    <mx:SolidColorStroke id="strokecolor" color="{strokeColor}" color.active="0xFF8C00" color.done="0x228B22" weight="{strokeWidth}" caps="none"/>
+    <mx:SolidColor id="fillcolor" color="{strokeColor}" color.active="0xFF8C00" color.done="0x228B22"/>
+  </fx:Declarations>
+  
+  <fx:Declarations>
+    <s:Animate id="flowAnimation" target="{monitoringSequenceDecoration}" duration="{hostComponent.monitoringDelay}">
+      <s:SimpleMotionPath property="position" valueFrom="0.0" valueTo="1.0" >
+      </s:SimpleMotionPath>
+    </s:Animate>
+  </fx:Declarations>
+
+  <!-- base is made of a main path and arrows --> 
+  <s:Group id="base" includeInLayout="false">  
+    <s:filters>
+      <s:GlowFilter includeIn="ShowsCaret" color="{caretColor}" alpha="0.8" blurX="8" blurY="8">
+      </s:GlowFilter>
+    </s:filters>    
+    
+    <s:Path id="path" data="M 0 0 L 0 0" stroke="{strokecolor}"/>    
+    
+    <!-- data path must be relative to (0,0) because arrow are centered on path end/start points-->
+    <s:Path id="endArrow" data="M -10 -5 l 10 5 l -10 5 Z" fill="{fillcolor}" >
+    </s:Path>     
+    
+  </s:Group>
+
+  <idiag:LinkDecorationsPresenter id="decorationPresenter">
+    <idiag:LinkDecoration id="labelElement" label="{hostComponent.label}" color="{color}"
+                          positionType="absolute-from-middle"
+                          orthogonalAlignment="left" distance="2"/>
+    <idiag:LinkDecoration includeIn="monitoring"
+                          id="monitoringSequenceDecoration" 
+                          positionType="relative"
+                          position="0"
+                          autoRotate="true"
+                          styleName.active="SequenceActive"
+                          addedToStage="{flowAnimation.play();}"/>
+  </idiag:LinkDecorationsPresenter>
+  
+</s:SparkSkin>

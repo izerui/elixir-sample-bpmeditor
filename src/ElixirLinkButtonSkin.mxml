@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Y31,5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<!--
+//////////////////////////////////////////////////////////////////////////////// 
+// 
+// This file contains code from the Open Source Flex SDK obtained under the 
+// license below 
+// 
+//////////////////////////////////////////////////////////////////////////////// 
+
+//////////////////////////////////////////////////////////////////////////////// 
+// 
+// The contents of this file are subject to the Mozilla Public License 
+// Version 1.1 (the "License"); you may not use this file except in 
+// compliance with the License. You may obtain a copy of the License at 
+//  http://www.mozilla.org/MPL/ 
+// 
+//  Software distributed under the License is distributed on an "AS IS" 
+//  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the 
+//  License for the specific language governing rights and limitations 
+//  under the License. 
+// 
+//  The Original Code is Open Source Flex SDK. 
+// 
+//  The Initial Developer of the Original Code is Adobe Systems Incoporated.   
+// 
+// Portions created by Intial Developer are Copyright 2005-2007 Adobe Systems 
+// Incorporated. All Rights Reserved.     
+// 
+// Contributor(s): 
+// 
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
+             xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
+             xmlns:local="*" minWidth="21" minHeight="21" alpha.disabled="0.5"
+             useChromeColor="false"
+             height="28">
+  <fx:Metadata>
+    <![CDATA[ 
+    [HostComponent("ElixirLinkButton")]
+    ]]>
+  </fx:Metadata>
+  <s:states>
+    <s:State name="up" />
+    <s:State name="over" />
+    <s:State name="down" />
+    <s:State name="disabled" />
+  </s:states>
+  <s:Rect id="highlight" left="1" right="1" top="1" bottom="1" radiusX="4">
+    <s:fill>
+      <s:LinearGradient rotation="90">
+        <s:GradientEntry color="0xFFFFFF"
+                         ratio="0.0"
+                         alpha="0.33" 
+                         alpha.up="0"
+                         alpha.over="0.22" 
+                         alpha.down="0.32"/>
+        <s:GradientEntry color="0xFFFFFF"
+                         ratio="0.48"
+                         alpha="0.33"
+                         alpha.up="0"
+                         alpha.over="0.22"
+                         alpha.down="0.32" />
+        <s:GradientEntry color="0xFFFFFF"
+                         ratio="0.48001"
+                         alpha="0" />
+      </s:LinearGradient>
+    </s:fill>
+  </s:Rect>
+  <s:Rect id="highlightStroke" left="1" right="1" top="1" bottom="1" radiusX="4">
+    <s:stroke>
+      <s:LinearGradientStroke rotation="90" weight="1">
+        <s:GradientEntry color="0xFFFFFF" alpha.over="0.52" alpha.up="0"/>
+        <s:GradientEntry color="0xD8D8D8" alpha.over="0.52" alpha.up="0"/>
+      </s:LinearGradientStroke>
+    </s:stroke>
+    <s:fill.over>
+      <s:SolidColor color="0x136ABF" alpha="0.3"/>
+    </s:fill.over>
+    <s:fill.down>
+      <s:SolidColor color="0x136ABF" alpha="0.5"/>
+    </s:fill.down>
+  </s:Rect>
+  <s:HGroup verticalAlign="middle"
+            horizontalCenter="0"
+            left="10" right="10" top="2" bottom="2">
+    <s:BitmapImage source="{hostComponent.iconClass}"/>
+    <s:Label id="labelDisplay" 
+             textAlign="center"
+             maxDisplayedLines="1" paddingTop="4"
+             visible="{hostComponent.label != ''}"
+             includeInLayout="{hostComponent.label != ''}">
+    </s:Label>
+  </s:HGroup>
+</s:SparkSkin>

@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>DiagramMenuFactory.as</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre><span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptpackage">package</span>
+<span class="ActionScriptBracket/Brace">{</span>
+  <span class="ActionScriptReserved">import</span> bpm.graphic.SubProcess;
+  
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Diagram;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Node;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Renderer;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Subgraph;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.editor.DiagramEditor;
+  
+  <span class="ActionScriptReserved">import</span> flash.events.ContextMenuEvent;
+  <span class="ActionScriptReserved">import</span> flash.events.MouseEvent;
+  <span class="ActionScriptReserved">import</span> flash.geom.Point;
+  <span class="ActionScriptReserved">import</span> flash.ui.ContextMenu;
+  <span class="ActionScriptReserved">import</span> flash.ui.ContextMenuItem;
+  
+  <span class="ActionScriptReserved">import</span> mx.core.FlexGlobals;
+  <span class="ActionScriptReserved">import</span> mx.resources.IResourceManager;
+  
+  <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">   * Creates the popup menu for the Diagram. </span>
+<span class="ActionScriptASDoc">   */</span>
+  <span class="ActionScriptReserved">public</span> class DiagramMenuFactory
+  <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> diageditor:DiagramEditor;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> resourceManager:IResourceManager;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> diagramPopupMenu:ContextMenu;
+    
+    <span class="ActionScriptComment">// Custom menu items</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> selectAllMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> deleteMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> cutMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> copyMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> pasteMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> groupSubMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> ungroupMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> layoutMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> connectMenuItem:ContextMenuItem;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> renameMenuItem:ContextMenuItem;
+    
+    <span class="ActionScriptComment">// Cache for labels used in popup menu</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> deleteSelectedObjectsLabel:String;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> deleteObjectLabel:String;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> cutSelectedObjectsLabel:String;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> cutObjectLabel:String;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> copySelectedObjectsLabel:String;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> copyObjectLabel:String;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> layoutAllLabel:String;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> layoutObjectLabel:String;
+    
+    <span class="ActionScriptComment">// Renderer that is currently with the mouse</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> currentObject:Object;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> currentMouseLocationX:Number = NaN;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> currentMouseLocationY:Number = NaN;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> menuLocationX:Number = NaN;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> menuLocationY:Number = NaN;
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Factory to create the Diagram popup menu </span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> DiagramMenuFactory(resourceMgr:IResourceManager, 
+                                       editor:DiagramEditor, 
+                                       diagram:Diagram)
+    <span class="ActionScriptBracket/Brace">{</span>
+      diageditor = editor;
+      resourceManager = resourceMgr;
+      diagram.addEventListener(MouseEvent.MOUSE_MOVE, diagramMouseMoveHandler);
+    <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> diagramMouseMoveHandler(event:MouseEvent):<span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      currentMouseLocationX = event.stageX;        
+      currentMouseLocationY = event.stageY;
+      currentObject = diageditor.graph.getHitRenderer(event.target);
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptComment">// -----------------------------------------------------</span>
+    <span class="ActionScriptComment">// Popup Menu for the Diagram</span>
+    <span class="ActionScriptComment">// -----------------------------------------------------</span>
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> populatePopupMenu():<span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      diagramPopupMenu = <span class="ActionScriptReserved">new</span> ContextMenu();
+      diagramPopupMenu.hideBuiltInItems();
+      addCustomItems(diagramPopupMenu);
+      diagramPopupMenu.addEventListener(ContextMenuEvent.MENU_SELECT, popupMenu_menuSelect);  
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Enables or disables the menu items according to</span>
+<span class="ActionScriptASDoc">     * the number of selected objects. </span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> popupMenu_menuSelect(evt:ContextMenuEvent):<span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptComment">// Store the position of the mouse at the moment when the menu is opened</span>
+      menuLocationX = currentMouseLocationX;
+      menuLocationY = currentMouseLocationY;
+            
+      <span class="ActionScriptvar">var</span> selObjs:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt;;
+      <span class="ActionScriptReserved">if</span> (currentObject != <span class="ActionScriptReserved">null</span>) <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// The popup menu has been opened for a specific object.        </span>
+        selObjs = diageditor.getSelectedObjects();
+        <span class="ActionScriptReserved">if</span> (selObjs.indexOf(currentObject) &lt; 0) {
+          <span class="ActionScriptComment">// The object is not in the selected objects list</span>
+          <span class="MXMLComponent_Tag">diageditor</span>.deselectAll();
+          diageditor.setSelected(currentObject as Renderer, <span class="ActionScriptReserved">true</span>);
+          deleteMenuItem.caption = deleteObjectLabel;
+          copyMenuItem.caption = copyObjectLabel;
+          cutMenuItem.caption = cutObjectLabel;
+          renameMenuItem.visible = <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (selObjs.length == 1) <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptComment">// This is the only selected object</span>
+          deleteMenuItem.caption = deleteObjectLabel;
+          copyMenuItem.caption = copyObjectLabel;
+          cutMenuItem.caption = cutObjectLabel;
+          renameMenuItem.visible = <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptComment">// The object is in the selected list, so apply popup menu</span>
+          <span class="ActionScriptComment">// functions to all selected objects</span>
+          deleteMenuItem.caption = deleteSelectedObjectsLabel;
+          copyMenuItem.caption = copySelectedObjectsLabel;
+          cutMenuItem.caption = cutSelectedObjectsLabel;
+          renameMenuItem.visible = <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        selectAllMenuItem.visible = diageditor.canUngroup;
+        layoutMenuItem.caption = layoutObjectLabel;
+        layoutMenuItem.visible = diageditor.canUngroup;
+        
+        <span class="ActionScriptComment">// Enable layout item only when something is configured</span>
+        selObjs = diageditor.getSelectedObjects();
+        <span class="ActionScriptvar">var</span> layoutEnabled:Boolean = <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span> (<span class="ActionScriptvar">var</span> s:Renderer <span class="ActionScriptReserved">in</span> selObjs) <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptReserved">if</span> (s is Subgraph) <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> ((Subgraph(s).graph.getCurrentLinkLayout() != <span class="ActionScriptReserved">null</span>) ||
+                (Subgraph(s).graph.getCurrentNodeLayout() != <span class="ActionScriptReserved">null</span>)) <span class="ActionScriptBracket/Brace">{</span>
+              layoutEnabled = <span class="ActionScriptReserved">true</span>;
+              break;
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        layoutMenuItem.enabled = layoutEnabled;
+      <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// This is the background popup menu</span>
+        renameMenuItem.visible = <span class="ActionScriptReserved">false</span>;
+        selectAllMenuItem.visible = <span class="ActionScriptReserved">true</span>;
+        selectAllMenuItem.enabled = (diageditor.graph.numElements &gt; 0);
+        deleteMenuItem.caption = deleteSelectedObjectsLabel;
+        copyMenuItem.caption = copySelectedObjectsLabel;
+        cutMenuItem.caption = cutSelectedObjectsLabel;
+        layoutMenuItem.caption = layoutAllLabel;
+        layoutMenuItem.visible = <span class="ActionScriptReserved">true</span>;
+        layoutMenuItem.enabled = ((diageditor.graph.numElements &gt; 0) && ((diageditor.graph.nodeLayout != <span class="ActionScriptReserved">null</span>) || (diageditor.graph.linkLayout != <span class="ActionScriptReserved">null</span>)));
+      <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptComment">// Connect objects is only available if two nodes are selected</span>
+      selObjs = diageditor.getSelectedObjects();
+      <span class="ActionScriptReserved">if</span> (selObjs.length == 2) <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">if</span> (selObjs<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> is Node && selObjs<span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span> is Node) <span class="ActionScriptBracket/Brace">{</span>
+          connectMenuItem.visible = <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+          connectMenuItem.visible = <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+        connectMenuItem.visible = <span class="ActionScriptReserved">false</span>;
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptvar">var</span> hasSelection:Boolean = diageditor.hasSelection;
+      deleteMenuItem.enabled = hasSelection;
+      cutMenuItem.enabled = diageditor.canCopy;
+      copyMenuItem.enabled = diageditor.canCopy;
+      pasteMenuItem.enabled = diageditor.canPaste;
+
+      groupSubMenuItem.enabled = FlexGlobals.topLevelApplication.canGroup;
+      ungroupMenuItem.visible = diageditor.canUngroup;      
+      
+      copyApplicationCustomItems();
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptComment">// The first visible item of the diagran context menu,</span>
+    <span class="ActionScriptComment">// used by copyApplicationCustomItems to set/clear the separator.</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> firstVisibleItem:ContextMenuItem = <span class="ActionScriptReserved">null</span>;
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Copies the custom menu items from the toplevel application's context menu</span>
+<span class="ActionScriptASDoc">     * (typically the View Source and About Elixir Enterprise... items) </span>
+<span class="ActionScriptASDoc">     */    </span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> copyApplicationCustomItems() : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptvar">var</span> appMenu:ContextMenu = FlexGlobals.topLevelApplication.contextMenu;
+      <span class="ActionScriptReserved">if</span>(appMenu)<span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> index:int = -1;
+        <span class="ActionScriptComment">// scan custom items in the application context menu</span>
+        <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span>(<span class="ActionScriptvar">var</span> item:ContextMenuItem <span class="ActionScriptReserved">in</span> appMenu.customItems)<span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptComment">// has the item already been copied to the diagram context menu?</span>
+          index = -1;
+          <span class="ActionScriptReserved">for</span>(<span class="ActionScriptvar">var</span> i:int = 0; i &lt; <span class="MXMLComponent_Tag">diagramPopupMenu</span>.customItems.length; i++)<span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(ContextMenuItem(diagramPopupMenu.customItems<span class="ActionScriptBracket/Brace">[</span>i<span class="ActionScriptBracket/Brace">]</span>).caption == item.caption)<span class="ActionScriptBracket/Brace">{</span>
+              index = i;
+              break;
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptReserved">if</span>(index &lt; 0){
+            <span class="ActionScriptComment">// item has not yet been copied: copy it.</span>
+            <span class="MXMLComponent_Tag">index</span> = appMenu.customItems.indexOf(item);
+            <span class="ActionScriptvar">var</span> newItem:ContextMenuItem = item.clone();
+            newItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, 
+              <span class="ActionScriptfunction">function</span>(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// when the copied item is selected, we redispatch the event to the original</span>
+                <span class="ActionScriptComment">// item in the application menu (we find it by its caption)</span>
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span>(<span class="ActionScriptvar">var</span> appItem:ContextMenuItem <span class="ActionScriptReserved">in</span> appMenu.customItems)<span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span>(appItem.caption == ContextMenuItem(event.currentTarget).caption)<span class="ActionScriptBracket/Brace">{</span>
+                    appItem.dispatchEvent(event);
+                    break;
+                  <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+              <span class="ActionScriptBracket/Brace">}</span>);
+            <span class="ActionScriptComment">// add the copied item at the same position as in the application menu:</span>
+            diagramPopupMenu.customItems.splice(index, 0, newItem);
+          <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptComment">// separate the application items from the diagram items by putting a separator</span>
+        <span class="ActionScriptComment">// on the first visible item of the diagram menu:</span>
+        <span class="ActionScriptReserved">if</span>(index &gt;= 0)<span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptReserved">if</span>(firstVisibleItem)
+            firstVisibleItem.separatorBefore = <span class="ActionScriptReserved">false</span>;
+          <span class="ActionScriptReserved">for</span>(<span class="ActionScriptvar">var</span> j:int = index+1; j &lt; <span class="MXMLComponent_Tag">diagramPopupMenu</span>.customItems.length; j++)<span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> nextItem:ContextMenuItem = ContextMenuItem(diagramPopupMenu.customItems<span class="ActionScriptBracket/Brace">[</span>j<span class="ActionScriptBracket/Brace">]</span>);
+            <span class="ActionScriptReserved">if</span>(nextItem.visible)<span class="ActionScriptBracket/Brace">{</span>
+              nextItem.separatorBefore = <span class="ActionScriptReserved">true</span>;
+              firstVisibleItem = nextItem;
+              break;
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Add custom items for nodes. </span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> addCustomItems(cmenu:ContextMenu):<span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      renameMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.renameCurrent.label"</span>));
+      cmenu.customItems.push(renameMenuItem);
+      renameMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemRenameHandler);
+
+      connectMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.connect.label"</span>));
+      cmenu.customItems.push(connectMenuItem);
+      connectMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemConnectHandler);
+
+      selectAllMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.selectall.label"</span>));
+      cmenu.customItems.push(selectAllMenuItem);
+      selectAllMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemSelectAllHandler);
+
+      deleteSelectedObjectsLabel = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.delete.label"</span>);
+      deleteObjectLabel = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.deleteCurrent.label"</span>);    
+      deleteMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(deleteSelectedObjectsLabel);
+      cmenu.customItems.push(deleteMenuItem);
+      deleteMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemDeleteHandler);
+      
+      cutSelectedObjectsLabel = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.cut.label"</span>);
+      cutObjectLabel = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.cutCurrent.label"</span>);
+      cutMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(cutSelectedObjectsLabel);
+      cmenu.customItems.push(cutMenuItem);
+      cutMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemCutHandler);
+      
+      copySelectedObjectsLabel = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.copy.label"</span>);
+      copyObjectLabel = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.copyCurrent.label"</span>);
+      copyMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(label);
+      cmenu.customItems.push(copyMenuItem);
+      copyMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemCopyHandler);
+      
+      <span class="ActionScriptvar">var</span> label:String = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.paste.label"</span>);
+      pasteMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(label);
+      cmenu.customItems.push(pasteMenuItem);
+      pasteMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemPasteHandler);
+      
+      label = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.groupSubprocess.label"</span>);
+      groupSubMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(label);
+      groupSubMenuItem.separatorBefore = <span class="ActionScriptReserved">true</span>;
+      cmenu.customItems.push(groupSubMenuItem);
+      groupSubMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemGroupSubgraphHandler);
+      
+      label = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.ungroup.label"</span>);
+      ungroupMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(label);
+      cmenu.customItems.push(ungroupMenuItem);
+      ungroupMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemUngroupHandler);
+      
+      layoutAllLabel = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.layout.label"</span>);
+      layoutObjectLabel = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.layoutCurrent.label"</span>);
+      layoutMenuItem = <span class="ActionScriptReserved">new</span> ContextMenuItem(layoutAllLabel);
+      layoutMenuItem.separatorBefore = <span class="ActionScriptReserved">true</span>;
+      cmenu.customItems.push(layoutMenuItem);
+      layoutMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, applMenuItemLayoutHandler);
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Open text editor to edit object text.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemRenameHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      diageditor.startEditingText(diageditor.getSelectedObjects()<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>);
+    <span class="ActionScriptBracket/Brace">}</span>    
+
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Connect two selected nodes.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemConnectHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      FlexGlobals.topLevelApplication.connectNodes();
+    <span class="ActionScriptBracket/Brace">}</span>    
+
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Select all objects in the graph or subgraph.</span>
+<span class="ActionScriptASDoc">     * Selection does not recursive in subgraphs.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemSelectAllHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">if</span> (currentObject is Subgraph) <span class="ActionScriptBracket/Brace">{</span>
+        diageditor.deselectAll();
+        <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span> (<span class="ActionScriptvar">var</span> node:Renderer <span class="ActionScriptReserved">in</span> Subgraph(currentObject).graph.getNodes()) <span class="ActionScriptBracket/Brace">{</span>
+          diageditor.setSelected(node, <span class="ActionScriptReserved">true</span>); 
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span> (<span class="ActionScriptvar">var</span> link:Renderer <span class="ActionScriptReserved">in</span> Subgraph(currentObject).graph.getLinks()) <span class="ActionScriptBracket/Brace">{</span>
+          diageditor.setSelected(link, <span class="ActionScriptReserved">true</span>);           
+        <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+        diageditor.deselectAll();
+        diageditor.selectAll();
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Delete selected objects.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemDeleteHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      diageditor.deleteSelection();
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Cut selected objects. </span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemCutHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      diageditor.cut();
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Copy selected objects. </span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemCopyHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      diageditor.copy();
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Paste selected objects. </span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemPasteHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptComment">// Do it</span>
+      diageditor.paste();
+      
+      <span class="ActionScriptComment">// Coordinate space of the parent</span>
+      <span class="ActionScriptvar">var</span> minx:Number = Number.MAX_VALUE;
+      <span class="ActionScriptvar">var</span> miny:Number = Number.MAX_VALUE;
+      <span class="ActionScriptvar">var</span> maxx:Number = Number.MIN_VALUE;
+      <span class="ActionScriptvar">var</span> maxy:Number = Number.MIN_VALUE;
+      
+      <span class="ActionScriptvar">var</span> pastedObjects:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt; = diageditor.getSelectedObjects();
+      <span class="ActionScriptvar">var</span> pasted:Renderer = <span class="ActionScriptReserved">null</span>;
+      <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span>(pasted <span class="ActionScriptReserved">in</span> pastedObjects)<span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">if</span> (pasted is Node) <span class="ActionScriptBracket/Brace">{</span>
+          minx = Math.min(minx, Number(pasted.x));
+          miny = Math.min(miny, Number(pasted.y));
+          maxx = Math.max(maxx, Number(pasted.x + pasted.width));
+          maxy = Math.max(maxy, Number(pasted.y + pasted.height));
+        <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptReserved">if</span> (pasted != <span class="ActionScriptReserved">null</span>) <span class="ActionScriptBracket/Brace">{</span> 
+        <span class="ActionScriptvar">var</span> p:Point = pasted.parent.globalToLocal(<span class="ActionScriptReserved">new</span> Point(menuLocationX, menuLocationY));
+        <span class="ActionScriptvar">var</span> dx:Number = p.x - minx;
+        <span class="ActionScriptvar">var</span> dy:Number = p.y - miny;
+        diageditor.translateSelectionOfDelta(dx, dy);        
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Group selected objects as children of a subgraph.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemGroupSubgraphHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptvar">var</span> subgraph:Subgraph = <span class="ActionScriptReserved">new</span> SubProcess();
+      subgraph.collapsed = <span class="ActionScriptReserved">false</span>;
+      subgraph.width = resourceManager.getNumber(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.subprocess.default.width"</span>);
+      subgraph.height = resourceManager.getNumber(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.subprocess.default.height"</span>);
+      subgraph.label = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.subprocess.default.label"</span>); 
+      FlexGlobals.topLevelApplication.groupObjects(subgraph);
+    <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Ungroup any selected subgraphs.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemUngroupHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      diageditor.ungroup();
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Perform layout on the whole diagram or on the selected subgraph.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> applMenuItemLayoutHandler(event:ContextMenuEvent):<span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">if</span> (currentObject == <span class="ActionScriptReserved">null</span>) <span class="ActionScriptBracket/Brace">{</span>
+        FlexGlobals.topLevelApplication.layoutAll();
+      <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+        FlexGlobals.topLevelApplication.layoutSelectedSubgraph();
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Returns the menu displayed for the diagram. </span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> getPopupMenu():ContextMenu
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">if</span> (diagramPopupMenu == <span class="ActionScriptReserved">null</span>)
+        populatePopupMenu();
+      <span class="ActionScriptReserved">return</span> diagramPopupMenu;
+    <span class="ActionScriptBracket/Brace">}</span>
+  <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body></html>

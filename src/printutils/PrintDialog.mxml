@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<mx:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+          xmlns:fx="http://ns.adobe.com/mxml/2009" 
+          title="@Resource(key='printutils.PrintDialogTitle', bundle='printutils')"
+          verticalScrollPolicy="off" horizontalScrollPolicy="off" creationComplete="init()">
+  
+  <fx:Metadata>
+    [ResourceBundle("printutils")]
+  </fx:Metadata>
+  
+  <fx:Declarations>
+    
+  </fx:Declarations>
+  
+  <fx:Script>
+    <![CDATA[
+      import com.ibm.ilog.elixir.diagram.PrintGraphHelper;
+      
+      import mx.controls.Alert;
+      import mx.controls.Label;
+      import mx.graphics.SolidColor;
+      import mx.managers.PopUpManager;
+      import mx.printing.FlexPrintJob;
+      import mx.printing.FlexPrintJobScaleType;
+      
+      import spark.components.Group;
+      import spark.primitives.Rect;
+
+      private var _graph:Group;
+      
+      /**
+       * The graph that will be printed
+       * 
+       */
+      public function get graph():Group
+      {
+        return _graph;
+      }
+      
+      public function set graph(graphToPrint:Group):void
+      {
+        _graph = graphToPrint;
+      }
+      
+      private function init():void
+      {
+        addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+      }
+      
+      private function onKeyDown(e:KeyboardEvent):void
+      {
+        if (e.keyCode == Keyboard.ESCAPE)
+          doCancel();
+        if (e.keyCode == Keyboard.ENTER)
+          doPrint();
+      }
+      
+      private function doCancel():void
+      {
+        PopUpManager.removePopUp(this);
+        removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);        
+      }
+      
+      private function doPrint():void
+      {
+        PopUpManager.removePopUp(this);
+        printGraph(pageCountStepper.value, printAsBitmapCheckbox.selected);
+        removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);        
+      }
+      
+      private function printGraph(pageCount:int,printAsBitmap:Boolean):void
+      {
+        var flexPrintJob:FlexPrintJob = new FlexPrintJob();
+        flexPrintJob.printAsBitmap=printAsBitmap;
+        var printHelper:PrintGraphHelper = new PrintGraphHelper(graph);
+        
+  
+        if (flexPrintJob.start()) {
+          
+          printHelper.pageCount = pageCount;
+          
+          // container with label
+          var container:Group = new Group();
+          
+          container.addElement(printHelper);
+          container.width = flexPrintJob.pageWidth;
+          container.height = flexPrintJob.pageHeight;
+          var margin:int = Math.min(Math.min(flexPrintJob.pageWidth / 2,flexPrintJob.pageHeight / 2),marginStepper.value);
+          printHelper.x = margin;
+          printHelper.y = margin;
+          printHelper.width = flexPrintJob.pageWidth - 2 * margin;
+          printHelper.height = flexPrintJob.pageHeight - 2 * margin;
+          
+          // add Label with page info
+          var pageNum:Label = new Label();
+          pageNum.left = 10;
+          pageNum.bottom = 10;
+          pageNum.setStyle("color", 0xCCCCCC);
+          pageNum.text = "Row: 1 - Column: 1";
+          container.addElement(pageNum);
+          
+          // White background (to nullify black app background)
+          var bgRect:Rect = new Rect();
+          bgRect.percentWidth = 100;
+          bgRect.percentHeight = 100;
+          bgRect.fill = new SolidColor(0xFFFFFF);          
+          printHelper.addElementAt(bgRect,0);
+          
+          parentApplication.addElement(container);
+          
+          printHelper.initPrinting();
+          
+          try {
+            while(printHelper.nextPageAvailable()) {
+              printHelper.nextPage();
+              pageNum.text = "Row: " + (printHelper.currentPageRowIndex +1)
+                + " - Column: " + (printHelper.currentPageColumnIndex +1);
+              
+              flexPrintJob.addObject(container,FlexPrintJobScaleType.NONE);
+            }
+          } catch (e:Error) {
+            
+            Alert.show(resourceManager.getString("printutils", "printutils.printErrorMessage"),
+              resourceManager.getString("printutils", "printutils.printErrorBoxTitle"))
+            flexPrintJob = null;
+            
+          } finally {
+            printHelper.finishPrinting();
+            parentApplication.removeElement(container);
+          }
+          if (flexPrintJob)
+            flexPrintJob.send();          
+        }
+     
+      }
+    ]]>
+  </fx:Script>
+  
+
+  
+  <mx:Form width="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" >   
+    <mx:FormItem label="@Resource(bundle='printutils', key='printutils.PrintAsBitmap')" width="100%">
+      <mx:CheckBox id="printAsBitmapCheckbox" selected="false" />
+    </mx:FormItem>
+    <mx:FormItem label="@Resource(bundle='printutils', key='printutils.Margin')" width="100%">
+      <mx:NumericStepper minimum="0" maximum="200" minWidth="60" id="marginStepper" value="0"/>   
+    </mx:FormItem>
+    <mx:FormItem label="@Resource(bundle='printutils', key='printutils.PageCount')" width="100%">
+      <mx:VBox width="100%">        
+          <mx:NumericStepper minimum="1" maximum="5" minWidth="60" id="pageCountStepper" value="2"/>          
+        <mx:TextArea  width="100%" text="{resourceManager.getString('printutils', 'printutils.PageCountInfo',[(pageCountStepper.value * pageCountStepper.value)])}"
+                     editable="false" selectable="false" borderStyle="none" id="text2" 
+          horizontalScrollPolicy="off" verticalScrollPolicy="off" />
+        
+      </mx:VBox>
+    </mx:FormItem>
+  </mx:Form>
+  <mx:HBox x="0" width="100%" verticalAlign="bottom" horizontalAlign="right" bottom="5">
+    <mx:Button label="@Resource(bundle='printutils', key='printutils.PrintButton')" minWidth="80" click="doPrint()"/>
+    <mx:Button label="@Resource(bundle='printutils', key='printutils.CancelButton')" minWidth="80" click="doCancel()"/>
+  </mx:HBox>
+</mx:Panel>

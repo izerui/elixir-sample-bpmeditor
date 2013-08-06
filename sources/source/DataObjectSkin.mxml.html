@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>DataObjectSkin.mxml</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre>&lt;?<span class="MXMLComponent_Tag">xml</span> version=<span class="ActionScriptString">"1.0"</span> encoding=<span class="ActionScriptString">"utf-8"</span>?&gt;
+<span class="ActionScriptComment">&lt;!--</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">--&gt;</span>
+&lt;<span class="MXMLComponent_Tag">ibm:NodeSkinBase</span> xmlns=<span class="ActionScriptString">"http://ns.adobe.com/mxml/2009"</span>
+        xmlns:mx=<span class="ActionScriptString">"library://ns.adobe.com/flex/mx"</span>
+        xmlns:s=<span class="ActionScriptString">"library://ns.adobe.com/flex/spark"</span>  
+        xmlns:ibm=<span class="ActionScriptString">"http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010"</span>
+        xmlns:bpmn=<span class="ActionScriptString">"bpm.graphic.icons.*"</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">Metadata</span>&gt;
+    <span class="ActionScriptBracket/Brace">[</span>HostComponent(<span class="ActionScriptString">"bpm.graphic.DataObject"</span>)<span class="ActionScriptBracket/Brace">]</span>
+  &lt;/<span class="MXMLComponent_Tag">Metadata</span>&gt; 
+  
+  &lt;<span class="MXMLComponent_Tag">ibm:states</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"normal"</span> /&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"selected"</span> stateGroups=<span class="ActionScriptString">"Selected"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"normalAndShowsCaret"</span> stateGroups=<span class="ActionScriptString">"ShowsCaret"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"selectedAndShowsCaret"</span> stateGroups=<span class="ActionScriptString">"Selected,ShowsCaret"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"active"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"done"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">ibm:states</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">ibm:layout</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> gap=<span class="ActionScriptString">"5"</span> horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+  &lt;/<span class="MXMLComponent_Tag">ibm:layout</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">s:Group</span> id=<span class="ActionScriptString">"base"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:filters</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:GlowFilter</span> includeIn=<span class="ActionScriptString">"ShowsCaret"</span> color=<span class="ActionScriptBracket/Brace">"{</span>caretColor<span class="ActionScriptBracket/Brace">}"</span> alpha=<span class="ActionScriptString">"0.8"</span> blurX=<span class="ActionScriptString">"8"</span> blurY=<span class="ActionScriptString">"8"</span>&gt;
+      &lt;/<span class="MXMLComponent_Tag">s:GlowFilter</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:filters</span>&gt;    
+    
+    &lt;<span class="MXMLComponent_Tag">s:Path</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:data</span>&gt;M 0 0 L 18 0 L 30 12 L 30 40 L 0 40 z&lt;/<span class="MXMLComponent_Tag">s:data</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:fill</span>&gt;&lt;<span class="MXMLComponent_Tag">s:SolidColor</span> color=<span class="ActionScriptString">"0xFAFAD2"</span> /&gt;&lt;/<span class="MXMLComponent_Tag">s:fill</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:stroke</span>&gt;&lt;<span class="MXMLComponent_Tag">s:SolidColorStroke</span> weight=<span class="ActionScriptString">"2"</span> color=<span class="ActionScriptString">"0x808080"</span> /&gt;&lt;/<span class="MXMLComponent_Tag">s:stroke</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:Path</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Path</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:data</span>&gt;M 18 0 L 18 12 L 30 12&lt;/<span class="MXMLComponent_Tag">s:data</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:stroke</span>&gt;&lt;<span class="MXMLComponent_Tag">s:SolidColorStroke</span> weight=<span class="ActionScriptString">"1"</span> color=<span class="ActionScriptString">"0x808080"</span> /&gt;&lt;/<span class="MXMLComponent_Tag">s:stroke</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:Path</span>&gt;
+    
+  &lt;/<span class="MXMLComponent_Tag">s:Group</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">s:Group</span> id=<span class="ActionScriptString">"labelsGroup"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Label</span> id=<span class="ActionScriptString">"labelElement"</span> text=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.label<span class="ActionScriptBracket/Brace">}"</span> maxWidth=<span class="ActionScriptString">"100"</span> textAlign=<span class="ActionScriptString">"center"</span> color=<span class="ActionScriptBracket/Brace">"{</span>color<span class="ActionScriptBracket/Brace">}"</span> fontSize=<span class="ActionScriptString">"12"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:Group</span>&gt;
+  
+&lt;/<span class="MXMLComponent_Tag">ibm:NodeSkinBase</span>&gt;
+</pre></body></html>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<s:Skin xmlns="http://ns.adobe.com/mxml/2009"
+        xmlns:mx="library://ns.adobe.com/flex/mx"
+        xmlns:s="library://ns.adobe.com/flex/spark"  
+        xmlns:ilog="http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010">
+  
+  <Metadata>
+    [HostComponent("bpm.graphic.HPool")]
+  </Metadata> 
+  
+  <s:states>
+    <s:State name="collapsed" stateGroups="Collapsed"/>        
+    <s:State name="normal" stateGroups="Expanded"/>
+    <s:State name="selected" stateGroups="Expanded,Selected"/>   
+    <s:State name="collapsedSelected" stateGroups="Collapsed,Selected"/> 
+    <s:State name="normalAndShowsCaret" stateGroups="Expanded,ShowsCaret"/>
+    <s:State name="collapsedAndShowsCaret" stateGroups="Collapsed,ShowsCaret"/>
+    <s:State name="selectedAndShowsCaret" stateGroups="Expanded,Selected,ShowsCaret"/>
+    <s:State name="collapsedSelectedAndShowsCaret" stateGroups="Collapsed,Selected,ShowsCaret"/>
+  </s:states>
+  
+  <Script>
+    <![CDATA[
+      
+      import com.ibm.ilog.elixir.diagram.HPool;
+      
+      /**
+       * Invoked when skin is attached to pool
+       * @private
+       */
+      public override  function set owner(value:DisplayObjectContainer):void
+      {
+        super.owner = value;
+        var host:HPool = value as HPool;
+        host.gap = -2; // install negative gap on pool so that the borders of lanes overlap, overwise 
+        // borders are doubled.
+      }
+      
+      /**
+       *  @private
+       */
+      override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void
+      {      
+        var cr:Number = getStyle("caretColor");
+        if (caretColor != cr) caretColor = cr;
+        
+        var bkg:Number = getStyle("backgroundColor");
+        if (backgroundColor != bkg) backgroundColor = bkg;
+        
+        var bg:Number = getStyle("borderColor");
+        if (borderColor != bg) borderColor = bg;
+        
+        var c:Number = getStyle("color");
+        if (color != c) color = c;
+        
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+      }
+      
+      [Bindable]
+      /**
+       * The color for the caret border of the node.
+       */
+      public var caretColor:uint;
+      
+      [Bindable]
+      /**
+       * The color for the background
+       */
+      public var backgroundColor:uint;
+      
+      [Bindable]
+      /**
+       * The color for the border
+       */
+      public var borderColor:uint;
+      
+      [Bindable]
+      /**
+       * The color for the label
+       */
+      public var color:uint;      
+    ]]>
+  </Script>
+  
+  <!-- 
+  the main group containing all parts of the skin and adapted to subgraph's size
+  -->
+  <s:Group id="base" left="0" top="0" width="100%" height="100%">
+    <s:filters>
+      <s:GlowFilter includeIn="ShowsCaret" color="{caretColor}" alpha="0.8" blurX="8" blurY="8">
+      </s:GlowFilter>
+    </s:filters>    
+    
+    <!-- rectangle surrounding all parts of the skin -->
+    <s:Rect id="border" left="0" top="0" width="100%" height="100%">
+      <s:stroke>
+        <mx:SolidColorStroke id="stroke" color="{borderColor}" weight="2" />
+      </s:stroke>
+      <s:fill>
+        <mx:SolidColor color="white" />
+      </s:fill>
+    </s:Rect>    
+    
+    <s:Group left="0" top="0" bottom="0" minWidth="25" clipAndEnableScrolling="true">
+      <s:Rect  left="2" top="2" right="0" bottom="2">
+        <s:fill>
+          <mx:SolidColor color="0xFFFDE4" />
+        </s:fill>
+      </s:Rect>
+      <s:Group id="labelElement" left="0" top="0" bottom="0" right="0" fontSize="12">
+        <s:Label text="{hostComponent.label}" rotation="-90" horizontalCenter="0" 
+                 verticalCenter="0" color="{color}" />
+      </s:Group>
+    </s:Group>
+    
+    <s:Line yTo="100" left="{Math.max(25, labelElement.width)}" top="0" bottom="0">
+      <s:stroke>
+        <mx:SolidColorStroke color="{borderColor}" weight="2" />
+      </s:stroke>
+    </s:Line>
+    
+    <!-- group containing the graph -->
+    <!-- IMPORTANT don't use 'includeIn' to control display when state is collapsed
+    because graph parent will be null ( = pbl during link clipping)
+    Instead, let's use visibility
+    -->
+    <s:Group id="graphGroup" left="{Math.max(25, labelElement.width)}" 
+             top="0" right="0" bottom="0" 
+             clipAndEnableScrolling="true"
+             visible.Expanded="true" 
+             visible.Collapsed="false" 
+             alpha="1" alpha.Collapsed="0">
+      <s:Rect left="2" top="2" right="2" bottom="2">
+        <s:fill>
+          <mx:SolidColor color="{backgroundColor}" />
+        </s:fill>
+      </s:Rect>    
+      <ilog:Graph  id="graph" left="0" top="0" width="100%" height="100%" 
+                   automaticGraphLayout="false"/>
+    </s:Group>
+    
+  </s:Group>
+  
+</s:Skin>

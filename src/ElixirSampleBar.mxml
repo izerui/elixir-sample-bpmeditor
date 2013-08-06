@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Y31,5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+         xmlns:s="library://ns.adobe.com/flex/spark" 
+         xmlns:local="*"
+         width="100%"
+         creationComplete="group1_creationCompleteHandler(event)"
+         visible="{_display}"
+         includeInLayout="{_display}"
+         >
+  <fx:Script>
+    <![CDATA[
+      import mx.events.FlexEvent;
+      import mx.resources.ResourceManager;
+      
+      [Bindable]
+      private var _display:Boolean = true;
+      
+      private function getString(key:String):String {
+        var s:String;
+        try {    
+          s = ResourceManager.getInstance().getString("elixirsamplebar_enterprise", "samplebar."+key);
+        } catch (e:Error) {
+          s = null;
+        }
+        return s == null ? key : s;
+      }
+      
+      public static function goToURL(url:String):void {
+        try {
+          navigateToURL(new URLRequest(url), '_self');
+        } catch (e:SecurityError) {
+          trace("Cannot navigate to URL "+url);
+        }
+      }
+
+      /**
+      * When the sample bar is created, check if an existing function available
+      * from ExternalInterface, controls the visibility of the sample bar
+      */
+      protected function group1_creationCompleteHandler(event:FlexEvent):void
+      {
+        _display = true; // default value
+        if (ExternalInterface.available ){ 
+          var res:* = ExternalInterface.call("isSampleBarVisible") as Boolean;
+          _display = res!=null?res:true; 
+        }
+      }
+
+    ]]>
+  </fx:Script>
+  <fx:Declarations>
+    <fx:String id="label"/>
+  </fx:Declarations>
+  <fx:Style source="../resources/elixirsample.css"/>
+  <s:BitmapImage width="100%" height="100%" fillMode="scale"
+                 source="@Embed(source='../resources/bannerbg_long.png', scaleGridLeft='3', scaleGridTop='3', scaleGridRight='842', scaleGridBottom='33')"/>
+  <s:HGroup gap="3" verticalAlign="middle" width="100%" height="100%" paddingLeft="10">
+    <s:BitmapImage source="@Embed(source='../resources/elixir.png')"/>
+    <s:Label text="@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.productName')"
+             paddingTop="2" paddingRight="3" styleName="productNameStyle"/>
+    <s:BitmapImage source="@Embed(source='../resources/banner_sep.png')"/>
+    <s:Line width="2"/>
+    <s:Label text="{label}" paddingTop="4" styleName="sampleNameStyle"/>
+    <s:HGroup verticalAlign="middle" width="100%" horizontalAlign="right" height="100%" paddingRight="2"
+              styleName="buttonStyle">
+      <local:ElixirLinkButton iconClass="@Embed(source='../resources/viewotherdemos.png')" 
+                              label="@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.linkdemos')"
+                              click="{goToURL(getString('demourl'))}"
+                              skinClass="ElixirLinkButtonSkin"/>
+      <s:BitmapImage source="@Embed(source='../resources/banner_sep.png')"/>
+      <local:ElixirLinkButton iconClass="@Embed(source='../resources/download.png')" 
+                              label="@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.download')" 
+                              click="{ElixirSampleBar.goToURL(getString('downurl'))}"
+                              skinClass="ElixirLinkButtonSkin"/>
+      <local:ElixirLinkButton iconClass="@Embed(source='../resources/ibm_1px.png')" 
+                              skinClass="ElixirLinkButtonSkin"
+                              click="goToURL(getString('producturl'))"
+                              toolTip="@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.gotoelixir')"/>
+    </s:HGroup>
+  </s:HGroup>
+</s:Group>

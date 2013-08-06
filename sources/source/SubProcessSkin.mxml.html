@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>SubProcessSkin.mxml</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre>&lt;?<span class="MXMLComponent_Tag">xml</span> version=<span class="ActionScriptString">"1.0"</span> encoding=<span class="ActionScriptString">"utf-8"</span>?&gt;
+<span class="ActionScriptComment">&lt;!--</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">--&gt;</span>
+&lt;<span class="MXMLComponent_Tag">s:Skin</span> xmlns=<span class="ActionScriptString">"http://ns.adobe.com/mxml/2009"</span>
+        xmlns:fx=<span class="ActionScriptString">"http://ns.adobe.com/mxml/2009"</span>
+        xmlns:mx=<span class="ActionScriptString">"library://ns.adobe.com/flex/mx"</span>
+        xmlns:s=<span class="ActionScriptString">"library://ns.adobe.com/flex/spark"</span>  
+        xmlns:bpmn=<span class="ActionScriptString">"bpm.graphic.icons.*"</span> 
+        xmlns:ilog=<span class="ActionScriptString">"http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010"</span>&gt;
+
+  &lt;<span class="MXMLComponent_Tag">Metadata</span>&gt;
+    <span class="ActionScriptBracket/Brace">[</span>HostComponent(<span class="ActionScriptString">"bpm.graphic.SubProcess"</span>)<span class="ActionScriptBracket/Brace">]</span>
+  &lt;/<span class="MXMLComponent_Tag">Metadata</span>&gt; 
+  
+  &lt;<span class="MXMLComponent_Tag">Declarations</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:GlowFilter</span> id=<span class="ActionScriptString">"glowFilter"</span> color=<span class="ActionScriptString">"0x00FF00"</span> strength=<span class="ActionScriptString">"3"</span> blurX=<span class="ActionScriptString">"18"</span> blurY=<span class="ActionScriptString">"18"</span>/&gt;
+    
+    &lt;<span class="MXMLComponent_Tag">s:AnimateFilter</span> id=<span class="ActionScriptString">"animateWaitEffect"</span> 
+                     target=<span class="ActionScriptBracket/Brace">"{</span>wait<span class="ActionScriptBracket/Brace">}"</span>
+                     repeatCount=<span class="ActionScriptString">"0"</span>
+                     duration=<span class="ActionScriptString">"250"</span>
+                     repeatBehavior=<span class="ActionScriptString">"reverse"</span>
+                     bitmapFilter=<span class="ActionScriptBracket/Brace">"{</span>glowFilter<span class="ActionScriptBracket/Brace">}"</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:SimpleMotionPath</span> property=<span class="ActionScriptString">"alpha"</span> valueFrom=<span class="ActionScriptString">"0"</span> valueTo=<span class="ActionScriptString">"1"</span>/&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:AnimateFilter</span>&gt;
+  &lt;/<span class="MXMLComponent_Tag">Declarations</span>&gt;  
+  
+  &lt;<span class="MXMLSpecial_Tag">fx:Script</span>&gt;
+    &lt;![<span class="MXMLComponent_Tag">CDATA</span><span class="ActionScriptBracket/Brace">[</span>      
+       
+      <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">       *  @private</span>
+<span class="ActionScriptASDoc">       */</span>
+      <span class="ActionScriptReserved">override</span> protected <span class="ActionScriptfunction">function</span> updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : <span class="ActionScriptReserved">void</span>
+      <span class="ActionScriptBracket/Brace">{</span>      
+        <span class="ActionScriptvar">var</span> cr:Number = getStyle(<span class="ActionScriptString">"caretColor"</span>);
+        <span class="ActionScriptReserved">if</span> (caretColor != cr) caretColor = cr;
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+      <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">       * The color for the caret border of the node.</span>
+<span class="ActionScriptASDoc">       */</span>
+      <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> caretColor:uint;
+      
+    <span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">]</span>&gt; 
+  &lt;/<span class="MXMLSpecial_Tag">fx:Script</span>&gt;
+
+  &lt;<span class="MXMLComponent_Tag">s:states</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"collapsed"</span> stateGroups=<span class="ActionScriptString">"Collapsed"</span>/&gt;        
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"normal"</span> stateGroups=<span class="ActionScriptString">"Expanded"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"selected"</span> stateGroups=<span class="ActionScriptString">"Expanded,Selected"</span>/&gt;   
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"collapsedSelected"</span> stateGroups=<span class="ActionScriptString">"Collapsed,Selected"</span>/&gt; 
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"normalAndShowsCaret"</span> stateGroups=<span class="ActionScriptString">"Expanded,ShowsCaret"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"collapsedAndShowsCaret"</span> stateGroups=<span class="ActionScriptString">"Collapsed,ShowsCaret"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"selectedAndShowsCaret"</span> stateGroups=<span class="ActionScriptString">"Expanded,Selected,ShowsCaret"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"collapsedSelectedAndShowsCaret"</span> stateGroups=<span class="ActionScriptString">"Collapsed,Selected,ShowsCaret"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"activeCollapsed"</span> stateGroups=<span class="ActionScriptString">"Collapsed"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"doneCollapsed"</span> stateGroups=<span class="ActionScriptString">"Collapsed"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:states</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">Declarations</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:Sequence</span> id=<span class="ActionScriptString">"collapseSequence"</span>
+                 effectStart=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.collapseAnimationStart()<span class="ActionScriptBracket/Brace">}"</span>
+                 effectEnd=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.collapseAnimationEnd()<span class="ActionScriptBracket/Brace">}"</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:Fade</span> target=<span class="ActionScriptBracket/Brace">"{</span>graphGroup<span class="ActionScriptBracket/Brace">}"</span> alphaTo=<span class="ActionScriptString">"0"</span> duration=<span class="ActionScriptString">"150"</span>/&gt;
+      &lt;<span class="MXMLComponent_Tag">s:Resize</span> target=<span class="ActionScriptBracket/Brace">"{</span>main<span class="ActionScriptBracket/Brace">}"</span> 
+                duration=<span class="ActionScriptString">"150"</span>/&gt;        
+    &lt;/<span class="MXMLComponent_Tag">mx:Sequence</span>&gt;  
+    
+    &lt;<span class="MXMLComponent_Tag">mx:Sequence</span> id=<span class="ActionScriptString">"expandSequence"</span> 
+                 effectStart=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.expandAnimationStart()<span class="ActionScriptBracket/Brace">}"</span>
+                 effectEnd=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.expandAnimationEnd()<span class="ActionScriptBracket/Brace">}"</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:Resize</span> target=<span class="ActionScriptBracket/Brace">"{</span>main<span class="ActionScriptBracket/Brace">}"</span> 
+                duration=<span class="ActionScriptString">"150"</span>/&gt;        
+      &lt;<span class="MXMLComponent_Tag">s:Fade</span> target=<span class="ActionScriptBracket/Brace">"{</span>graphGroup<span class="ActionScriptBracket/Brace">}"</span> alphaTo=<span class="ActionScriptString">"1"</span> duration=<span class="ActionScriptString">"150"</span>/&gt;
+    &lt;/<span class="MXMLComponent_Tag">mx:Sequence</span>&gt;    
+  &lt;/<span class="MXMLComponent_Tag">Declarations</span>&gt;
+
+  &lt;<span class="MXMLComponent_Tag">s:transitions</span>&gt;
+    &lt;!-- <span class="MXMLComponent_Tag">transition</span> TO state <span class="ActionScriptString">'collapsed'</span> or <span class="ActionScriptString">'collapseSequence'</span>: 
+     1) fade the graph
+     2) then resize to height=25
+     --&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:Transition</span> fromState=<span class="ActionScriptString">"*"</span> toState=<span class="ActionScriptString">"collapsed"</span> effect=<span class="ActionScriptBracket/Brace">"{</span>collapseSequence<span class="ActionScriptBracket/Brace">}"</span> /&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:Transition</span> fromState=<span class="ActionScriptString">"*"</span> toState=<span class="ActionScriptString">"collapsedSelected"</span> effect=<span class="ActionScriptBracket/Brace">"{</span>collapseSequence<span class="ActionScriptBracket/Brace">}"</span> /&gt;
+    
+    &lt;!-- <span class="MXMLComponent_Tag">transition</span> FROM state <span class="ActionScriptString">'collapsed'</span> or <span class="ActionScriptString">'collapseSequence'</span> : 
+     2) resize from height=25
+     1) fade the graph
+     --&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:Transition</span> fromState=<span class="ActionScriptString">"collapsed"</span> toState=<span class="ActionScriptString">"*"</span> effect=<span class="ActionScriptBracket/Brace">"{</span>expandSequence<span class="ActionScriptBracket/Brace">}"</span> /&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:Transition</span> fromState=<span class="ActionScriptString">"collapsedSelected"</span> toState=<span class="ActionScriptString">"*"</span> effect=<span class="ActionScriptBracket/Brace">"{</span>expandSequence<span class="ActionScriptBracket/Brace">}"</span> /&gt;
+
+  &lt;/<span class="MXMLComponent_Tag">s:transitions</span>&gt;
+  
+  &lt;!-- 
+  <span class="MXMLComponent_Tag">the</span> main group containing all parts of the skin and adapted to subgraph<span class="ActionScriptString">'s size</span>
+<span class="ActionScriptString">  --&gt;</span>
+<span class="ActionScriptString">  <s:Group id="main" left="0" top="0"</span>
+<span class="ActionScriptString">           width.Expanded="{hostComponent.expandedWidth}"</span>
+<span class="ActionScriptString">           height.Expanded="{hostComponent.expandedHeight}"</span>
+<span class="ActionScriptString">           width.Collapsed="{hostComponent.collapsedWidth}"</span>
+<span class="ActionScriptString">           height.Collapsed="{hostComponent.collapsedHeight}"</span>
+<span class="ActionScriptString">                              ></span>
+<span class="ActionScriptString"> </span>
+<span class="ActionScriptString">    <s:filters></span>
+<span class="ActionScriptString">      <s:GlowFilter includeIn="ShowsCaret" color="{caretColor}" alpha="0.8" blurX="8" blurY="8"></span>
+<span class="ActionScriptString">      </s:GlowFilter></span>
+<span class="ActionScriptString">    </s:filters>    </span>
+
+<span class="ActionScriptString">    &lt;!-- indicators for monitoring status --&gt;</span>
+<span class="ActionScriptString">    <mx:SWFLoader id="wait" top="-16" right="-8" includeIn="activeCollapsed" source="@Embed(source=</span>images/wait.svg<span class="ActionScriptString">')" height="16" width="16"</span>
+<span class="ActionScriptString">                  add="{animateWaitEffect.play()}"</span>
+<span class="ActionScriptString">                  remove="{animateWaitEffect.stop()}"/></span>
+<span class="ActionScriptString">    <mx:SWFLoader top="-16" right="-8" includeIn="doneCollapsed" source="@Embed(source=</span>images/ok.svg<span class="ActionScriptString">')" height="16" width="16"/></span>
+<span class="ActionScriptString">   </span>
+<span class="ActionScriptString">    &lt;!-- rectangle surrounding all parts of the skin --&gt;</span>
+<span class="ActionScriptString">    <s:Rect id="border" left="0" top="0" width="100%" height="100%" radiusX="5" radiusY="5"></span>
+<span class="ActionScriptString">      <s:stroke></span>
+<span class="ActionScriptString">        <mx:SolidColorStroke color.Collapsed="0xACAEAF" color.Expanded="0xC4C4C4" weight="2" /></span>
+<span class="ActionScriptString">      </s:stroke></span>
+<span class="ActionScriptString">      <s:fill></span>
+<span class="ActionScriptString">        <mx:SolidColor color.Collapsed="0xCEEDFF" color.Expanded="0xF7F7F7" /></span>
+<span class="ActionScriptString">      </s:fill></span>
+<span class="ActionScriptString">    </s:Rect>    </span>
+<span class="ActionScriptString">    </span>
+<span class="ActionScriptString">    <s:Group id="markers" bottom="2" horizontalCenter="0" ></span>
+<span class="ActionScriptString">    </span>
+<span class="ActionScriptString">      <s:layout></span>
+<span class="ActionScriptString">        <s:HorizontalLayout gap="3"/></span>
+<span class="ActionScriptString">      </s:layout></span>
+<span class="ActionScriptString">    </span>
+<span class="ActionScriptString">      &lt;!-- button to expand or collapse the subgraph --&gt;</span>
+<span class="ActionScriptString">      &lt;!--</span>
+<span class="ActionScriptString">      <mx:Button width="16" height="16" paddingLeft="0" paddingTop="0" paddingRight="1" paddingBottom="5"</span>
+<span class="ActionScriptString">                           click="{hostComponent.collapsed = !hostComponent.collapsed }"</span>
+<span class="ActionScriptString">                           buttonMode="true"</span>
+<span class="ActionScriptString">                           fontSize="14" fontWeight="bold"</span>
+<span class="ActionScriptString">                           label.Collapsed="+"</span>
+<span class="ActionScriptString">                           label.Expanded="-"</span>
+<span class="ActionScriptString">        /></span>
+<span class="ActionScriptString">      --&gt;</span>
+<span class="ActionScriptString">      <s:Group width="14" height="14"</span>
+<span class="ActionScriptString">                         mouseDown="{hostComponent.collapsed = !hostComponent.collapsed; event.stopPropagation();}"></span>
+<span class="ActionScriptString">        <s:Rect width="14" height="14" bottom="1" radiusX="3" radiusY="3"></span>
+<span class="ActionScriptString">          <s:fill></span>
+<span class="ActionScriptString">            <mx:SolidColor color="0xd0d0d0"/></span>
+<span class="ActionScriptString">          </s:fill></span>
+<span class="ActionScriptString">        </s:Rect></span>
+<span class="ActionScriptString">        <s:Rect width="8" height="2" horizontalCenter="0" verticalCenter="-1"></span>
+<span class="ActionScriptString">          <s:fill></span>
+<span class="ActionScriptString">            <mx:SolidColor color="0x404040"/></span>
+<span class="ActionScriptString">          </s:fill></span>
+<span class="ActionScriptString">        </s:Rect></span>
+<span class="ActionScriptString">        <s:Rect width="2" height="8" horizontalCenter="0" verticalCenter="-1" visible.Expanded="false"></span>
+<span class="ActionScriptString">          <s:fill></span>
+<span class="ActionScriptString">            <mx:SolidColor color="0x404040"/></span>
+<span class="ActionScriptString">          </s:fill></span>
+<span class="ActionScriptString">        </s:Rect></span>
+<span class="ActionScriptString">      </s:Group></span>
+<span class="ActionScriptString">        </span>
+<span class="ActionScriptString">      <bpmn:BPMNIcon includeInLayout="{hostComponent.adHoc}" visible="{hostComponent.adHoc}"</span>
+<span class="ActionScriptString">                styleName="AdHocMarker" openStrokeColor="0x444444"/></span>
+<span class="ActionScriptString">    </s:Group></span>
+
+<span class="ActionScriptString">    <s:Group id="labelElement" left.Expanded="5" top.Expanded="8" fontSize="12"</span>
+<span class="ActionScriptString">            horizontalCenter.Collapsed="0" verticalCenter.Collapsed="-10"></span>
+<span class="ActionScriptString">      <s:Label id="label" text="{hostComponent.label}"  maxWidth="{main.width - 2}" color="0x000000" </span>
+<span class="ActionScriptString">            textAlign.Collapsed="center" textAlign.Expanded="start"/></span>
+<span class="ActionScriptString">    </s:Group></span>
+
+<span class="ActionScriptString">    &lt;!-- group containing the graph --&gt;</span>
+<span class="ActionScriptString">    &lt;!-- IMPORTANT don</span>t use <span class="ActionScriptString">'includeIn'</span> to control display when state is collapsed
+    because graph parent will be <span class="ActionScriptReserved">null</span> ( = pbl during link clipping)
+    Instead, let<span class="ActionScriptString">'s use visibility</span>
+<span class="ActionScriptString">    --&gt;</span>
+<span class="ActionScriptString">    <s:Group id="graphGroup" left="5" top="{labelElement.height + 10}" right="5" bottom="20" clipAndEnableScrolling="true"</span>
+<span class="ActionScriptString">      visible.Expanded="true" </span>
+<span class="ActionScriptString">      visible.Collapsed="false" </span>
+<span class="ActionScriptString">      alpha="1" alpha.Collapsed="0"></span>
+<span class="ActionScriptString">      <s:Rect left="0" top="0" width="100%" height="100%" ></span>
+<span class="ActionScriptString">        <s:fill></span>
+<span class="ActionScriptString">          <mx:SolidColor color="0xF7F7F7" /></span>
+<span class="ActionScriptString">        </s:fill></span>
+<span class="ActionScriptString">      </s:Rect></span>
+<span class="ActionScriptString">      <ilog:Graph id="graph"</span>
+<span class="ActionScriptString">                  left="{hostComponent.graphMarginLeft}"</span>
+<span class="ActionScriptString">                  top="{hostComponent.graphMarginTop}" </span>
+<span class="ActionScriptString">                  right="{hostComponent.graphMarginRight}" </span>
+<span class="ActionScriptString">                  bottom="{hostComponent.graphMarginBottom}"</span>
+<span class="ActionScriptString">                  automaticGraphLayout="false"/></span>
+<span class="ActionScriptString">    </s:Group></span>
+
+<span class="ActionScriptString">  </s:Group></span>
+<span class="ActionScriptString">  </span>
+<span class="ActionScriptString"></s:Skin></span>
+</pre></body></html>

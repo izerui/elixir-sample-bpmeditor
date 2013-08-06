@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>ElixirLinkButtonSkin.mxml</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre>&lt;?<span class="MXMLComponent_Tag">xml</span> version=<span class="ActionScriptString">"1.0"</span> encoding=<span class="ActionScriptString">"utf-8"</span>?&gt;
+<span class="ActionScriptComment">&lt;!--</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Y31,5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">--&gt;</span>
+<span class="ActionScriptComment">&lt;!--</span>
+<span class="ActionScriptComment">//////////////////////////////////////////////////////////////////////////////// </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">// This file contains code from the Open Source Flex SDK obtained under the </span>
+<span class="ActionScriptComment">// license below </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">//////////////////////////////////////////////////////////////////////////////// </span>
+
+<span class="ActionScriptComment">//////////////////////////////////////////////////////////////////////////////// </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">// The contents of this file are subject to the Mozilla Public License </span>
+<span class="ActionScriptComment">// Version 1.1 (the "License"); you may not use this file except in </span>
+<span class="ActionScriptComment">// compliance with the License. You may obtain a copy of the License at </span>
+<span class="ActionScriptComment">//  http://www.mozilla.org/MPL/ </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">//  Software distributed under the License is distributed on an "AS IS" </span>
+<span class="ActionScriptComment">//  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the </span>
+<span class="ActionScriptComment">//  License for the specific language governing rights and limitations </span>
+<span class="ActionScriptComment">//  under the License. </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">//  The Original Code is Open Source Flex SDK. </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">//  The Initial Developer of the Original Code is Adobe Systems Incoporated.   </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">// Portions created by Intial Developer are Copyright 2005-2007 Adobe Systems </span>
+<span class="ActionScriptComment">// Incorporated. All Rights Reserved.     </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">// Contributor(s): </span>
+<span class="ActionScriptComment">// </span>
+<span class="ActionScriptComment">////////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">--&gt;</span>
+&lt;<span class="MXMLComponent_Tag">s:SparkSkin</span> xmlns:fx=<span class="ActionScriptString">"http://ns.adobe.com/mxml/2009"</span> xmlns:s=<span class="ActionScriptString">"library://ns.adobe.com/flex/spark"</span> 
+             xmlns:fb=<span class="ActionScriptString">"http://ns.adobe.com/flashbuilder/2009"</span> 
+             xmlns:local=<span class="ActionScriptString">"*"</span> minWidth=<span class="ActionScriptString">"21"</span> minHeight=<span class="ActionScriptString">"21"</span> alpha.disabled=<span class="ActionScriptString">"0.5"</span>
+             useChromeColor=<span class="ActionScriptString">"false"</span>
+             height=<span class="ActionScriptString">"28"</span>&gt;
+  &lt;<span class="MXMLSpecial_Tag">fx:Metadata</span>&gt;
+    &lt;![<span class="MXMLComponent_Tag">CDATA</span><span class="ActionScriptBracket/Brace">[</span> 
+    <span class="ActionScriptBracket/Brace">[</span>HostComponent(<span class="ActionScriptString">"ElixirLinkButton"</span>)<span class="ActionScriptBracket/Brace">]</span>
+    <span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">]</span>&gt;
+  &lt;/<span class="MXMLSpecial_Tag">fx:Metadata</span>&gt;
+  &lt;<span class="MXMLComponent_Tag">s:states</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"up"</span> /&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"over"</span> /&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"down"</span> /&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"disabled"</span> /&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:states</span>&gt;
+  &lt;<span class="MXMLComponent_Tag">s:Rect</span> id=<span class="ActionScriptString">"highlight"</span> left=<span class="ActionScriptString">"1"</span> right=<span class="ActionScriptString">"1"</span> top=<span class="ActionScriptString">"1"</span> bottom=<span class="ActionScriptString">"1"</span> radiusX=<span class="ActionScriptString">"4"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:fill</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:LinearGradient</span> rotation=<span class="ActionScriptString">"90"</span>&gt;
+        &lt;<span class="MXMLComponent_Tag">s:GradientEntry</span> color=<span class="ActionScriptString">"0xFFFFFF"</span>
+                         ratio=<span class="ActionScriptString">"0.0"</span>
+                         alpha=<span class="ActionScriptString">"0.33"</span> 
+                         alpha.up=<span class="ActionScriptString">"0"</span>
+                         alpha.over=<span class="ActionScriptString">"0.22"</span> 
+                         alpha.down=<span class="ActionScriptString">"0.32"</span>/&gt;
+        &lt;<span class="MXMLComponent_Tag">s:GradientEntry</span> color=<span class="ActionScriptString">"0xFFFFFF"</span>
+                         ratio=<span class="ActionScriptString">"0.48"</span>
+                         alpha=<span class="ActionScriptString">"0.33"</span>
+                         alpha.up=<span class="ActionScriptString">"0"</span>
+                         alpha.over=<span class="ActionScriptString">"0.22"</span>
+                         alpha.down=<span class="ActionScriptString">"0.32"</span> /&gt;
+        &lt;<span class="MXMLComponent_Tag">s:GradientEntry</span> color=<span class="ActionScriptString">"0xFFFFFF"</span>
+                         ratio=<span class="ActionScriptString">"0.48001"</span>
+                         alpha=<span class="ActionScriptString">"0"</span> /&gt;
+      &lt;/<span class="MXMLComponent_Tag">s:LinearGradient</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:fill</span>&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:Rect</span>&gt;
+  &lt;<span class="MXMLComponent_Tag">s:Rect</span> id=<span class="ActionScriptString">"highlightStroke"</span> left=<span class="ActionScriptString">"1"</span> right=<span class="ActionScriptString">"1"</span> top=<span class="ActionScriptString">"1"</span> bottom=<span class="ActionScriptString">"1"</span> radiusX=<span class="ActionScriptString">"4"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:stroke</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:LinearGradientStroke</span> rotation=<span class="ActionScriptString">"90"</span> weight=<span class="ActionScriptString">"1"</span>&gt;
+        &lt;<span class="MXMLComponent_Tag">s:GradientEntry</span> color=<span class="ActionScriptString">"0xFFFFFF"</span> alpha.over=<span class="ActionScriptString">"0.52"</span> alpha.up=<span class="ActionScriptString">"0"</span>/&gt;
+        &lt;<span class="MXMLComponent_Tag">s:GradientEntry</span> color=<span class="ActionScriptString">"0xD8D8D8"</span> alpha.over=<span class="ActionScriptString">"0.52"</span> alpha.up=<span class="ActionScriptString">"0"</span>/&gt;
+      &lt;/<span class="MXMLComponent_Tag">s:LinearGradientStroke</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:stroke</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:fill</span>.over&gt;
+      &lt;<span class="MXMLComponent_Tag">s:SolidColor</span> color=<span class="ActionScriptString">"0x136ABF"</span> alpha=<span class="ActionScriptString">"0.3"</span>/&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:fill</span>.over&gt;
+    &lt;<span class="MXMLComponent_Tag">s:fill</span>.down&gt;
+      &lt;<span class="MXMLComponent_Tag">s:SolidColor</span> color=<span class="ActionScriptString">"0x136ABF"</span> alpha=<span class="ActionScriptString">"0.5"</span>/&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:fill</span>.down&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:Rect</span>&gt;
+  &lt;<span class="MXMLComponent_Tag">s:HGroup</span> verticalAlign=<span class="ActionScriptString">"middle"</span>
+            horizontalCenter=<span class="ActionScriptString">"0"</span>
+            left=<span class="ActionScriptString">"10"</span> right=<span class="ActionScriptString">"10"</span> top=<span class="ActionScriptString">"2"</span> bottom=<span class="ActionScriptString">"2"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:BitmapImage</span> source=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.iconClass<span class="ActionScriptBracket/Brace">}"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Label</span> id=<span class="ActionScriptString">"labelDisplay"</span> 
+             textAlign=<span class="ActionScriptString">"center"</span>
+             maxDisplayedLines=<span class="ActionScriptString">"1"</span> paddingTop=<span class="ActionScriptString">"4"</span>
+             visible=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.label != ''<span class="ActionScriptBracket/Brace">}"</span>
+             includeInLayout=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.label != ''<span class="ActionScriptBracket/Brace">}"</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:Label</span>&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:HGroup</span>&gt;
+&lt;/<span class="MXMLComponent_Tag">s:SparkSkin</span>&gt;
+</pre></body></html>

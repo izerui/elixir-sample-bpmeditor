@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009"
+             xmlns:mx="library://ns.adobe.com/flex/mx"
+             xmlns:s="library://ns.adobe.com/flex/spark" 
+             xmlns:idiag="http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010">
+  
+  <fx:Metadata>
+    [HostComponent("com.ibm.ilog.elixir.diagram.LinkDecoration")]
+  </fx:Metadata>   
+    
+  <!-- base is made of a main path and arrows --> 
+  <mx:SWFLoader source="@Embed(source='images/moveright.svg')" width="16" height="16"/>
+
+</s:SparkSkin>
+

@@ -1,0 +1,442 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>bpmeditor.properties</title>
+ </head>
+ <body>
+  <pre>
+##############################################################
+# This file contains the properties for the BPM editor sample
+##############################################################
+
+# NLS_ENCODING=UTF-8
+# NLS_MESSAGEFORMAT_NONE
+
+# Sample application title
+bpmeditor.application.title=BPM Editor
+
+# The two following properties are used by the sample launcher
+# Name as displayed by Sample launcher
+bpmeditorsample.application.name=BPM Editor
+# Description as displayed by Sample launcher
+bpmeditorsample.application.description=The BPM Editor sample shows how to create a business process diagram editor using IBM ILOG Elixir Enterprise.
+
+#
+# Help
+#
+# Help panel title
+bpmeditor.help.title=Help
+# Hover help of Help button
+bpmeditor.help.tooltip = Click to show or hide the help window.
+
+# Help panel contents
+bpmeditor.help.text = The BPM Editor sample shows how to create a business process diagram editor by using IBM ILOG Elixir Enterprise.\n\nTo start creating a business process diagram, drag and drop BPM elements from the palette onto the work area.\nTo create a link between two elements, drag a red triangular connection point from the side of the first element to a connection point on the second element.\n\nDouble-click the text of an element to edit it.\n\nYou will find sample diagram files in the samples/bpmeditor/data directory.\n\nThe following hot keys are available when the focus is on the diagram:\nDelete or Backspace: deletes selected objects.\nControl key + 'a': selects all objects.\nControl key + 'c': copies selected objects.\nControl key + 'g': groups selected objects as a subprocess.\nControl key + 'j': creates a link between two selected nodes.\nControl key + 'u': moves all objects from the selected subprocess to its parent graph and removes the subprocess.\nControl key + 'v': pastes copied objects.\nControl key + 'x': cuts selected objects\nF7: enables keyboard navigation on the objects in the diagram. Pressing F7 once sets the navigation to cycle through the nodes. Pressing F7 again sets the navigation to go from the selected node to the links that connect to this node.\nF8: disables keyboard navigation in the diagram.\nArrow keys: when keyboard navigation is enabled, arrow keys move the focus and selection throughout the objects. Pressing the Shift and arrow keys moves the selected node.\nArrow keys: when keyboard navigation is disabled, arrow keys scroll the diagram horizontally or vertically, or move selected objects.\nControl and '+' key: zooms in. \nControl and '-' key: zooms out.\n\nWhen the palette of objects has the focus:\nArrow keys: selects a node in the palette.\nENTER or SPACE: creates the selected object in the diagram.\nShift and '+' key: increases the area of the panel.\nShift and '-' key: decreases the area of the panel.\n\nWhen the properties panel or help panel has the focus:\nShift and '+' key: increases the area of the panel.\nShift and '-' key: decreases the area of the panel.
+# tooltip of the "New" button
+bpmeditor.new.tooltip = New Diagram
+
+# tooltip of the "Open" button
+bpmeditor.open.tooltip = Open XML File
+
+# tooltip of the "Save" button
+bpmeditor.save.tooltip = Save to XML File
+
+# tooltip of the "Print Diagram" button
+bpmeditor.print.tooltip = Print current Diagram
+
+# tooltip of the "zoom in" button
+bpmeditor.zoomin.tooltip = Zoom In
+
+# tooltip of the "zoom out" button
+bpmeditor.zoomout.tooltip = Zoom Out
+
+# tooltip of the "show all" button
+bpmeditor.showall.tooltip = Show All
+
+# tooltip of the "reset zoom" button
+bpmeditor.resetzoom.tooltip = Reset Zoom
+
+# tooltip of the "show grid" button
+bpmeditor.showgrid.tooltip = Hide/Show Grid
+
+# tooltip of the "layout all" button
+bpmeditor.layout.tooltip = Layout All
+
+# tooltip of the "layout selected subgraph" button
+bpmeditor.layoutsel.tooltip = Layout Selected Subgraph
+
+# tooltip of the "cut" button
+bpmeditor.cut.tooltip = Cut Selected Objects
+
+# tooltip of the "copy" button
+bpmeditor.copy.tooltip = Copy Selected Objects
+
+# tooltip of the "paste" button
+bpmeditor.paste.tooltip = Paste Objects from Clipboard
+
+# tooltip of the "undo" button
+bpmeditor.undo.tooltip = Undo
+
+# tooltip of the "redo" button
+bpmeditor.redo.tooltip = Redo
+
+# tooltip of the "group" button
+bpmeditor.group.tooltip = Group Selected Objects into a Subprocess
+
+# tooltip of the "Ungroup" button
+bpmeditor.ungroup.tooltip = Ungroup Selected Subprocesses
+
+# tooltip of the button which allows to bring an object forward
+bpmeditor.bringForward.tooltip = Bring Forward
+
+# tooltip of the button which allows to bring an object to the front
+bpmeditor.bringToFront.tooltip = Bring to Front
+
+# tooltip of the button which allows to send an object backward
+bpmeditor.sendBackward.tooltip = Send Backward
+
+# tooltip of the button which allows to send an object to the back
+bpmeditor.sendToBack.tooltip = Send to Back
+
+# tooltip of the button which allows to align the left sides of nodes
+bpmeditor.alignLeft.tooltip = Align Left
+
+# tooltip of the button which allows to align the horizontal centers of nodes
+bpmeditor.alignHorizontalCenter.tooltip = Align Horizontal Center
+
+# tooltip of the button which allows to align the right sides of nodes
+bpmeditor.alignRight.tooltip = Align Right
+
+# tooltip of the button which allows to align the top sides of nodes
+bpmeditor.alignTop.tooltip = Align Top
+
+# tooltip of the button which allows to align the vertical centers of nodes
+bpmeditor.alignVerticalCenter.tooltip = Align Vertical Center
+
+# tooltip of the button which allows to align the bottom sides of nodes
+bpmeditor.alignBottom.tooltip = Align Bottom
+
+
+# default label of the editing buffer
+bpmeditor.default.buffer.title = (unnamed)
+
+# title of the alert box popped when the user click the Open button
+# while the current diagram is modified
+bpmeditor.diagramModified.title = Diagram Modified
+# text of the alert box popped when the user click the Open button
+# while the current diagram is modified
+bpmeditor.diagramModified.text = The current diagram has been modified. Are you sure that you want to discard your changes?
+
+# default file name used when saving an unnamed process
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.defaultFileName = process.idfl
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# description of the file filter for IBM ILOG Elixir Enterprise XML files
+bpmeditor.filefilter.bpm = IBM ILOG Elixir Enterprise (Diagram) Files (*.idfl)
+
+# description of the file filter for all files
+bpmeditor.filefilter.all = All Files (*.*)
+
+# error message: not an IBM ILOG Elixir Enterprise (Diagram) XML file
+bpmeditor.error.not_a_diagram_file = This file does not appear to contain a valid IBM ILOG Elixir Enterprise diagram.
+
+# label of the "Layout All" button
+bpmeditor.layoutbutton.label = Layout All
+
+# title of the BPMN elements palette
+bpmeditor.elements.palette.title = BPM Elements
+
+# label of the Tasks category in the palette
+bpmeditor.tasks.category.label = Tasks
+
+# label of the Start Events category in the palette
+bpmeditor.startevents.category.label = Start Events
+
+# label of the End Events category in the palette
+bpmeditor.endevents.category.label = End Events
+
+# label of the Intermediate Events category in the palette
+bpmeditor.intermediateevents.category.label = Intermediate Events
+
+# label of the Gateways category in the palette
+bpmeditor.gateways.category.label = Gateways
+
+# label of the Subprocesses category in the palette
+bpmeditor.subprocesses.category.label = Subprocesses
+
+# label of the Pools/Lanes category in the palette
+bpmeditor.poolslanes.category.label = Pools/Lanes
+
+# label of the Links category in the palette
+bpmeditor.links.category.label = Links
+
+# label of the Artifacts category in the palette
+bpmeditor.artifacts.category.label = Artifacts
+
+# label of the different types of Tasks in the palette
+bpmeditor.task.default.label = Task
+bpmeditor.task.looping.label = Looping Task
+bpmeditor.task.multiinstance.label = Multi-Instance Task
+bpmeditor.task.compensation.label = Compensation Task
+
+# label of the different types of Start Events in the palette
+bpmeditor.startevent.default.label = Start
+bpmeditor.startevent.message.label = Message Start
+bpmeditor.startevent.timer.label = Timer Start
+bpmeditor.startevent.error.label = Error Start
+bpmeditor.startevent.compensation.label = Compensation Start
+bpmeditor.startevent.conditional.label = Conditional Start
+bpmeditor.startevent.multiple.label = Multiple Start
+
+# label of the different types of End Events in the palette
+bpmeditor.endevent.default.label = End
+bpmeditor.endevent.message.label = Message End
+bpmeditor.endevent.error.label = Error End
+bpmeditor.endevent.cancel.label = Cancel End
+bpmeditor.endevent.compensation.label = Compensation End
+bpmeditor.endevent.terminate.label = Terminate End
+bpmeditor.endevent.multiple.label = Multiple End
+
+# label of the different types of Intermediate Events in the palette
+bpmeditor.intermediateevent.default.label = Intermediate
+bpmeditor.intermediateevent.message.label = Message
+bpmeditor.intermediateevent.timer.label = Timer
+bpmeditor.intermediateevent.error.label = Error
+bpmeditor.intermediateevent.cancel.label = Cancel
+bpmeditor.intermediateevent.compensation.label = Compensation
+bpmeditor.intermediateevent.conditional.label = Conditional
+bpmeditor.intermediateevent.link.label = Target Link
+bpmeditor.intermediateevent.multiple.label = Multiple
+
+# label of the different types of Gateways in the palette
+bpmeditor.gateway.exclusive.label = Exclusive Gateway
+bpmeditor.gateway.parallel.label = Parallel Gateway
+bpmeditor.gateway.inclusive.label = Inclusive Gateway
+bpmeditor.gateway.complex.label = Complex Gateway
+
+# label and size of the different types of Subprocesses in the palette
+bpmeditor.subprocess.default.label = Subprocess
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.subprocess.default.width = 120
+bpmeditor.subprocess.default.height = 120
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+bpmeditor.subprocess.adhoc.label = Ad Hoc Subprocess
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.subprocess.adhoc.width = 120
+bpmeditor.subprocess.adhoc.height = 120
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# label and size of the Pools and Lanes in the palette
+# Label of horizontal pool
+bpmeditor.hpool.label = Horizontal Pool
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.hpool.width = 120
+bpmeditor.hlane.height = 60
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# Label of vertical pool
+bpmeditor.vpool.label = Vertical Pool
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.vpool.height = 120
+bpmeditor.vlane.width = 60
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# Label of Lane
+bpmeditor.lane.label = Lane
+
+# label of the different types of Artifacts in the palette
+bpmeditor.dataobject.label = Data Object
+bpmeditor.textannotation.label = Text Annotation
+bpmeditor.group.label = Group
+
+# message displayed in the links palette
+bpmeditor.links.palette.message = Select a link below to change the type of link created by dragging link handles in the diagram:
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.links.palette.message.maxwidth = 150
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# labels of the different types of links in the palette
+bpmeditor.sequenceflow.label = Sequence Flow
+bpmeditor.messageflow.label = Message Flow
+bpmeditor.association.label = Association
+
+# format applied to the buffer title when the diagram is modified
+# {0} will be replaced by the current file name
+bpmeditor.modifiedFormat = *{0}
+
+# default width of a newly dropped Subprocess
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.subprocess.drop.width = 200
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default height of a newly dropped Subprocess
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.subprocess.drop.height = 200
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default width of a newly dropped HPool
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.hpool.drop.width = 500
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default height of a newly dropped HLane
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.hlane.drop.height = 100
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default height of a newly dropped VPool
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.vpool.drop.height = 500
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+# default width of a newly dropped VLane
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+bpmeditor.vlane.drop.width = 100
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+
+#
+# Save diagram alert
+#
+
+# Title of Save Diagram window
+bpmeditor.save.title = Save Diagram
+
+# Error message displayed when the Diagram file can not be saved
+bpmeditor.save.error = {0} \nDiagram could not be saved as {1}. \
+Please verify that a correct path was given and that you have the \
+permissions to write the file.
+
+#
+# Alert box displayed when vertical and horizontal pools are mixed
+# and a graph layout is attempted:
+#
+
+# Title of Mixed Pool Orientations alert
+bpmeditor.mixedpools.title = Mixed Pool Orientations
+
+# Error message of Mixed Pool Orientations alert
+bpmeditor.mixedpools.error = Graph layout cannot be performed \
+because the diagram contains both horizontal and vertical pools/lanes.
+
+#
+# Popup menu
+# Note that in Flex popup menu labels for custom items
+# must not have the same text as built-in menu items, such as:
+# Delete, Paste, Copy, Cut, Select All. 
+# Refer to Flex ContextMenuItem documentation for the list of
+# reserved menu item captions
+#
+
+# Popup menu entry label to rename an object
+bpmeditor.renameCurrent.label = Rename Object
+
+# Popup menu entry label for operation that selects all objects in the Diagram
+bpmeditor.selectall.label = Select All Objects
+
+# Popup menu entry label for deleting the selected objects
+# This is displayed when the popup menu is opened for multiple selected objects
+bpmeditor.delete.label = Delete Selected Objects
+
+# Popup menu entry label for deleting the current selected object
+# This is displayed when popup menu is opened for a single selected object
+bpmeditor.deleteCurrent.label = Delete Object
+
+# Popup menu entry for cutting the selected objects from the Diagram
+# This is displayed when the popup menu is opened for multiple selected objects
+bpmeditor.cut.label = Cut Selected Objects
+
+# Popup menu entry for cutting the selected object from the Diagram
+# This is displayed when popup menu is opened for a single selected object
+bpmeditor.cutCurrent.label = Cut Object
+
+# Popup menu entry for copying selected objects 
+# This is displayed when the popup menu is opened for multiple selected objects
+bpmeditor.copy.label = Copy Selected Objects
+
+# Popup menu entry for copying the selected object from the Diagram
+# This is displayed when popup menu is opened for a single selected object
+bpmeditor.copyCurrent.label = Copy Object
+
+# Popup menu entry for pasting the objects that are currently in the clipboard
+bpmeditor.paste.label = Paste Objects
+
+# Popup menu entry displayed when subprocesses are selected, which allow to
+# end the joining of the subprocess by moving all its child objects to the
+# parent graph and removing the selected subprocess.
+bpmeditor.ungroup.label = Ungroup Subprocess
+
+# Popup menu entry displayed when objects are selected, which allow to
+# group the objects inside a Subprocess.
+bpmeditor.groupSubprocess.label = Group as Subprocess
+
+# Popup menu entry allowing to perform the configured layout in the Diagram
+bpmeditor.layout.label = Layout Diagram
+
+# Popup menu entry displayed when subgraphs are selected, which allow to
+# perform layout only in the selected subgraphs.
+bpmeditor.layoutCurrent.label = Layout Selected Objects
+
+# Popup menu entry which allows to create a link between two selected nodes
+bpmeditor.connect.label = Connect Objects
+
+#
+# Accelerators
+#
+
+# START NON-TRANSLATABLE
+# @ilog.nopseudo.begin
+
+# These keyboard accelerators are used with control key
+
+# Keyboard accelerator to Connect (Create Link) operation
+bpmeditor.connect.accelerator = j
+
+# Keyboard accelerator to Group objects as Subnetwork operation
+bpmeditor.groupAsSubprocess.accelerator = g
+
+# Keyboard accelerator Ungroup subprocess operation
+bpmeditor.ungroup.accelerator = u
+
+#
+# These accelerators are used with shift key
+#
+
+# Keyboard accelerator to allow panel width to increase when it
+# has the focus.
+bpmeditor.dividerincrease.accelerator = +
+
+# Keyboard accelerator to allow panel width to be reduced when it
+# has the focus.
+bpmeditor.dividerreduce.accelerator = -
+
+# @ilog.nopseudo.end
+# END NON-TRANSLATABLE
+  </pre>
+ </body>
+</html>

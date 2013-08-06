@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>UndoManager.as</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre><span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptpackage">package</span> serialization
+<span class="ActionScriptBracket/Brace">{</span>
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Graph;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.GraphEvent;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.SubgraphEvent;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.editor.DiagramEditor;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.editor.DiagramEditorEvent;
+  
+  <span class="ActionScriptReserved">import</span> flash.display.DisplayObject;
+  <span class="ActionScriptReserved">import</span> flash.events.MouseEvent;
+  
+  <span class="ActionScriptReserved">import</span> mx.core.UIComponent;
+  <span class="ActionScriptReserved">import</span> mx.events.SandboxMouseEvent;
+  
+  <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">   * The UndoManager class implements a simple undo/redo mechanism for a DiagramEditor.</span>
+<span class="ActionScriptASDoc">   * </span>
+<span class="ActionScriptASDoc">   * The undo manager must be attached to a DiagramEditor instance by setting the editor property.</span>
+<span class="ActionScriptASDoc">   * The graph is serialized (using an XMLSerializer object) when changes</span>
+<span class="ActionScriptASDoc">   * have been done in the editor. The undo() and redo() methods restore the previous</span>
+<span class="ActionScriptASDoc">   * state by deserializing the serialized graph.</span>
+<span class="ActionScriptASDoc">   */</span>
+  <span class="ActionScriptReserved">public</span> class UndoManager extends UIComponent
+  <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptComment">// The diagram editor to which to undo manager is attached</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _editor:DiagramEditor;
+    
+    <span class="ActionScriptComment">// Contains the successive states of the graph.</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _states:Vector.&lt;<span class="MXMLComponent_Tag">Object</span>&gt; = <span class="ActionScriptReserved">new</span> Vector.&lt;<span class="MXMLComponent_Tag">Object</span>&gt;();
+    
+    <span class="ActionScriptComment">// Index of the current state.</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _currentState:int = -1;
+    
+    <span class="ActionScriptComment">// Was the graph modified since the last state change?</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _modified:Boolean = <span class="ActionScriptReserved">false</span>;
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _mouseDown:Boolean = <span class="ActionScriptReserved">false</span>;
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _undoEnabled:Boolean = <span class="ActionScriptReserved">true</span>;
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _undoLimit:uint = 100;
+    
+    protected <span class="ActionScriptvar">var</span> _serializer:XMLSerializer = <span class="ActionScriptReserved">new</span> XMLSerializer();
+        
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * The Graph instance being modified. </span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> graph(): Graph
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">return</span> _editor.graph;
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * The DiagramEditor instance to which this undo manager is attached.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> editor() : DiagramEditor
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">return</span> _editor;
+    <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * @private</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> editor(editor:DiagramEditor) : <span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">if</span>(_editor != <span class="ActionScriptReserved">null</span>)<span class="ActionScriptBracket/Brace">{</span>
+        editor.removeEventListener(<span class="ActionScriptString">"enterFrame"</span>, enterFrameHandler);
+        editor.removeEventListener(DiagramEditorEvent.EDITOR_CREATE, handleEventForUndo);
+        editor.removeEventListener(DiagramEditorEvent.EDITOR_DELETE, handleEventForUndo);
+        editor.removeEventListener(DiagramEditorEvent.EDITOR_MOVE, handleEventForUndo);
+        editor.removeEventListener(DiagramEditorEvent.EDITOR_RESIZE, handleEventForUndo);
+        editor.removeEventListener(DiagramEditorEvent.EDITOR_REPARENT, handleEventForUndo);
+        editor.removeEventListener(DiagramEditorEvent.EDITOR_CONNECT_LINK, handleEventForUndo);
+        editor.removeEventListener(DiagramEditorEvent.EDITOR_CHANGE_ZORDER, handleEventForUndo);
+        editor.removeEventListener(DiagramEditorEvent.EDITOR_FINISH_TEXT_EDITING, handleEventForUndo);
+        editor.removeEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler, <span class="ActionScriptReserved">true</span>);
+        editor.removeEventListener(SubgraphEvent.COLLAPSE_ANIMATION_END, handleSubgraphExpandCollapse);
+        editor.removeEventListener(SubgraphEvent.EXPAND_ANIMATION_END, handleSubgraphExpandCollapse);
+        editor.removeEventListener(GraphEvent.GRAPH_LAYOUT_END, handleGraphLayoutEnd);
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      _editor = editor;
+      
+      <span class="ActionScriptReserved">if</span>(_editor != <span class="ActionScriptReserved">null</span>)<span class="ActionScriptBracket/Brace">{</span>
+        editor.addEventListener(<span class="ActionScriptString">"enterFrame"</span>, enterFrameHandler);
+        editor.addEventListener(DiagramEditorEvent.EDITOR_CREATE, handleEventForUndo);
+        editor.addEventListener(DiagramEditorEvent.EDITOR_DELETE, handleEventForUndo);
+        editor.addEventListener(DiagramEditorEvent.EDITOR_MOVE, handleEventForUndo);
+        editor.addEventListener(DiagramEditorEvent.EDITOR_RESIZE, handleEventForUndo);
+        editor.addEventListener(DiagramEditorEvent.EDITOR_REPARENT, handleEventForUndo);
+        editor.addEventListener(DiagramEditorEvent.EDITOR_CONNECT_LINK, handleEventForUndo);
+        editor.addEventListener(DiagramEditorEvent.EDITOR_CHANGE_ZORDER, handleEventForUndo);
+        editor.addEventListener(DiagramEditorEvent.EDITOR_FINISH_TEXT_EDITING, handleEventForUndo);
+        editor.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler, <span class="ActionScriptReserved">true</span>);
+        editor.addEventListener(SubgraphEvent.COLLAPSE_ANIMATION_END, handleSubgraphExpandCollapse);
+        editor.addEventListener(SubgraphEvent.EXPAND_ANIMATION_END, handleSubgraphExpandCollapse);
+        editor.addEventListener(GraphEvent.GRAPH_LAYOUT_END, handleGraphLayoutEnd);
+        _modified = <span class="ActionScriptReserved">true</span>;
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Enables or disables undo/redo for this editor.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> undoEnabled() : Boolean
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">return</span> _undoEnabled;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * @private</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> undoEnabled(enabled:Boolean) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _undoEnabled = enabled;
+      <span class="ActionScriptReserved">if</span>(enabled)
+        updateFlags();
+      <span class="ActionScriptReserved">else</span>
+        clearUndo();
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * The maximum number of changes that can be undone.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> undoLimit() : uint
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">return</span> _undoLimit;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * @private</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> undoLimit(limit:uint) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _undoLimit = limit;
+      <span class="ActionScriptReserved">if</span>(_states.length &gt; _undoLimit)<span class="ActionScriptBracket/Brace">{</span>
+        _currentState -= _states.length - _undoLimit;
+        <span class="ActionScriptReserved">if</span>(_currentState &lt; -1)
+          _<span class="MXMLComponent_Tag">currentState</span> = -1;
+        _states.splice(0, _states.length - _undoLimit);
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Undoes the last changes in the editor.</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * @see #redo()</span>
+<span class="ActionScriptASDoc">     * @see #canUndo</span>
+<span class="ActionScriptASDoc">     * @see #canRedo</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> undo() : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">if</span>(canUndo)<span class="ActionScriptBracket/Brace">{</span>
+        _editor.clear();
+        
+        _currentState--;
+        deserialize(_states<span class="ActionScriptBracket/Brace">[</span>_currentState<span class="ActionScriptBracket/Brace">]</span>);
+        _modified = <span class="ActionScriptReserved">false</span>;
+        
+        updateFlags();
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Redoes the last undone changes in the editor.</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * @see #undo()</span>
+<span class="ActionScriptASDoc">     * @see #canUndo</span>
+<span class="ActionScriptASDoc">     * @see #canRedo</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> redo() : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">if</span>(canRedo)<span class="ActionScriptBracket/Brace">{</span>
+        _editor.clear();
+        
+        _currentState++;
+        deserialize(_states<span class="ActionScriptBracket/Brace">[</span>_currentState<span class="ActionScriptBracket/Brace">]</span>);
+        _modified = <span class="ActionScriptReserved">false</span>;
+        
+        updateFlags();
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Indicates whether any changes can be undone.</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * @see #undo()</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> canUndo:Boolean = <span class="ActionScriptReserved">false</span>;
+    
+    <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Indicates whether any undone changes can be redone.</span>
+<span class="ActionScriptASDoc">     * </span>
+<span class="ActionScriptASDoc">     * @see #redo()</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> canRedo:Boolean = <span class="ActionScriptReserved">false</span>;
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> updateFlags() : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      canUndo = _currentState &gt; 0;
+      canRedo = _currentState &lt; _<span class="MXMLComponent_Tag">states</span>.length - 1;
+    <span class="ActionScriptBracket/Brace">}</span> 
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Clears the undo stack.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> clearUndo() : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _states = <span class="ActionScriptReserved">new</span> Vector.&lt;<span class="MXMLComponent_Tag">Object</span>&gt;();
+      _currentState = -1;
+      _modified = <span class="ActionScriptReserved">true</span>;
+      
+      updateFlags();
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">     * Causes the editor to record its state so that a change can be undone.</span>
+<span class="ActionScriptASDoc">     * This function should be called after external changes to the graph have been done</span>
+<span class="ActionScriptASDoc">     * (like performing a graph layout for example), to allow the changes to be undone.</span>
+<span class="ActionScriptASDoc">     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> recordUndo() : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _editor.validateNow();
+      _modified = <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptComment">// Called whenever something changes in the editor</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> handleEventForUndo(event:DiagramEditorEvent) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">if</span>(event.isDefaultPrevented())
+        <span class="ActionScriptReserved">return</span>;
+      
+      <span class="ActionScriptReserved">if</span>(event.type == DiagramEditorEvent.EDITOR_FINISH_TEXT_EDITING && event.textEditCancelled)
+        <span class="ActionScriptReserved">return</span>;
+      
+      _modified = <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> handleSubgraphExpandCollapse(event:SubgraphEvent) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _modified = <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> handleGraphLayoutEnd(event:GraphEvent) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _modified = <span class="ActionScriptReserved">true</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> mouseDownHandler(event:MouseEvent) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _mouseDown = <span class="ActionScriptReserved">true</span>;
+      
+      <span class="ActionScriptvar">var</span> sandboxRoot:DisplayObject = _editor.systemManager.getSandboxRoot();
+      sandboxRoot.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler, <span class="ActionScriptReserved">true</span>);
+      sandboxRoot.addEventListener(SandboxMouseEvent.MOUSE_UP_SOMEWHERE, mouseUpHandler, <span class="ActionScriptReserved">true</span>);
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> mouseUpHandler(event:MouseEvent) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _mouseDown = <span class="ActionScriptReserved">false</span>;
+      
+      <span class="ActionScriptvar">var</span> sandboxRoot:DisplayObject = _editor.systemManager.getSandboxRoot();
+      sandboxRoot.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler, <span class="ActionScriptReserved">true</span>);
+      sandboxRoot.removeEventListener(SandboxMouseEvent.MOUSE_UP_SOMEWHERE, mouseUpHandler, <span class="ActionScriptReserved">true</span>);
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> enterFrameHandler(event:Event) : <span class="ActionScriptReserved">void</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptReserved">if</span>(!_mouseDown && _modified && _undoEnabled)<span class="ActionScriptBracket/Brace">{</span>
+        
+        _currentState++;
+        _states.splice(_currentState, _states.length - _currentState, serialize());
+        <span class="ActionScriptReserved">if</span>(_states.length &gt; _undoLimit)<span class="ActionScriptBracket/Brace">{</span>
+          _currentState -= _states.length - _undoLimit;
+          <span class="ActionScriptReserved">if</span>(_currentState &lt; -1)
+            _<span class="MXMLComponent_Tag">currentState</span> = -1;
+          _states.splice(0, _states.length - _undoLimit);
+        <span class="ActionScriptBracket/Brace">}</span>
+        _modified = <span class="ActionScriptReserved">false</span>;
+        
+        updateFlags();
+      <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    protected <span class="ActionScriptfunction">function</span> serialize() : Object
+    <span class="ActionScriptBracket/Brace">{</span>
+      <span class="ActionScriptvar">var</span> xml:XML = _serializer.serialize(_editor.graph, <span class="ActionScriptString">"undo"</span>);
+      <span class="ActionScriptReserved">return</span> xml;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    protected <span class="ActionScriptfunction">function</span> deserialize(serialized:Object) : <span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+      _serializer.deserialize(_editor.graph, XML(serialized)); 
+    <span class="ActionScriptBracket/Brace">}</span>
+  <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body></html>

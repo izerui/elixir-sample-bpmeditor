@@ -1,0 +1,1430 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>bpmeditor.mxml</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre>&lt;?<span class="MXMLComponent_Tag">xml</span> version=<span class="ActionScriptString">"1.0"</span> encoding=<span class="ActionScriptString">"utf-8"</span>?&gt;
+<span class="ActionScriptComment">&lt;!--</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">--&gt;</span>
+&lt;<span class="MXMLComponent_Tag">mx:Application</span> 
+    xmlns:fx=<span class="ActionScriptString">"http://ns.adobe.com/mxml/2009"</span> 
+    xmlns:s=<span class="ActionScriptString">"library://ns.adobe.com/flex/spark"</span> 
+    xmlns:mx=<span class="ActionScriptString">"library://ns.adobe.com/flex/mx"</span>
+    xmlns:idiag=<span class="ActionScriptString">"http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010"</span> 
+    xmlns:bpm=<span class="ActionScriptString">"bpm.graphic.*"</span>
+    xmlns:editor=<span class="ActionScriptString">"com.ibm.ilog.elixir.diagram.editor.*"</span> 
+    xmlns:local=<span class="ActionScriptString">"*"</span>
+    viewSourceURL=<span class="ActionScriptString">"srcview/index.html"</span>
+    layout=<span class="ActionScriptString">"absolute"</span>
+    initialize=<span class="ActionScriptString">"initializeHandler(event)"</span>
+    applicationComplete=<span class="ActionScriptString">"init()"</span> 
+    xmlns:serialization=<span class="ActionScriptString">"serialization.*"</span>&gt;
+    
+    &lt;<span class="MXMLSpecial_Tag">fx:Metadata</span>&gt;
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">ResourceBundle</span>(<span class="ActionScriptString">"bpmeditor"</span>)<span class="ActionScriptBracket/Brace">]</span>
+    &lt;/<span class="MXMLSpecial_Tag">fx:Metadata</span>&gt;
+    
+    &lt;<span class="MXMLSpecial_Tag">fx:Script</span>&gt;
+        &lt;![<span class="MXMLComponent_Tag">CDATA</span><span class="ActionScriptBracket/Brace">[</span>
+          <span class="ActionScriptReserved">import</span> bpm.graphic.Artifact;
+          <span class="ActionScriptReserved">import</span> bpm.port.OrthogonalPort;
+          
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Graph;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.LaneBase;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Link;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.LinkShapeType;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Node;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.PortBase;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.PortPosition;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Renderer;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Subgraph;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.graphlayout.GraphLayout;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.graphlayout.GraphLayoutEvent;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalGroupSpreadConstraint;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalLayout;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalNodeGroup;
+          <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalSameLevelConstraint;
+          
+          <span class="ActionScriptReserved">import</span> mx.collections.IList;
+          <span class="ActionScriptReserved">import</span> mx.controls.Alert;
+          <span class="ActionScriptReserved">import</span> mx.events.CloseEvent;
+          <span class="ActionScriptReserved">import</span> mx.events.FlexEvent;
+          <span class="ActionScriptReserved">import</span> mx.events.PropertyChangeEvent;
+          <span class="ActionScriptReserved">import</span> mx.managers.PopUpManager;
+          <span class="ActionScriptReserved">import</span> mx.utils.StringUtil;
+          
+          <span class="ActionScriptReserved">import</span> printutils.PrintDialog;
+          
+          <span class="ActionScriptReserved">import</span> serialization.UndoManager;
+          <span class="ActionScriptReserved">import</span> serialization.XMLSerializer;
+          
+          <span class="ActionScriptReserved">import</span> spark.components.RichEditableText;
+          <span class="ActionScriptReserved">import</span> spark.core.IViewport;
+          <span class="ActionScriptReserved">import</span> spark.events.IndexChangeEvent;
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> file:FileReference;
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> currentFileName:String = <span class="ActionScriptReserved">null</span>;
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _isModified:Boolean;
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> popupMenuFactory:DiagramMenuFactory = <span class="ActionScriptReserved">null</span>;
+          
+          <span class="ActionScriptComment">// Accelerators</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> connectAcc:uint;
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> groupSubAcc:uint;
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> ungroupAcc:uint;
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> dividerIncreaseAcc:uint;
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> dividerReduceAcc:uint;
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> init() : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            diagram.nodeLayout.addEventListener(GraphLayoutEvent.LAYOUT_STEP_PERFORMED, layoutStepPerformed);
+            mainPanel.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler, <span class="ActionScriptReserved">true</span>);
+            palettePanel.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+            diageditor.addEventListener(KeyboardEvent.KEY_DOWN, editorKeyDownHandler);
+            
+            initAccelerators();
+            
+            popupMenuFactory = <span class="ActionScriptReserved">new</span> DiagramMenuFactory(resourceManager, diageditor, diagram);
+            diagramBox.contextMenu = popupMenuFactory.getPopupMenu();        
+            diagram.scroller.allowKeyboardScroll = <span class="ActionScriptReserved">false</span>;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> initAccelerators():<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> value:String;
+            value = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.connect.accelerator"</span>);
+            <span class="ActionScriptReserved">if</span> (value && value.length==1)
+              connectAcc = value.charCodeAt(0);
+            value = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.groupAsSubprocess.accelerator"</span>);
+            <span class="ActionScriptReserved">if</span> (value && value.length==1)
+              groupSubAcc = value.charCodeAt(0);        
+            value = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.ungroup.accelerator"</span>);
+            <span class="ActionScriptReserved">if</span> (value && value.length==1)
+              ungroupAcc = value.charCodeAt(0);        
+            value = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.dividerincrease.accelerator"</span>);
+            <span class="ActionScriptReserved">if</span> (value && value.length==1)
+              dividerIncreaseAcc = value.charCodeAt(0);
+            value = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.dividerreduce.accelerator"</span>);
+            <span class="ActionScriptReserved">if</span> (value && value.length==1)
+              dividerReduceAcc = value.charCodeAt(0);
+          <span class="ActionScriptBracket/Brace">}</span>          
+                    
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> linkListChangeHandler(event:IndexChangeEvent) : <span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            diageditor.linkPrototype = IList(linkList.dataProvider).getItemAt(event.newIndex) as Link;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> createLink(startNode:Node, startPortPosition:String, 
+                                      endNode:Node, endPortPosition:String) : Link
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(startNode is Artifact || endNode is Artifact)
+              <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> Association();
+            <span class="ActionScriptReserved">if</span>(startNode != <span class="ActionScriptReserved">null</span> && endNode != <span class="ActionScriptReserved">null</span> && getPool(startNode) != getPool(endNode))
+              <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> MessageFlow();
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> getPool(node:DisplayObject) : LaneBase 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> pool:LaneBase = <span class="ActionScriptReserved">null</span>;
+            while(node != <span class="ActionScriptReserved">null</span>)<span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span>(node is LaneBase)
+                pool = LaneBase(node);
+              node = node.parent;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> pool;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> createPort(node:Node, link:Link, position:String, start:Boolean) : PortBase
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(node is LaneBase)
+              <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> OrthogonalPort();
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Function used to create a subgraph when grouping objects. </span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> createGroup() : Subgraph
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> group:SubProcess = <span class="ActionScriptReserved">new</span> SubProcess();
+            group.label = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.subprocess.default.label"</span>);
+            <span class="ActionScriptReserved">return</span> group;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Function used to clone objects when doing copy and paste. </span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> cloneFunction(obj:Renderer, clone:Renderer, inCopyPaste:Boolean) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(!inCopyPaste)<span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span>(clone is SubProcess)<span class="ActionScriptBracket/Brace">{</span>
+                clone.width = resourceManager.getNumber(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.subprocess.drop.width"</span>);
+                clone.height = resourceManager.getNumber(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.subprocess.drop.height"</span>);
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span>(clone is com.ibm.ilog.elixir.diagram.HPool)<span class="ActionScriptBracket/Brace">{</span>
+                clone.width = resourceManager.getNumber(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.hpool.drop.width"</span>);
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span>(clone is com.ibm.ilog.elixir.diagram.HLane)<span class="ActionScriptBracket/Brace">{</span>
+                clone.height = resourceManager.getNumber(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.hlane.drop.height"</span>);
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span>(clone is com.ibm.ilog.elixir.diagram.VPool)<span class="ActionScriptBracket/Brace">{</span>
+                clone.height = resourceManager.getNumber(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.vpool.drop.height"</span>);
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span>(clone is com.ibm.ilog.elixir.diagram.VLane)<span class="ActionScriptBracket/Brace">{</span>
+                clone.width = resourceManager.getNumber(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.vlane.drop.width"</span>);
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span>(clone is bpm.graphic.ConnectingObject)<span class="ActionScriptBracket/Brace">{</span>
+                bpm.graphic.ConnectingObject(clone).label = <span class="ActionScriptString">""</span>;
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span>(clone is bpm.graphic.Group)<span class="ActionScriptBracket/Brace">{</span>
+                bpm.graphic.Group(clone).clickableInside = <span class="ActionScriptReserved">false</span>;
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span>(clone is SubProcess)<span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span>(SubProcess(obj).nodeLayout != <span class="ActionScriptReserved">null</span>)
+                SubProcess(clone).nodeLayout = SubProcess(obj).nodeLayout.copy();
+            <span class="ActionScriptBracket/Brace">}</span>               
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> moveResizeHandler(event:com.ibm.ilog.elixir.diagram.editor.DiagramEditorEvent) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            isModified = <span class="ActionScriptReserved">true</span>;
+            
+            <span class="ActionScriptComment">// reset links to auto style in case a graph layout was performed:</span>
+            <span class="ActionScriptvar">var</span> node:Node = event.renderer as Node;
+            <span class="ActionScriptReserved">if</span>(node)<span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span> (<span class="ActionScriptvar">var</span> link:Link <span class="ActionScriptReserved">in</span> node.getLinks()) <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span>(!(link is Association))
+                  link.shapeType =  LinkShapeType.ORTHOGONAL;
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> modifiedHandler(event:com.ibm.ilog.elixir.diagram.editor.DiagramEditorEvent) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            isModified = <span class="ActionScriptReserved">true</span>;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> selectionChangedHandler(event:com.ibm.ilog.elixir.diagram.editor.DiagramEditorEvent) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            layoutSelectedButton.enabled = getSelectedSubgraph() != <span class="ActionScriptReserved">null</span>;
+            groupButton.enabled = canGroup;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> isModified() : Boolean
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> _isModified;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> isModified(v:Boolean) : <span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            _isModified = v;
+            
+            <span class="ActionScriptvar">var</span> title:String;
+            <span class="ActionScriptReserved">if</span>(currentFileName != <span class="ActionScriptReserved">null</span>)
+              title = currentFileName;
+            <span class="ActionScriptReserved">else</span>
+              title = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.default.buffer.title"</span>);
+            
+            <span class="ActionScriptReserved">if</span>(_isModified)
+              title = StringUtil.substitute(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.modifiedFormat"</span>), title);
+            
+            titlePanel.title = title;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptComment">// --------------------</span>
+          <span class="ActionScriptComment">// Create a new diagram</span>
+          <span class="ActionScriptComment">// --------------------</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> newDiagram() : <span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(isModified)<span class="ActionScriptBracket/Brace">{</span>
+              Alert.show(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.diagramModified.text"</span>),
+                resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.diagramModified.title"</span>),
+                Alert.YES|Alert.NO, <span class="ActionScriptReserved">this</span>, newAlertCloseHandler, <span class="ActionScriptReserved">null</span>, Alert.NO);
+            <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+              doNewDiagram();
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> newAlertCloseHandler(event:CloseEvent) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(event.detail == Alert.YES)
+              doNewDiagram();
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> doNewDiagram() : <span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            diageditor.clear();
+            currentFileName = <span class="ActionScriptReserved">null</span>;
+            isModified = <span class="ActionScriptReserved">false</span>;
+            undoManager.clearUndo();
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptComment">// -----------------------------------------</span>
+          <span class="ActionScriptComment">// Save and Load the contents of the diagram</span>
+          <span class="ActionScriptComment">// -----------------------------------------</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> saveXML() : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            file = <span class="ActionScriptReserved">new</span> FileReference();
+            <span class="ActionScriptvar">var</span> xml:XML = <span class="ActionScriptReserved">new</span> XMLSerializer().serialize(diageditor.graph, <span class="ActionScriptString">"diagram"</span>);
+            <span class="ActionScriptvar">var</span> fileName:String = currentFileName;
+            <span class="ActionScriptReserved">if</span>(fileName == <span class="ActionScriptReserved">null</span>)
+              fileName = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.defaultFileName"</span>);
+            file.addEventListener(flash.events.<span class="ActionScriptMetadata">Event</span>.COMPLETE, fileSaved);
+            file.addEventListener(flash.events.IOErrorEvent.IO_ERROR, ioError);
+            file.save(xml, fileName);
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> fileSaved(event:flash.events.<span class="ActionScriptMetadata">Event</span>) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(file != <span class="ActionScriptReserved">null</span>)<span class="ActionScriptBracket/Brace">{</span>
+              currentFileName = file.name;
+              isModified = <span class="ActionScriptReserved">false</span>;
+              
+              file = <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> loadXML() : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(isModified)<span class="ActionScriptBracket/Brace">{</span>
+              Alert.show(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.diagramModified.text"</span>),
+                resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.diagramModified.title"</span>),
+                Alert.YES|Alert.NO, <span class="ActionScriptReserved">this</span>, loadAlertCloseHandler, <span class="ActionScriptReserved">null</span>, Alert.NO);
+            <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+              doLoadXML();
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> loadAlertCloseHandler(event:CloseEvent) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(event.detail == Alert.YES)
+              doLoadXML();
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> doLoadXML(): <span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            file = <span class="ActionScriptReserved">new</span> FileReference();
+            file.addEventListener(flash.events.<span class="ActionScriptMetadata">Event</span>.SELECT, fileSelectedForLoad);
+            file.browse(<span class="ActionScriptBracket/Brace">[</span> <span class="ActionScriptReserved">new</span> FileFilter(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.filefilter.bpm"</span>), <span class="ActionScriptString">"*.idfl"</span>),
+              <span class="ActionScriptReserved">new</span> FileFilter(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.filefilter.all"</span>), <span class="ActionScriptString">"*.*"</span>)<span class="ActionScriptBracket/Brace">]</span>);
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> fileSelectedForLoad(event:flash.events.<span class="ActionScriptMetadata">Event</span>) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(file != <span class="ActionScriptReserved">null</span>)<span class="ActionScriptBracket/Brace">{</span>
+              file.addEventListener(flash.events.<span class="ActionScriptMetadata">Event</span>.COMPLETE, fileLoaded);
+              file.addEventListener(flash.events.IOErrorEvent.IO_ERROR, ioError);
+              file.load();
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> fileLoaded(event:flash.events.<span class="ActionScriptMetadata">Event</span>) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(file != <span class="ActionScriptReserved">null</span>)<span class="ActionScriptBracket/Brace">{</span>
+              try <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> xml:XML = <span class="ActionScriptReserved">new</span> XML(file.data.toString());
+                <span class="ActionScriptReserved">if</span>(xml.localName() != <span class="ActionScriptString">"diagram"</span>)<span class="ActionScriptBracket/Brace">{</span>
+                  Alert.show(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.error.not_a_diagram_file"</span>));
+                  <span class="ActionScriptReserved">return</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                diageditor.clear();
+                <span class="ActionScriptReserved">new</span> XMLSerializer().deserialize(diageditor.graph, xml);
+                currentFileName = file.name;
+                isModified = <span class="ActionScriptReserved">false</span>;
+                undoManager.clearUndo();
+              <span class="ActionScriptBracket/Brace">}</span> catch(err:Error)<span class="ActionScriptBracket/Brace">{</span>
+                Alert.show(err.message);
+              <span class="ActionScriptBracket/Brace">}</span>
+              file = <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>    
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> ioError(event:IOErrorEvent) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> msg:String = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.save.error"</span>, <span class="ActionScriptBracket/Brace">[</span>event.text, file.name<span class="ActionScriptBracket/Brace">]</span>);
+            <span class="ActionScriptvar">var</span> title:String = resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.save.title"</span>);
+            Alert.show(msg, title, Alert.OK|Alert.CANCEL, <span class="ActionScriptReserved">null</span>, ioErrorAlertHandler);
+          <span class="ActionScriptBracket/Brace">}</span>
+                    
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> ioErrorAlertHandler(event:CloseEvent):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> (event.detail == Alert.OK)
+              saveXML();        
+          <span class="ActionScriptBracket/Brace">}</span>
+
+          <span class="ActionScriptComment">// ----------------</span>
+          <span class="ActionScriptComment">// Printing Support</span>
+          <span class="ActionScriptComment">// ----------------</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> printDialog:PrintDialog;
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> showPrintDialog():<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> (!printDialog) <span class="ActionScriptBracket/Brace">{</span>
+              printDialog = <span class="ActionScriptReserved">new</span> PrintDialog();
+              printDialog.graph = diagram.graph;
+            <span class="ActionScriptBracket/Brace">}</span>
+            PopUpManager.addPopUp(printDialog, <span class="ActionScriptReserved">this</span>, <span class="ActionScriptReserved">true</span>);  
+            PopUpManager.centerPopUp(printDialog);  
+            printDialog.setFocus();
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptComment">// --------------------</span>
+          <span class="ActionScriptComment">// Perform Graph Layout</span>
+          <span class="ActionScriptComment">// --------------------</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> layoutStepPerformed(event:GraphLayoutEvent) : <span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(event.layoutStarted)<span class="ActionScriptBracket/Brace">{</span>
+              prepareForGraphLayout(event.graphLayout);
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> prepareForGraphLayout(layout:GraphLayout) : <span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> hierarchicalLayout:HierarchicalLayout = layout as HierarchicalLayout;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span>(<span class="ActionScriptvar">var</span> link:Link <span class="ActionScriptReserved">in</span> hierarchicalLayout.getGraphModel().getLinks())<span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span>(link is Association)<span class="ActionScriptBracket/Brace">{</span>
+                layout.setFixed(link, <span class="ActionScriptReserved">true</span>);
+                layout.preserveFixedLinks = <span class="ActionScriptReserved">true</span>;
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span>(hierarchicalLayout != <span class="ActionScriptReserved">null</span> && 
+                link.startNode != <span class="ActionScriptReserved">null</span> && link.endNode != <span class="ActionScriptReserved">null</span> &&
+                getPool(link.startNode) != getPool(link.endNode))<span class="ActionScriptBracket/Brace">{</span>
+                hierarchicalLayout.addConstraint(<span class="ActionScriptReserved">new</span> HierarchicalSameLevelConstraint(link.startNode, link.endNode));
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span>(<span class="ActionScriptvar">var</span> node:Node <span class="ActionScriptReserved">in</span> hierarchicalLayout.getGraphModel().getNodes())<span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span>(node is Artifact)<span class="ActionScriptBracket/Brace">{</span>
+                layout.setFixed(node, <span class="ActionScriptReserved">true</span>);
+                layout.preserveFixedNodes = <span class="ActionScriptReserved">true</span>;
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> layoutAll() : <span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span>(beforeLayout(diagram.graph))<span class="ActionScriptBracket/Brace">{</span>
+              diagram.performGraphLayout(<span class="ActionScriptReserved">true</span>);
+              isModified = <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> layoutSelectedSubgraph() : <span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> subgraph:Subgraph = getSelectedSubgraph();
+            <span class="ActionScriptReserved">if</span>(subgraph != <span class="ActionScriptReserved">null</span> && beforeLayout(diagram.graph))<span class="ActionScriptBracket/Brace">{</span>
+              subgraph.performGraphLayout(<span class="ActionScriptReserved">false</span>);
+              isModified = <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> getSelectedSubgraph() : Subgraph
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> selection:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt; = diageditor.getSelectedObjects();
+            <span class="ActionScriptReserved">if</span>(selection.length == 1)<span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptvar">var</span> subgraph:Subgraph = selection<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> as Subgraph;
+              <span class="ActionScriptReserved">if</span>(subgraph != <span class="ActionScriptReserved">null</span>)<span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">for</span>(<span class="ActionScriptvar">var</span> i:int = 0; i &lt; <span class="MXMLComponent_Tag">subgraph</span>.graph.numElements; i++)<span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span>(!(subgraph.graph.getElementAt(i) is LaneBase))
+                    <span class="ActionScriptReserved">return</span> subgraph;
+                <span class="ActionScriptBracket/Brace">}</span>
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>         
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Sets the margins on swimlanes, and also checks that</span>
+<span class="ActionScriptASDoc">           * the graph is not empty (except swimlanes).</span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> beforeLayout(graph:Graph) : Boolean
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> notEmpty:Boolean = <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptvar">var</span> hasHorizontalLanes:Boolean = <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptvar">var</span> hasVerticalLanes:Boolean = <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptReserved">for</span>(<span class="ActionScriptvar">var</span> i:int = 0; i &lt; <span class="MXMLComponent_Tag">graph</span>.numElements; i++)<span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptvar">var</span> lane:LaneBase = graph.getElementAt(i) as LaneBase;
+              <span class="ActionScriptReserved">if</span>(lane != <span class="ActionScriptReserved">null</span>)<span class="ActionScriptBracket/Brace">{</span>
+                
+                <span class="ActionScriptReserved">if</span>(lane.isHorizontal())<span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span>(hasVerticalLanes)<span class="ActionScriptBracket/Brace">{</span>
+                    Alert.show(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.mixedpools.error"</span>),
+                               resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.mixedpools.title"</span>));
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+                  <span class="ActionScriptBracket/Brace">}</span>
+                  hasHorizontalLanes = <span class="ActionScriptReserved">true</span>;
+                <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span>(hasHorizontalLanes)<span class="ActionScriptBracket/Brace">{</span>
+                    Alert.show(resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.mixedpools.error"</span>),
+                               resourceManager.getString(<span class="ActionScriptString">"bpmeditor"</span>, <span class="ActionScriptString">"bpmeditor.mixedpools.title"</span>));
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+                  <span class="ActionScriptBracket/Brace">}</span>
+                  hasVerticalLanes = <span class="ActionScriptReserved">true</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                lane.poolMarginLeft = 10;
+                lane.poolMarginTop = 10;
+                lane.poolMarginRight = 10;
+                lane.poolMarginBottom = 10;
+                lane.graphMarginLeft = 20;
+                lane.graphMarginTop = 20;
+                lane.graphMarginRight = 20;
+                lane.graphMarginBottom = 20;
+                
+                <span class="ActionScriptReserved">if</span>(beforeLayout(lane.graph))
+                  notEmpty  = <span class="ActionScriptReserved">true</span>;
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                notEmpty = <span class="ActionScriptReserved">true</span>;
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> notEmpty;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptComment">// --------------------------------------</span>
+          <span class="ActionScriptComment">// Group selected objects as a Subprocess</span>
+          <span class="ActionScriptComment">// --------------------------------------</span>
+
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Indicates whether the selected objects can be grouped</span>
+<span class="ActionScriptASDoc">           * as a subprocess or not. </span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> canGroup():Boolean
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> (diageditor) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptvar">var</span> selObjs:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt; = diageditor.getSelectedObjects();
+              selObjs = selObjs.filter(filterGroupingObjects,<span class="ActionScriptReserved">this</span>);
+              <span class="ActionScriptReserved">return</span> (selObjs.length &gt; 0);
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Filter the list of selected objects so that if an object</span>
+<span class="ActionScriptASDoc">           * is selected, but its parent is also selected, then the</span>
+<span class="ActionScriptASDoc">           * object is removed from the list. </span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> filterGroupingObjects(r:Renderer, index:int, 
+                                                 vector:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt;):Boolean
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> (r != <span class="ActionScriptReserved">null</span>) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptComment">// Links should not be part of the list of objects to</span>
+              <span class="ActionScriptComment">// be moved from one graph to another. This is automatically</span>
+              <span class="ActionScriptComment">// done for all links at the end of group (see reparentIntergraphLinks)</span>
+              <span class="ActionScriptReserved">if</span> (r is Link) <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+              <span class="ActionScriptBracket/Brace">}</span>
+              
+              <span class="ActionScriptComment">// Objects that are selected, but whose parent is also selected</span>
+              <span class="ActionScriptComment">// do not need to be moved. The parent will already be moved.</span>
+              <span class="ActionScriptReserved">if</span> (r is LaneBase) <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> rp:DisplayObjectContainer = r.parent;
+                <span class="ActionScriptReserved">if</span> (rp is Graph) <span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptvar">var</span> sub:Subgraph = Graph(rp).owningSubgraph;
+                  <span class="ActionScriptReserved">if</span> (sub is LaneBase)
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;                
+                <span class="ActionScriptBracket/Brace">}</span>                
+              <span class="ActionScriptBracket/Brace">}</span>
+              
+              <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Groups the selected objects into a subprocess.</span>
+<span class="ActionScriptASDoc">           * </span>
+<span class="ActionScriptASDoc">           * In this sample, grouping objects means adding the</span>
+<span class="ActionScriptASDoc">           * objects into a subprocess. This operation is not</span>
+<span class="ActionScriptASDoc">           * allowed for lanes that are displayed within a pool.</span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> groupObjects(sub:Subgraph=<span class="ActionScriptReserved">null</span>):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// Deselect all lanes that are within other lanes, these ones</span>
+            <span class="ActionScriptComment">// can not be grouped.</span>
+            <span class="ActionScriptvar">var</span> selObjs:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt; = diageditor.getSelectedObjects();
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span> (<span class="ActionScriptvar">var</span> r:Renderer <span class="ActionScriptReserved">in</span> selObjs) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span> (r is LaneBase) <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// Objects that are selected, but whose parent is also selected</span>
+                <span class="ActionScriptComment">// do not need to be moved. The parent will already be moved.</span>
+                <span class="ActionScriptvar">var</span> rp:DisplayObjectContainer = r.parent;
+                <span class="ActionScriptReserved">if</span> (rp is Graph) <span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span> (Graph(rp).owningSubgraph is LaneBase) <span class="ActionScriptBracket/Brace">{</span>
+                    diageditor.setSelected(r,<span class="ActionScriptReserved">false</span>);
+                  <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">// If something is still selected, then group it</span>
+            <span class="ActionScriptReserved">if</span> (diageditor.hasSelection)
+              diageditor.group(sub);
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Connects two selected nodes. </span>
+<span class="ActionScriptASDoc">           * In order to create the link, there must be two selected</span>
+<span class="ActionScriptASDoc">           * objects, and both must be node renderers.</span>
+<span class="ActionScriptASDoc">           * </span>
+<span class="ActionScriptASDoc">           * <p>This function is called through the popup menu and</span>
+<span class="ActionScriptASDoc">           * accelerator.</p></span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> connectNodes():<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// The menu item is only available when two nodes are selected</span>
+            <span class="ActionScriptvar">var</span> selObjs:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt; = diageditor.getSelectedObjects();
+            <span class="ActionScriptReserved">if</span> (selObjs.length == 2) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptComment">// There must be two nodes selected</span>
+              <span class="ActionScriptReserved">if</span> ((selObjs<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> is Node) && (selObjs<span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span> is Node)) <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// Get the two nodes and create the link. </span>
+                <span class="ActionScriptComment">// It relies on the DiagramEditor.createLinkFunction or link prototype</span>
+                <span class="ActionScriptvar">var</span> link:Link = diageditor.createLink(Node(selObjs<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>), PortPosition.CENTER, 
+                                                      Node(selObjs<span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>), PortPosition.CENTER);
+                <span class="ActionScriptComment">// If the link was correctly created</span>
+                <span class="ActionScriptReserved">if</span> (link) <span class="ActionScriptBracket/Brace">{</span>
+                  link.startNode = Node(selObjs<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>);
+                  link.endNode = Node(selObjs<span class="ActionScriptBracket/Brace">[</span>1<span class="ActionScriptBracket/Brace">]</span>);
+                  <span class="ActionScriptvar">var</span> linkParent:Graph = DiagramEditor.getLowestCommonGraph(link.startNode, link.endNode);
+                  linkParent.addElement(link);
+                  diageditor.deselectAll();
+                  diageditor.setSelected(link, <span class="ActionScriptReserved">true</span>);
+                  <span class="ActionScriptReserved">if</span>(diageditor.allowEditingText && diageditor.allowEditingTextOnCreate)
+                    diageditor.startEditingText(link);
+                <span class="ActionScriptBracket/Brace">}</span>            
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>        
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptComment">// ---------------------------</span>
+          <span class="ActionScriptComment">// Support in the Palettes to navigate the palette contents</span>
+          <span class="ActionScriptComment">// using the keyboard. When a palette object is selected,</span>
+          <span class="ActionScriptComment">// you can press ENTER or SPACE to create the object in the</span>
+          <span class="ActionScriptComment">// diagram. Using the mouse the same operation is achieved</span>
+          <span class="ActionScriptComment">// by double-clicking the object in the palette.</span>
+          <span class="ActionScriptComment">// ---------------------------</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> paletteKeyDownHandler(event:KeyboardEvent):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> obj:Object = event.target;
+            <span class="ActionScriptReserved">if</span> (obj is DiagramPalette) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span> ((event.keyCode == Keyboard.ENTER) || (event.keyCode == Keyboard.SPACE)) <span class="ActionScriptBracket/Brace">{</span> 
+                <span class="ActionScriptvar">var</span> pal:DiagramPalette = DiagramPalette(obj);
+                <span class="ActionScriptvar">var</span> selObjs:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt; = pal.getSelectedObjects();
+                <span class="ActionScriptReserved">if</span> (selObjs.length &gt; 0) <span class="ActionScriptBracket/Brace">{</span>
+                  paletteAddToDiagram(Renderer(selObjs<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>));
+                  event.stopPropagation();
+                <span class="ActionScriptBracket/Brace">}</span>
+              <span class="ActionScriptBracket/Brace">}</span>          
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Create an object from the palette in the diagram using</span>
+<span class="ActionScriptASDoc">           * double-click.</span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> paletteMouseDoubleClickHandler(event:MouseEvent):<span class="ActionScriptReserved">void</span> 
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> palette:DiagramPalette = event.currentTarget as DiagramPalette;
+            <span class="ActionScriptReserved">if</span> (palette) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptvar">var</span> hit:Renderer = palette.getHitRenderer(event.target);
+              <span class="ActionScriptReserved">if</span> (hit)
+                paletteAddToDiagram(hit);
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>    
+          
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> paletteAddToDiagram(obj:Renderer):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// Add to the top graph or to the selected subnetwork</span>
+            <span class="ActionScriptvar">var</span> parent:Graph = diageditor.graph;
+            <span class="ActionScriptvar">var</span> selObjs:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt; = diageditor.getSelectedObjects();
+            <span class="ActionScriptReserved">if</span> (selObjs.length == 1) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span> (selObjs<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> is Subgraph)
+                parent = Subgraph(selObjs<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>).graph;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptvar">var</span> toCopy:Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt; = <span class="ActionScriptReserved">new</span> Vector.&lt;<span class="MXMLComponent_Tag">Renderer</span>&gt;();
+            toCopy.push(obj);
+            diageditor.duplicate(toCopy, parent);        
+            <span class="ActionScriptReserved">if</span>(diageditor.allowEditingText && diageditor.allowEditingTextOnCreate)
+              diageditor.startEditingText(diageditor.getSelectedObjects()<span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>);            
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Enables or disables keyboard navigation. </span>
+<span class="ActionScriptASDoc">           */</span>
+          protected <span class="ActionScriptfunction">function</span> editorKeyDownHandler(event:KeyboardEvent):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> (event.keyCode == Keyboard.F7) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span> (diageditor.keyboardNavigationPolicy == <span class="ActionScriptString">"none"</span>
+                || diageditor.keyboardNavigationPolicy == <span class="ActionScriptString">"nodesByConnection"</span>) <span class="ActionScriptBracket/Brace">{</span>
+                diageditor.keyboardNavigationPolicy = <span class="ActionScriptString">"nodesByHierarchy"</span>;
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                diageditor.keyboardNavigationPolicy = <span class="ActionScriptString">"nodesByConnection"</span>;
+              <span class="ActionScriptBracket/Brace">}</span>
+              diagram.scroller.allowKeyboardScroll = <span class="ActionScriptReserved">false</span>;
+              event.stopPropagation();
+              diageditor.graph.setFocus();
+            <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (event.keyCode == Keyboard.F8) <span class="ActionScriptBracket/Brace">{</span>
+              diageditor.keyboardNavigationPolicy = <span class="ActionScriptString">"none"</span>;
+              diagram.scroller.allowKeyboardScroll = <span class="ActionScriptReserved">true</span>;
+              event.stopPropagation();
+              diageditor.graph.setFocus();
+            <span class="ActionScriptBracket/Brace">}</span>          
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Implement custom accelerators for Open, Save, Delete, Group and Ungroup.</span>
+<span class="ActionScriptASDoc">           * As well as keyboard actions to increase and decrease width of palette</span>
+<span class="ActionScriptASDoc">           * and help panels.</span>
+<span class="ActionScriptASDoc">           * </span>
+<span class="ActionScriptASDoc">           * Predefined keyboard accelerators are:</span>
+<span class="ActionScriptASDoc">           * <ul></span>
+<span class="ActionScriptASDoc">           * <li>control key + 'J' : Create a link between two selected nodes</li></span>
+<span class="ActionScriptASDoc">           * <li>control key + 'G' : Group selected objects into a SubProcess</li></span>
+<span class="ActionScriptASDoc">           * <li>control key + 'U' : Ungroup selected objects</li></span>
+<span class="ActionScriptASDoc">           * <li>control key + 'S' : Save diagram</li></span>
+<span class="ActionScriptASDoc">           * <li>control key + 'O' : Open diagram file</li></span>
+<span class="ActionScriptASDoc">           * <li>control key + 'L' : Layout diagram</li></span>
+<span class="ActionScriptASDoc">           * <li>shift key and '+' : Increase width of help or palette panels</li></span>
+<span class="ActionScriptASDoc">           * <li>shift key and '-' : Decrease width of help or palette panels</li></span>
+<span class="ActionScriptASDoc">           * </ul></span>
+<span class="ActionScriptASDoc">           */</span>
+          protected <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> keyDownHandler(event:KeyboardEvent):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> (diageditor.getSelectedObjects().length &gt; 0) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span> (event.keyCode == Keyboard.DELETE || event.keyCode == Keyboard.BACKSPACE) <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// Event occurred in a text field, so it's delecting characters</span>
+                <span class="ActionScriptvar">var</span> eventTarget:Object = event.target;
+                <span class="ActionScriptReserved">if</span> (event.target is TextField || eventTarget is RichEditableText)
+                  <span class="ActionScriptReserved">return</span>;
+                diageditor.deleteSelection();
+                event.stopPropagation();
+                <span class="ActionScriptReserved">return</span>;
+              <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span> (event.ctrlKey) <span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span> (event.charCode == connectAcc) <span class="ActionScriptBracket/Brace">{</span>
+                    connectNodes();
+                    event.stopPropagation();
+                    <span class="ActionScriptReserved">return</span>;
+                  <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (event.charCode == ungroupAcc) <span class="ActionScriptBracket/Brace">{</span>
+                    diageditor.ungroup();
+                    event.stopPropagation();
+                    <span class="ActionScriptReserved">return</span>;
+                  <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (event.charCode == groupSubAcc) <span class="ActionScriptBracket/Brace">{</span>
+                    groupObjects();
+                    event.stopPropagation();
+                    <span class="ActionScriptReserved">return</span>;
+                  <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span> (event.currentTarget == palettePanel) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">if</span> (event.shiftKey) <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span> (event.charCode == dividerIncreaseAcc) <span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span> (event.currentTarget.width &lt; <span class="MXMLComponent_Tag">event</span>.currentTarget.maxWidth)<span class="ActionScriptBracket/Brace">{</span>
+                    event.currentTarget.width++;
+                    event.stopPropagation();
+                    <span class="ActionScriptReserved">return</span>;
+                  <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (event.charCode == dividerReduceAcc) <span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span> (event.currentTarget.width &gt; event.currentTarget.minWidth) <span class="ActionScriptBracket/Brace">{</span>
+                    event.currentTarget.width--;
+                    event.stopPropagation();
+                    <span class="ActionScriptReserved">return</span>;
+                  <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>          
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+                        
+            super.keyDownHandler(event);
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * Remove caret on focus out event. </span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> paletteFocusOutHandler(event:FocusEvent):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> palette:DiagramPalette = event.currentTarget as DiagramPalette;
+            <span class="ActionScriptReserved">if</span> (palette) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span> (<span class="ActionScriptvar">var</span> n:Node <span class="ActionScriptReserved">in</span> palette.getNodes()) <span class="ActionScriptBracket/Brace">{</span>
+                n.showsCaret = <span class="ActionScriptReserved">false</span>;
+                n.selected = <span class="ActionScriptReserved">false</span>;
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">           * This function is responsible for scrolling the palette when</span>
+<span class="ActionScriptASDoc">           * the caret renderer changes. This occurs when navigating in</span>
+<span class="ActionScriptASDoc">           * the objects using the keyboard.</span>
+<span class="ActionScriptASDoc">           * </span>
+<span class="ActionScriptASDoc">           * @param event An event that indicates that the renderer that</span>
+<span class="ActionScriptASDoc">           * currently has the focus changed</span>
+<span class="ActionScriptASDoc">           * @param pscroller Palette scroller </span>
+<span class="ActionScriptASDoc">           */</span>
+          <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> caretChangeHandler(event:PropertyChangeEvent, pscroller:Scroller):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> (event.property == <span class="ActionScriptString">"caretRenderer"</span>) <span class="ActionScriptBracket/Brace">{</span>
+              <span class="ActionScriptvar">var</span> ren:Renderer = event.newValue as Renderer;
+              <span class="ActionScriptReserved">if</span> (ren) <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> viewport:IViewport = pscroller.viewport;
+                <span class="ActionScriptvar">var</span> bounds:Rectangle = ren.getBounds(viewport as DisplayObject);
+                <span class="ActionScriptComment">// We only care here with vertical scroll bar since</span>
+                <span class="ActionScriptComment">// the palettes are configured to have only one column</span>
+                <span class="ActionScriptReserved">if</span> (pscroller.verticalScrollBar) <span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptvar">var</span> vsPos:Number = viewport.verticalScrollPosition;
+                  <span class="ActionScriptvar">var</span> lastYCoord:Number = viewport.height + vsPos;
+                  
+                  <span class="ActionScriptReserved">if</span> (bounds.y &lt; <span class="MXMLComponent_Tag">vsPos</span>) <span class="ActionScriptBracket/Brace">{</span>
+                    viewport.verticalScrollPosition = bounds.y;
+                  <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span>( (bounds.y+bounds.height)-lastYCoord &gt; 0 ) <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptvar">var</span> newPos:Number = Math.min(pscroller.verticalScrollBar.maximum, 
+                      vsPos + (bounds.y+bounds.height-lastYCoord));
+                    viewport.verticalScrollPosition = newPos;
+                  <span class="ActionScriptBracket/Brace">}</span>              
+                <span class="ActionScriptBracket/Brace">}</span>
+              <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptBracket/Brace">}</span>
+
+          protected <span class="ActionScriptfunction">function</span> initializeHandler(event:FlexEvent):<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> (ExternalInterface.available) 
+              ExternalInterface.call(<span class="ActionScriptString">"ElixirSample.initialize"</span>); 
+          <span class="ActionScriptBracket/Brace">}</span>
+          
+          protected <span class="ActionScriptfunction">function</span> showHelp():<span class="ActionScriptReserved">void</span>
+          <span class="ActionScriptBracket/Brace">{</span>
+            helpview.visible = !helpview.visible;
+          <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">]</span>&gt;
+    &lt;/<span class="MXMLSpecial_Tag">fx:Script</span>&gt;
+
+    &lt;<span class="MXMLSpecial_Tag">fx:Style</span> source=<span class="ActionScriptString">"../resources/bpmgraphic.css"</span>/&gt;
+    &lt;<span class="MXMLSpecial_Tag">fx:Style</span> source=<span class="ActionScriptString">"../resources/printutils.css"</span>/&gt; 
+    
+    &lt;<span class="MXMLSpecial_Tag">fx:Style</span>&gt;
+        @namespace s <span class="ActionScriptString">"library://ns.adobe.com/flex/spark"</span>;
+        @namespace mx <span class="ActionScriptString">"library://ns.adobe.com/flex/mx"</span>;
+        
+        mx|Panel <span class="ActionScriptBracket/Brace">{</span>
+            header-height: 30;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        mx|Button
+        <span class="ActionScriptBracket/Brace">{</span>
+            base-color: #d0d0d0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        s|List <span class="ActionScriptBracket/Brace">{</span>
+            skinClass: ClassReference(<span class="ActionScriptString">"skins.BorderlessListSkin"</span>);
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    &lt;/<span class="MXMLSpecial_Tag">fx:Style</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">fx:Declarations</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">serialization:UndoManager</span> id=<span class="ActionScriptString">"undoManager"</span> editor=<span class="ActionScriptBracket/Brace">"{</span>diageditor<span class="ActionScriptBracket/Brace">}"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Resize</span> id=<span class="ActionScriptString">"showHelpEffect"</span> widthFrom=<span class="ActionScriptString">"0"</span> widthTo=<span class="ActionScriptString">"350"</span> duration=<span class="ActionScriptString">"200"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Resize</span> id=<span class="ActionScriptString">"hideHelpEffect"</span> widthFrom=<span class="ActionScriptString">"350"</span> widthTo=<span class="ActionScriptString">"0"</span> duration=<span class="ActionScriptString">"200"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">fx:Declarations</span>&gt;
+    
+    &lt;<span class="MXMLComponent_Tag">s:VGroup</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> left=<span class="ActionScriptString">"5"</span> right=<span class="ActionScriptString">"5"</span> top=<span class="ActionScriptString">"5"</span> bottom=<span class="ActionScriptString">"5"</span> 
+              clipAndEnableScrolling=<span class="ActionScriptString">"true"</span> styleName=<span class="ActionScriptString">"bpmeditor"</span> &gt;   
+        &lt;<span class="MXMLComponent_Tag">local:ElixirSampleBar</span> id=<span class="ActionScriptString">"sbar"</span> 
+                             width=<span class="ActionScriptString">"100%"</span>
+                             label=<span class="ActionScriptString">"@Resource(key='bpmeditor.application.title', bundle='bpmeditor')"</span>&gt;
+        &lt;/<span class="MXMLComponent_Tag">local:ElixirSampleBar</span>&gt;
+      
+      &lt;<span class="MXMLComponent_Tag">mx:HDividedBox</span> id=<span class="ActionScriptString">"mainPanel"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                      hasFocusableChildren=<span class="ActionScriptString">"true"</span> focusEnabled=<span class="ActionScriptString">"true"</span>&gt;
+          
+          &lt;<span class="MXMLComponent_Tag">s:Panel</span> id=<span class="ActionScriptString">"palettePanel"</span> 
+                   title=<span class="ActionScriptString">"@Resource(key='bpmeditor.elements.palette.title', bundle='bpmeditor')"</span>
+                   width=<span class="ActionScriptString">"200"</span> height=<span class="ActionScriptString">"100%"</span>
+                   hasFocusableChildren=<span class="ActionScriptString">"true"</span> focusEnabled=<span class="ActionScriptString">"true"</span>&gt;
+            &lt;<span class="MXMLComponent_Tag">mx:Accordion</span> openDuration=<span class="ActionScriptString">"250"</span> minWidth=<span class="ActionScriptString">"0"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                          selectedIndex=<span class="ActionScriptString">"1"</span> creationPolicy=<span class="ActionScriptString">"all"</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.tasks.category.label', bundle='bpmeditor')"</span> 
+                       focusEnabled=<span class="ActionScriptString">"false"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                       width=<span class="ActionScriptString">"100%"</span> &gt;
+                &lt;<span class="MXMLComponent_Tag">s:Scroller</span> id=<span class="ActionScriptString">"paletteTasksScroller"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                            focusEnabled=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                            horizontalScrollPolicy=<span class="ActionScriptString">"auto"</span> verticalScrollPolicy=<span class="ActionScriptString">"auto"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:VGroup</span> minWidth=<span class="ActionScriptString">"0"</span> maxWidth=<span class="ActionScriptString">"200"</span> 
+                            paddingBottom=<span class="ActionScriptString">"10"</span> paddingTop=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"300"</span> 
+                                           clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>
+                                           keyboardNavigationPolicy=<span class="ActionScriptString">"nodesByHierarchy"</span>
+                                           doubleClickEnabled=<span class="ActionScriptString">"true"</span>
+                                           focusOut=<span class="ActionScriptBracket/Brace">"{</span>paletteFocusOutHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           keyDown=<span class="ActionScriptBracket/Brace">"{</span>paletteKeyDownHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           doubleClick=<span class="ActionScriptBracket/Brace">"{</span>paletteMouseDoubleClickHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           caretChange=<span class="ActionScriptBracket/Brace">"{</span>caretChangeHandler(event, paletteTasksScroller)<span class="ActionScriptBracket/Brace">}"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> paddingLeft=<span class="ActionScriptString">"20"</span> paddingRight=<span class="ActionScriptString">"20"</span> paddingTop=<span class="ActionScriptString">"20"</span> gap=<span class="ActionScriptString">"15"</span> 
+                                          horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+                      &lt;/<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Task</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.task.default.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Task</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.task.looping.label', bundle='bpmeditor')"</span> 
+                                loop=<span class="ActionScriptString">"true"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Task</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.task.multiinstance.label', bundle='bpmeditor')"</span> 
+                                multiInstance=<span class="ActionScriptString">"true"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Task</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.task.compensation.label', bundle='bpmeditor')"</span> 
+                                compensation=<span class="ActionScriptString">"true"</span>/&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:DiagramPalette</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Scroller</span>&gt;                
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.startevents.category.label', bundle='bpmeditor')"</span> 
+                       width=<span class="ActionScriptString">"100%"</span>  horizontalAlign=<span class="ActionScriptString">"center"</span>&gt;
+                &lt;<span class="MXMLComponent_Tag">s:Scroller</span> id=<span class="ActionScriptString">"paletteStartEventsScroller"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                            focusEnabled=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                            horizontalScrollPolicy=<span class="ActionScriptString">"auto"</span> verticalScrollPolicy=<span class="ActionScriptString">"auto"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:VGroup</span> minWidth=<span class="ActionScriptString">"0"</span> maxWidth=<span class="ActionScriptString">"200"</span> 
+                            paddingBottom=<span class="ActionScriptString">"10"</span> paddingTop=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"450"</span>
+                                           clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>
+                                           keyboardNavigationPolicy=<span class="ActionScriptString">"nodesByHierarchy"</span>
+                                           doubleClickEnabled=<span class="ActionScriptString">"true"</span>
+                                           focusOut=<span class="ActionScriptBracket/Brace">"{</span>paletteFocusOutHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           keyDown=<span class="ActionScriptBracket/Brace">"{</span>paletteKeyDownHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           doubleClick=<span class="ActionScriptBracket/Brace">"{</span>paletteMouseDoubleClickHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           caretChange=<span class="ActionScriptBracket/Brace">"{</span>caretChangeHandler(event, paletteStartEventsScroller)<span class="ActionScriptBracket/Brace">}"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> paddingLeft=<span class="ActionScriptString">"20"</span> paddingRight=<span class="ActionScriptString">"20"</span> paddingTop=<span class="ActionScriptString">"20"</span> gap=<span class="ActionScriptString">"5"</span> 
+                                          horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+                      &lt;/<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:StartEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.startevent.default.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:StartEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.startevent.message.label', bundle='bpmeditor')"</span> 
+                                      trigger=<span class="ActionScriptString">"Message"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:StartEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.startevent.timer.label', bundle='bpmeditor')"</span> 
+                                      trigger=<span class="ActionScriptString">"Timer"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:StartEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.startevent.error.label', bundle='bpmeditor')"</span> 
+                                      trigger=<span class="ActionScriptString">"Error"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:StartEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.startevent.compensation.label', bundle='bpmeditor')"</span> 
+                                      trigger=<span class="ActionScriptString">"Compensation"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:StartEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.startevent.conditional.label', bundle='bpmeditor')"</span> 
+                                      trigger=<span class="ActionScriptString">"Rule"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:StartEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.startevent.multiple.label', bundle='bpmeditor')"</span> 
+                                      trigger=<span class="ActionScriptString">"Multiple"</span>/&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:DiagramPalette</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Scroller</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.endevents.category.label', bundle='bpmeditor')"</span> 
+                       width=<span class="ActionScriptString">"100%"</span> horizontalAlign=<span class="ActionScriptString">"center"</span> &gt;
+                &lt;<span class="MXMLComponent_Tag">s:Scroller</span> id=<span class="ActionScriptString">"paletteEndEventsScroller"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                            focusEnabled=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                            horizontalScrollPolicy=<span class="ActionScriptString">"auto"</span> verticalScrollPolicy=<span class="ActionScriptString">"auto"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:VGroup</span> minWidth=<span class="ActionScriptString">"0"</span> maxWidth=<span class="ActionScriptString">"200"</span> 
+                            paddingBottom=<span class="ActionScriptString">"10"</span> paddingTop=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"450"</span>
+                                           clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>
+                                           keyboardNavigationPolicy=<span class="ActionScriptString">"nodesByHierarchy"</span>
+                                           doubleClickEnabled=<span class="ActionScriptString">"true"</span>
+                                           focusOut=<span class="ActionScriptBracket/Brace">"{</span>paletteFocusOutHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           keyDown=<span class="ActionScriptBracket/Brace">"{</span>paletteKeyDownHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           doubleClick=<span class="ActionScriptBracket/Brace">"{</span>paletteMouseDoubleClickHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           caretChange=<span class="ActionScriptBracket/Brace">"{</span>caretChangeHandler(event, paletteEndEventsScroller)<span class="ActionScriptBracket/Brace">}"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> paddingLeft=<span class="ActionScriptString">"20"</span> paddingRight=<span class="ActionScriptString">"20"</span> paddingTop=<span class="ActionScriptString">"20"</span> gap=<span class="ActionScriptString">"5"</span> 
+                                          horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+                      &lt;/<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:EndEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.endevent.default.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:EndEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.endevent.message.label', bundle='bpmeditor')"</span> 
+                                    trigger=<span class="ActionScriptString">"Message"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:EndEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.endevent.error.label', bundle='bpmeditor')"</span> 
+                                    trigger=<span class="ActionScriptString">"Error"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:EndEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.endevent.cancel.label', bundle='bpmeditor')"</span> 
+                                    trigger=<span class="ActionScriptString">"Cancel"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:EndEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.endevent.compensation.label', bundle='bpmeditor')"</span> 
+                                    trigger=<span class="ActionScriptString">"Compensation"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:EndEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.endevent.terminate.label', bundle='bpmeditor')"</span> 
+                                    trigger=<span class="ActionScriptString">"Terminate"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:EndEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.endevent.multiple.label', bundle='bpmeditor')"</span> 
+                                    trigger=<span class="ActionScriptString">"Multiple"</span>/&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:DiagramPalette</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Scroller</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevents.category.label', bundle='bpmeditor')"</span> 
+                       width=<span class="ActionScriptString">"100%"</span> horizontalAlign=<span class="ActionScriptString">"center"</span> &gt;
+                &lt;<span class="MXMLComponent_Tag">s:Scroller</span> id=<span class="ActionScriptString">"paletteIntermediateEventsScroller"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                            focusEnabled=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                            horizontalScrollPolicy=<span class="ActionScriptString">"auto"</span> verticalScrollPolicy=<span class="ActionScriptString">"auto"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:VGroup</span> minWidth=<span class="ActionScriptString">"0"</span> maxWidth=<span class="ActionScriptString">"200"</span> 
+                            paddingBottom=<span class="ActionScriptString">"10"</span> paddingTop=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"550"</span> 
+                                           clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>
+                                           keyboardNavigationPolicy=<span class="ActionScriptString">"nodesByHierarchy"</span>
+                                           doubleClickEnabled=<span class="ActionScriptString">"true"</span>
+                                           focusOut=<span class="ActionScriptBracket/Brace">"{</span>paletteFocusOutHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           keyDown=<span class="ActionScriptBracket/Brace">"{</span>paletteKeyDownHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           doubleClick=<span class="ActionScriptBracket/Brace">"{</span>paletteMouseDoubleClickHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           caretChange=<span class="ActionScriptBracket/Brace">"{</span>caretChangeHandler(event, paletteIntermediateEventsScroller)<span class="ActionScriptBracket/Brace">}"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> paddingLeft=<span class="ActionScriptString">"20"</span> paddingRight=<span class="ActionScriptString">"20"</span> paddingTop=<span class="ActionScriptString">"20"</span> gap=<span class="ActionScriptString">"5"</span> 
+                                          horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+                      &lt;/<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.default.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.message.label', bundle='bpmeditor')"</span> 
+                                             trigger=<span class="ActionScriptString">"Message"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.timer.label', bundle='bpmeditor')"</span> 
+                                             trigger=<span class="ActionScriptString">"Timer"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.error.label', bundle='bpmeditor')"</span> 
+                                             trigger=<span class="ActionScriptString">"Error"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.cancel.label', bundle='bpmeditor')"</span> 
+                                             trigger=<span class="ActionScriptString">"Cancel"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.compensation.label', bundle='bpmeditor')"</span> 
+                                             trigger=<span class="ActionScriptString">"Compensation"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.conditional.label', bundle='bpmeditor')"</span> 
+                                             trigger=<span class="ActionScriptString">"Rule"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.link.label', bundle='bpmeditor')"</span> 
+                                             trigger=<span class="ActionScriptString">"Link"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:IntermediateEvent</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.intermediateevent.multiple.label', bundle='bpmeditor')"</span> 
+                                             trigger=<span class="ActionScriptString">"Multiple"</span>/&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:DiagramPalette</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Scroller</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.gateways.category.label', bundle='bpmeditor')"</span> 
+                       width=<span class="ActionScriptString">"100%"</span> &gt;
+                &lt;<span class="MXMLComponent_Tag">s:Scroller</span> id=<span class="ActionScriptString">"paletteGatewaysEventsScroller"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                            focusEnabled=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                            horizontalScrollPolicy=<span class="ActionScriptString">"auto"</span> verticalScrollPolicy=<span class="ActionScriptString">"auto"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:VGroup</span> minWidth=<span class="ActionScriptString">"0"</span> maxWidth=<span class="ActionScriptString">"200"</span> 
+                            paddingBottom=<span class="ActionScriptString">"10"</span> paddingTop=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> width=<span class="ActionScriptString">"100%"</span> 
+                                           clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>
+                                           keyboardNavigationPolicy=<span class="ActionScriptString">"nodesByHierarchy"</span>
+                                           doubleClickEnabled=<span class="ActionScriptString">"true"</span>
+                                           focusOut=<span class="ActionScriptBracket/Brace">"{</span>paletteFocusOutHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           keyDown=<span class="ActionScriptBracket/Brace">"{</span>paletteKeyDownHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           doubleClick=<span class="ActionScriptBracket/Brace">"{</span>paletteMouseDoubleClickHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           caretChange=<span class="ActionScriptBracket/Brace">"{</span>caretChangeHandler(event, paletteGatewaysEventsScroller)<span class="ActionScriptBracket/Brace">}"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> paddingLeft=<span class="ActionScriptString">"20"</span> paddingRight=<span class="ActionScriptString">"20"</span> paddingTop=<span class="ActionScriptString">"20"</span> gap=<span class="ActionScriptString">"15"</span> 
+                                          horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+                      &lt;/<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Gateway</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.gateway.exclusive.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Gateway</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.gateway.parallel.label', bundle='bpmeditor')"</span> 
+                                   gatewayType=<span class="ActionScriptString">"AND"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Gateway</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.gateway.inclusive.label', bundle='bpmeditor')"</span> 
+                                   gatewayType=<span class="ActionScriptString">"OR"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Gateway</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.gateway.complex.label', bundle='bpmeditor')"</span> 
+                                   gatewayType=<span class="ActionScriptString">"Complex"</span>/&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:DiagramPalette</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Scroller</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.subprocesses.category.label', bundle='bpmeditor')"</span> 
+                       width=<span class="ActionScriptString">"100%"</span> &gt;
+                &lt;<span class="MXMLComponent_Tag">s:Scroller</span> id=<span class="ActionScriptString">"paletteSubprocessesScroller"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                            focusEnabled=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                            horizontalScrollPolicy=<span class="ActionScriptString">"auto"</span> verticalScrollPolicy=<span class="ActionScriptString">"auto"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:VGroup</span> minWidth=<span class="ActionScriptString">"0"</span> maxWidth=<span class="ActionScriptString">"200"</span> 
+                            paddingBottom=<span class="ActionScriptString">"10"</span> paddingTop=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> width=<span class="ActionScriptString">"100%"</span> 
+                                           clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>
+                                           keyboardNavigationPolicy=<span class="ActionScriptString">"nodesByHierarchy"</span>
+                                           doubleClickEnabled=<span class="ActionScriptString">"true"</span>
+                                           focusOut=<span class="ActionScriptBracket/Brace">"{</span>paletteFocusOutHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           keyDown=<span class="ActionScriptBracket/Brace">"{</span>paletteKeyDownHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           doubleClick=<span class="ActionScriptBracket/Brace">"{</span>paletteMouseDoubleClickHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           caretChange=<span class="ActionScriptBracket/Brace">"{</span>caretChangeHandler(event, paletteSubprocessesScroller)<span class="ActionScriptBracket/Brace">}"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> paddingLeft=<span class="ActionScriptString">"20"</span> paddingRight=<span class="ActionScriptString">"20"</span> paddingTop=<span class="ActionScriptString">"20"</span> gap=<span class="ActionScriptString">"15"</span> 
+                                          horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+                      &lt;/<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:SubProcess</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.subprocess.default.label', bundle='bpmeditor')"</span> 
+                                      width=<span class="ActionScriptString">"@Resource(key='bpmeditor.subprocess.default.width', bundle='bpmeditor')"</span> 
+                                      height=<span class="ActionScriptString">"@Resource(key='bpmeditor.subprocess.default.height', bundle='bpmeditor')"</span>&gt;
+                      &lt;/<span class="MXMLComponent_Tag">bpm:SubProcess</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:SubProcess</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.subprocess.adhoc.label', bundle='bpmeditor')"</span> 
+                                      adHoc=<span class="ActionScriptString">"true"</span> 
+                                      width=<span class="ActionScriptString">"@Resource(key='bpmeditor.subprocess.adhoc.width', bundle='bpmeditor')"</span> 
+                                      height=<span class="ActionScriptString">"@Resource(key='bpmeditor.subprocess.adhoc.height', bundle='bpmeditor')"</span>&gt;
+                      &lt;/<span class="MXMLComponent_Tag">bpm:SubProcess</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:DiagramPalette</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Scroller</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.poolslanes.category.label', bundle='bpmeditor')"</span> 
+                       width=<span class="ActionScriptString">"100%"</span> &gt;
+                &lt;<span class="MXMLComponent_Tag">s:Scroller</span> id=<span class="ActionScriptString">"palettePoolsLanesScroller"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                            focusEnabled=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                            horizontalScrollPolicy=<span class="ActionScriptString">"auto"</span> verticalScrollPolicy=<span class="ActionScriptString">"auto"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:VGroup</span> minWidth=<span class="ActionScriptString">"0"</span> maxWidth=<span class="ActionScriptString">"200"</span> 
+                            paddingBottom=<span class="ActionScriptString">"10"</span> paddingTop=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> width=<span class="ActionScriptString">"100%"</span> 
+                                           clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>
+                                           keyboardNavigationPolicy=<span class="ActionScriptString">"nodesByHierarchy"</span>
+                                           doubleClickEnabled=<span class="ActionScriptString">"true"</span>
+                                           focusOut=<span class="ActionScriptBracket/Brace">"{</span>paletteFocusOutHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           keyDown=<span class="ActionScriptBracket/Brace">"{</span>paletteKeyDownHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           doubleClick=<span class="ActionScriptBracket/Brace">"{</span>paletteMouseDoubleClickHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           caretChange=<span class="ActionScriptBracket/Brace">"{</span>caretChangeHandler(event, palettePoolsLanesScroller)<span class="ActionScriptBracket/Brace">}"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> paddingLeft=<span class="ActionScriptString">"20"</span> paddingRight=<span class="ActionScriptString">"20"</span> paddingTop=<span class="ActionScriptString">"20"</span> gap=<span class="ActionScriptString">"15"</span> 
+                                          horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+                      &lt;/<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:HPool</span> width=<span class="ActionScriptString">"@Resource(key='bpmeditor.hpool.width', bundle='bpmeditor')"</span> 
+                                   label=<span class="ActionScriptString">"@Resource(key='bpmeditor.hpool.label', bundle='bpmeditor')"</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">bpm:HLane</span> height=<span class="ActionScriptString">"@Resource(key='bpmeditor.hlane.height', bundle='bpmeditor')"</span> 
+                                     label=<span class="ActionScriptString">"@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"</span>/&gt;
+                        &lt;<span class="MXMLComponent_Tag">bpm:HLane</span> height=<span class="ActionScriptString">"@Resource(key='bpmeditor.hlane.height', bundle='bpmeditor')"</span> 
+                                     label=<span class="ActionScriptString">"@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;/<span class="MXMLComponent_Tag">bpm:HPool</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:VPool</span> height=<span class="ActionScriptString">"@Resource(key='bpmeditor.vpool.height', bundle='bpmeditor')"</span> 
+                                   label=<span class="ActionScriptString">"@Resource(key='bpmeditor.vpool.label', bundle='bpmeditor')"</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">bpm:VLane</span> width=<span class="ActionScriptString">"@Resource(key='bpmeditor.vlane.width', bundle='bpmeditor')"</span>
+                                     label=<span class="ActionScriptString">"@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"</span>/&gt;
+                        &lt;<span class="MXMLComponent_Tag">bpm:VLane</span> width=<span class="ActionScriptString">"@Resource(key='bpmeditor.vlane.width', bundle='bpmeditor')"</span> 
+                                     label=<span class="ActionScriptString">"@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;/<span class="MXMLComponent_Tag">bpm:VPool</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:DiagramPalette</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Scroller</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.artifacts.category.label', bundle='bpmeditor')"</span> 
+                       width=<span class="ActionScriptString">"100%"</span> &gt;
+                &lt;<span class="MXMLComponent_Tag">s:Scroller</span> id=<span class="ActionScriptString">"paletteArtifactsScroller"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                            focusEnabled=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> 
+                            horizontalScrollPolicy=<span class="ActionScriptString">"auto"</span> verticalScrollPolicy=<span class="ActionScriptString">"auto"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:VGroup</span> minWidth=<span class="ActionScriptString">"0"</span> maxWidth=<span class="ActionScriptString">"200"</span> 
+                            paddingBottom=<span class="ActionScriptString">"10"</span> paddingTop=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> width=<span class="ActionScriptString">"100%"</span> 
+                                           clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>
+                                           keyboardNavigationPolicy=<span class="ActionScriptString">"nodesByHierarchy"</span>
+                                           doubleClickEnabled=<span class="ActionScriptString">"true"</span>
+                                           focusOut=<span class="ActionScriptBracket/Brace">"{</span>paletteFocusOutHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           keyDown=<span class="ActionScriptBracket/Brace">"{</span>paletteKeyDownHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           doubleClick=<span class="ActionScriptBracket/Brace">"{</span>paletteMouseDoubleClickHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                           caretChange=<span class="ActionScriptBracket/Brace">"{</span>caretChangeHandler(event, paletteArtifactsScroller)<span class="ActionScriptBracket/Brace">}"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:VerticalLayout</span> paddingLeft=<span class="ActionScriptString">"20"</span> paddingRight=<span class="ActionScriptString">"20"</span> paddingTop=<span class="ActionScriptString">"20"</span> gap=<span class="ActionScriptString">"15"</span> 
+                                          horizontalAlign=<span class="ActionScriptString">"center"</span> /&gt;
+                      &lt;/<span class="MXMLComponent_Tag">editor:layout</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:DataObject</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.dataobject.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Group</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.group.label', bundle='bpmeditor')"</span> 
+                                 clickableInside=<span class="ActionScriptString">"true"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:TextAnnotation</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.textannotation.label', bundle='bpmeditor')"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:TextAnnotation</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.textannotation.label', bundle='bpmeditor')"</span> 
+                                          bracketOnRight=<span class="ActionScriptString">"true"</span>/&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:DiagramPalette</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Scroller</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">mx:VBox</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.links.category.label', bundle='bpmeditor')"</span> width=<span class="ActionScriptString">"100%"</span>&gt;
+                &lt;<span class="MXMLComponent_Tag">s:Group</span> width=<span class="ActionScriptString">"100%"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:Label</span> horizontalCenter=<span class="ActionScriptString">"0"</span> paddingTop=<span class="ActionScriptString">"5"</span> paddingBottom=<span class="ActionScriptString">"5"</span>
+                           textAlign=<span class="ActionScriptString">"center"</span>
+                           text=<span class="ActionScriptString">"@Resource(key='bpmeditor.links.palette.message', bundle='bpmeditor')"</span>
+                           fontStyle=<span class="ActionScriptString">"italic"</span>
+                           alpha=<span class="ActionScriptString">"0.5"</span>
+                           maxWidth=<span class="ActionScriptString">"@Resource(key='bpmeditor.links.palette.message.maxwidth', bundle='bpmeditor')"</span>/&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Group</span>&gt;
+                &lt;<span class="MXMLComponent_Tag">s:List</span> id=<span class="ActionScriptString">"linkList"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span>
+                        change=<span class="ActionScriptString">"linkListChangeHandler(event);"</span>
+                        selectedIndex=<span class="ActionScriptString">"0"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:itemRenderer</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">fx:Component</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">s:ItemRenderer</span> height=<span class="ActionScriptString">"30"</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:states</span>&gt;
+                          &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"normal"</span> /&gt;
+                          &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"hovered"</span> /&gt;
+                          &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"selected"</span> /&gt;
+                        &lt;/<span class="MXMLComponent_Tag">s:states</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">s:Rect</span> left=<span class="ActionScriptString">"0"</span> right=<span class="ActionScriptString">"0"</span> top=<span class="ActionScriptString">"0"</span> bottom=<span class="ActionScriptString">"0"</span>&gt;
+                          &lt;<span class="MXMLComponent_Tag">s:fill</span>&gt;
+                            &lt;<span class="MXMLComponent_Tag">s:SolidColor</span> color=<span class="ActionScriptString">"0x999999"</span> alpha=<span class="ActionScriptString">"0"</span> alpha.hovered=<span class="ActionScriptString">"0.2"</span>
+                                          alpha.selected=<span class="ActionScriptString">"0.6"</span> /&gt;
+                          &lt;/<span class="MXMLComponent_Tag">s:fill</span>&gt;
+                        &lt;/<span class="MXMLComponent_Tag">s:Rect</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">editor:DiagramPalette</span> data=<span class="ActionScriptBracket/Brace">"{</span>data<span class="ActionScriptBracket/Brace">}"</span> left=<span class="ActionScriptString">"10"</span> top=<span class="ActionScriptString">"10"</span>/&gt;
+                      &lt;/<span class="MXMLComponent_Tag">s:ItemRenderer</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">fx:Component</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:itemRenderer</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:dataProvider</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">s:ArrayList</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:SequenceFlow</span> 
+                                        label=<span class="ActionScriptString">"@Resource(key='bpmeditor.sequenceflow.label', bundle='bpmeditor')"</span> 
+                                        fallbackStartPoint=<span class="ActionScriptBracket/Brace">"{</span>new Point(10,10)<span class="ActionScriptBracket/Brace">}"</span> 
+                                        fallbackEndPoint=<span class="ActionScriptBracket/Brace">"{</span>new Point(170,10)<span class="ActionScriptBracket/Brace">}"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:MessageFlow</span> 
+                                       label=<span class="ActionScriptString">"@Resource(key='bpmeditor.messageflow.label', bundle='bpmeditor')"</span> 
+                                       fallbackStartPoint=<span class="ActionScriptBracket/Brace">"{</span>new Point(10,10)<span class="ActionScriptBracket/Brace">}"</span> 
+                                       fallbackEndPoint=<span class="ActionScriptBracket/Brace">"{</span>new Point(170,10)<span class="ActionScriptBracket/Brace">}"</span>/&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:Association</span> 
+                                       label=<span class="ActionScriptString">"@Resource(key='bpmeditor.association.label', bundle='bpmeditor')"</span> 
+                                       fallbackStartPoint=<span class="ActionScriptBracket/Brace">"{</span>new Point(10,10)<span class="ActionScriptBracket/Brace">}"</span> 
+                                       fallbackEndPoint=<span class="ActionScriptBracket/Brace">"{</span>new Point(170,10)<span class="ActionScriptBracket/Brace">}"</span>/&gt;
+                    &lt;/<span class="MXMLComponent_Tag">s:ArrayList</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:dataProvider</span>&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:List</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+            &lt;/<span class="MXMLComponent_Tag">mx:Accordion</span>&gt;
+          &lt;/<span class="MXMLComponent_Tag">s:Panel</span>&gt;
+          
+          &lt;<span class="MXMLComponent_Tag">mx:Canvas</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span>&gt;
+            &lt;<span class="MXMLComponent_Tag">mx:VBox</span> id=<span class="ActionScriptString">"diagramBox"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                     hasFocusableChildren=<span class="ActionScriptString">"true"</span> focusEnabled=<span class="ActionScriptString">"false"</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">s:HGroup</span> gap=<span class="ActionScriptString">"5"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span> width=<span class="ActionScriptString">"100%"</span> 
+                        clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/new.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.new.tooltip', bundle='bpmeditor')"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"newDiagram();"</span> 
+                  /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/open.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.open.tooltip', bundle='bpmeditor')"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"loadXML();"</span> 
+                  /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/save.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.save.tooltip', bundle='bpmeditor')"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"saveXML();"</span> 
+                  /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/print.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.print.tooltip', bundle='bpmeditor')"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"showPrintDialog();"</span> 
+                  /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Spacer</span> width=<span class="ActionScriptString">"6"</span>/&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span> id=<span class="ActionScriptString">"cutButton"</span> enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canCopy<span class="ActionScriptBracket/Brace">}"</span>
+                           icon=<span class="ActionScriptString">"@Embed(source='../resources/cut.png')"</span>
+                           toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.cut.tooltip', bundle='bpmeditor')"</span>
+                           width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.cut();"</span> 
+                           /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span> id=<span class="ActionScriptString">"copyButton"</span> enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canCopy<span class="ActionScriptBracket/Brace">}"</span>
+                           icon=<span class="ActionScriptString">"@Embed(source='../resources/copy.png')"</span>
+                           toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.copy.tooltip', bundle='bpmeditor')"</span>
+                           width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.copy();"</span> 
+                           /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span> id=<span class="ActionScriptString">"pasteButton"</span> enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canPaste<span class="ActionScriptBracket/Brace">}"</span>
+                           icon=<span class="ActionScriptString">"@Embed(source='../resources/paste.png')"</span>
+                           toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.paste.tooltip', bundle='bpmeditor')"</span>
+                           width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.paste();"</span> 
+                           /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Spacer</span> width=<span class="ActionScriptString">"6"</span>
+                           /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span> enabled=<span class="ActionScriptBracket/Brace">"{</span>undoManager.canUndo<span class="ActionScriptBracket/Brace">}"</span>
+                           icon=<span class="ActionScriptString">"@Embed(source='../resources/undo.png')"</span>
+                           toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.undo.tooltip', bundle='bpmeditor')"</span>
+                           width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"undoManager.undo();"</span> 
+                           /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span> enabled=<span class="ActionScriptBracket/Brace">"{</span>undoManager.canRedo<span class="ActionScriptBracket/Brace">}"</span>
+                           icon=<span class="ActionScriptString">"@Embed(source='../resources/redo.png')"</span>
+                           toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.redo.tooltip', bundle='bpmeditor')"</span>
+                           width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"undoManager.redo();"</span> 
+                           /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Spacer</span> width=<span class="ActionScriptString">"6"</span>/&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span> id=<span class="ActionScriptString">"groupButton"</span> enabled=<span class="ActionScriptString">"false"</span>
+                           icon=<span class="ActionScriptString">"@Embed(source='../resources/group.png')"</span>
+                           toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.group.tooltip', bundle='bpmeditor')"</span>
+                           width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"groupObjects();"</span> 
+                           /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span> id=<span class="ActionScriptString">"ungroupButton"</span> enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canUngroup<span class="ActionScriptBracket/Brace">}"</span>
+                           icon=<span class="ActionScriptString">"@Embed(source='../resources/ungroup.png')"</span>
+                           toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.ungroup.tooltip', bundle='bpmeditor')"</span>
+                           width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.ungroup();"</span> 
+                           /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Spacer</span> width=<span class="ActionScriptString">"6"</span>/&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/zoom.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.zoomin.tooltip', bundle='bpmeditor')"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diagram.zoom *= diagram.zoomFactor;"</span> 
+                  /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/unzoom.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.zoomout.tooltip', bundle='bpmeditor')"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diagram.zoom /= diagram.zoomFactor;"</span> 
+                  /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/resetzoom.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.resetzoom.tooltip', bundle='bpmeditor')"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diagram.zoom = 1;"</span> 
+                  /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/zoomfit.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.showall.tooltip', bundle='bpmeditor')"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"if(diagram.graph.numElements > 0) diagram.fitContent(false);"</span> 
+                  /&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Spacer</span> width=<span class="ActionScriptString">"6"</span>/&gt;
+                &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                  icon=<span class="ActionScriptString">"@Embed(source='../resources/showgrid.png')"</span>
+                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.showgrid.tooltip', bundle='bpmeditor')"</span>
+                  toggle=<span class="ActionScriptString">"true"</span> selected=<span class="ActionScriptString">"true"</span>
+                  width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.gridVisible = !diageditor.gridVisible;"</span> 
+                  /&gt;
+                
+            &lt;/<span class="MXMLComponent_Tag">s:HGroup</span>&gt;
+              &lt;<span class="MXMLComponent_Tag">s:HGroup</span> width=<span class="ActionScriptString">"100%"</span> clipAndEnableScrolling=<span class="ActionScriptString">"true"</span> hasFocusableChildren=<span class="ActionScriptString">"true"</span>&gt;
+                &lt;<span class="MXMLComponent_Tag">s:HGroup</span> gap=<span class="ActionScriptString">"5"</span> paddingLeft=<span class="ActionScriptString">"2"</span> paddingBottom=<span class="ActionScriptString">"2"</span> paddingTop=<span class="ActionScriptString">"2"</span> 
+                          hasFocusableChildren=<span class="ActionScriptString">"true"</span> width=<span class="ActionScriptString">"95%"</span> clipAndEnableScrolling=<span class="ActionScriptString">"true"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/bringtofront.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.hasSelection<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.bringToFront.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.bringToFront();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/bringforward.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.hasSelection<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.bringForward.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.bringForward();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/sendtoback.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.hasSelection<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.sendToBack.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.sendToBack();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/sendbackward.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.hasSelection<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.sendBackward.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.sendBackward();"</span> 
+                    /&gt;
+                  
+                  &lt;<span class="MXMLComponent_Tag">mx:Spacer</span> width=<span class="ActionScriptString">"6"</span>/&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/alignleft.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canAlign<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.alignLeft.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.alignLeft();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/alignhcenter.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canAlign<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.alignHorizontalCenter.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.alignHorizontalCenter();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/alignright.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canAlign<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.alignRight.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.alignRight();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/aligntop.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canAlign<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.alignTop.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.alignTop();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/alignvcenter.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canAlign<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.alignVerticalCenter.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.alignVerticalCenter();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/alignbottom.png')"</span>
+                    enabled=<span class="ActionScriptBracket/Brace">"{</span>diageditor.canAlign<span class="ActionScriptBracket/Brace">}"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.alignBottom.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"diageditor.alignBottom();"</span> 
+                    /&gt;
+                  
+                  &lt;<span class="MXMLComponent_Tag">mx:Spacer</span> width=<span class="ActionScriptString">"6"</span>/&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span>
+                    icon=<span class="ActionScriptString">"@Embed(source='../resources/layout.png')"</span>
+                    toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.layout.tooltip', bundle='bpmeditor')"</span>
+                    width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"layoutAll();"</span> 
+                    /&gt;
+                  &lt;<span class="MXMLComponent_Tag">mx:Button</span> id=<span class="ActionScriptString">"layoutSelectedButton"</span> enabled=<span class="ActionScriptString">"false"</span>
+                             icon=<span class="ActionScriptString">"@Embed(source='../resources/layoutsel.png')"</span>
+                             toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.layoutsel.tooltip', bundle='bpmeditor')"</span>
+                             width=<span class="ActionScriptString">"36"</span> height=<span class="ActionScriptString">"24"</span>  click=<span class="ActionScriptString">"layoutSelectedSubgraph();"</span> 
+                             /&gt;
+                  
+                &lt;/<span class="MXMLComponent_Tag">s:HGroup</span>&gt;
+                &lt;<span class="MXMLComponent_Tag">s:Group</span> width=<span class="ActionScriptString">"5%"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:ToggleButton</span> right=<span class="ActionScriptString">"2"</span> top=<span class="ActionScriptString">"2"</span>
+                                  label=<span class="ActionScriptString">"@Resource(key='bpmeditor.help.title', bundle='bpmeditor')"</span>
+                                  toolTip=<span class="ActionScriptString">"@Resource(key='bpmeditor.help.tooltip', bundle='bpmeditor')"</span>
+                                  selected=<span class="ActionScriptString">"false"</span>
+                                  skinClass=<span class="ActionScriptString">"skins.ToggleButtonLinkSkin"</span>
+                                  click=<span class="ActionScriptBracket/Brace">"{</span>showHelp()<span class="ActionScriptBracket/Brace">}"</span>
+                                  /&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Group</span>&gt;
+              &lt;/<span class="MXMLComponent_Tag">s:HGroup</span>&gt;
+              
+              &lt;<span class="MXMLComponent_Tag">s:Panel</span> id=<span class="ActionScriptString">"titlePanel"</span> title=<span class="ActionScriptString">"@Resource(key='bpmeditor.default.buffer.title', bundle='bpmeditor')"</span>
+                       hasFocusableChildren=<span class="ActionScriptString">"true"</span> focusEnabled=<span class="ActionScriptString">"false"</span>
+                       width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span>&gt;
+                &lt;<span class="MXMLComponent_Tag">s:VGroup</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">editor:DiagramEditor</span> id=<span class="ActionScriptString">"diageditor"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span>
+                                        focusEnabled=<span class="ActionScriptString">"true"</span>
+                                        cloneFunction=<span class="ActionScriptString">"cloneFunction"</span>
+                                        editorMove=<span class="ActionScriptBracket/Brace">"{</span>moveResizeHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                        editorResize=<span class="ActionScriptBracket/Brace">"{</span>moveResizeHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                        editorChangeZOrder=<span class="ActionScriptBracket/Brace">"{</span>modifiedHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                        editorConnectLink=<span class="ActionScriptBracket/Brace">"{</span>modifiedHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                        editorCreate=<span class="ActionScriptBracket/Brace">"{</span>modifiedHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                        editorDelete=<span class="ActionScriptBracket/Brace">"{</span>modifiedHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                        editorReparent=<span class="ActionScriptBracket/Brace">"{</span>modifiedHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                        editorSelectionChanged=<span class="ActionScriptBracket/Brace">"{</span>selectionChangedHandler(event)<span class="ActionScriptBracket/Brace">}"</span>
+                                        createLinkFunction=<span class="ActionScriptString">"createLink"</span>
+                                        createPortFunction=<span class="ActionScriptString">"createPort"</span>
+                                        createGroupFunction=<span class="ActionScriptString">"createGroup"</span>
+                                        keyboardMoveNodesModifierKey=<span class="ActionScriptString">"shift"</span>
+                                        confirmDelete=<span class="ActionScriptString">"false"</span>
+                                        &gt;
+                    &lt;<span class="MXMLComponent_Tag">editor:linkPrototype</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">bpm:SequenceFlow</span> label=<span class="ActionScriptString">"@Resource(key='bpmeditor.sequenceflow.label', bundle='bpmeditor')"</span>/&gt;
+                    &lt;/<span class="MXMLComponent_Tag">editor:linkPrototype</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">idiag:Diagram</span> id=<span class="ActionScriptString">"diagram"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> 
+                                   selectionMode=<span class="ActionScriptString">"multiple"</span> automaticGraphLayout=<span class="ActionScriptString">"false"</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">idiag:nodeLayout</span>&gt;
+                        &lt;<span class="MXMLComponent_Tag">idiag:HierarchicalLayout</span> flowDirection=<span class="ActionScriptString">"right"</span> globalLinkStyle=<span class="ActionScriptString">"orthogonal"</span> 
+                                                  intergraphConnectivityMode=<span class="ActionScriptString">"true"</span>&gt;
+                          &lt;<span class="MXMLComponent_Tag">idiag:position</span>&gt;
+                            &lt;<span class="MXMLComponent_Tag">mx:Point</span> x=<span class="ActionScriptString">"100"</span> y=<span class="ActionScriptString">"50"</span>/&gt;
+                          &lt;/<span class="MXMLComponent_Tag">idiag:position</span>&gt;
+                        &lt;/<span class="MXMLComponent_Tag">idiag:HierarchicalLayout</span>&gt;
+                      &lt;/<span class="MXMLComponent_Tag">idiag:nodeLayout</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">idiag:Diagram</span>&gt;
+                    &lt;!--
+                    &lt;<span class="MXMLComponent_Tag">idiag:Graph</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">idiag:Graph</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">idiag:GraphScroller</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">s:Group</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">idiag:Graph</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">idiag:Graph</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">s:Group</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">idiag:GraphScroller</span>&gt;
+                    --&gt;
+                  &lt;/<span class="MXMLComponent_Tag">editor:DiagramEditor</span>&gt;                
+                &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+                &lt;!--
+                - <span class="MXMLComponent_Tag">Help</span> Panel
+                --&gt;
+                &lt;!-- <span class="MXMLComponent_Tag">help</span> view --&gt;
+                &lt;<span class="MXMLComponent_Tag">s:Group</span> top=<span class="ActionScriptString">"-20"</span> right=<span class="ActionScriptString">"0"</span> bottom=<span class="ActionScriptString">"0"</span> 
+                         id=<span class="ActionScriptString">"helpview"</span> visible=<span class="ActionScriptString">"false"</span> 
+                         showEffect=<span class="ActionScriptString">"showHelpEffect"</span> hideEffect=<span class="ActionScriptString">"hideHelpEffect"</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:Rect</span> top=<span class="ActionScriptString">"0"</span> left=<span class="ActionScriptString">"0"</span> bottom=<span class="ActionScriptString">"0"</span> right=<span class="ActionScriptString">"0"</span> 
+                          bottomLeftRadiusX=<span class="ActionScriptString">"10"</span> bottomLeftRadiusY=<span class="ActionScriptString">"10"</span> 
+                          bottomRightRadiusX=<span class="ActionScriptString">"10"</span> bottomRightRadiusY=<span class="ActionScriptString">"10"</span> 
+                          topLeftRadiusX=<span class="ActionScriptString">"10"</span> topLeftRadiusY=<span class="ActionScriptString">"10"</span> 
+                          topRightRadiusX=<span class="ActionScriptString">"10"</span> topRightRadiusY=<span class="ActionScriptString">"10"</span>&gt;
+                    &lt;<span class="MXMLComponent_Tag">s:fill</span>&gt;
+                      &lt;<span class="MXMLComponent_Tag">s:SolidColor</span> color=<span class="ActionScriptString">"#e5e5e5"</span> alpha=<span class="ActionScriptString">"0.9"</span>&gt;
+                      &lt;/<span class="MXMLComponent_Tag">s:SolidColor</span>&gt;
+                    &lt;/<span class="MXMLComponent_Tag">s:fill</span>&gt;
+                  &lt;/<span class="MXMLComponent_Tag">s:Rect</span>&gt;
+                  &lt;<span class="MXMLComponent_Tag">s:TextArea</span> top=<span class="ActionScriptString">"10"</span> left=<span class="ActionScriptString">"10"</span> bottom=<span class="ActionScriptString">"10"</span> right=<span class="ActionScriptString">"10"</span>
+                              color=<span class="ActionScriptString">"black"</span>
+                              contentBackgroundAlpha=<span class="ActionScriptString">"0"</span>
+                              editable=<span class="ActionScriptString">"false"</span>
+                              text=<span class="ActionScriptString">"@Resource(key='bpmeditor.help.text', bundle='bpmeditor')"</span>
+                              /&gt;
+                &lt;/<span class="MXMLComponent_Tag">s:Group</span>&gt;  
+              &lt;/<span class="MXMLComponent_Tag">s:Panel</span>&gt;
+            &lt;/<span class="MXMLComponent_Tag">mx:VBox</span>&gt;
+          &lt;/<span class="MXMLComponent_Tag">mx:Canvas</span>&gt;                
+      &lt;/<span class="MXMLComponent_Tag">mx:HDividedBox</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:VGroup</span>&gt;
+    
+&lt;/<span class="MXMLComponent_Tag">mx:Application</span>&gt;
+</pre></body></html>

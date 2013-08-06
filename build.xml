@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!-- This project uses the Ant tasks from Adobe to compile the sample. -->
+<!-- You can find some documentation on the Ant tasks here:            -->
+<!--   http://labs.adobe.com/wiki/index.php/Flex_Ant_Tasks             -->
+
+<project name='Sample bpmeditor' default='build' basedir='.'>
+  <!-- Properties for the sample -->
+  <property name='output.dir' location='html'/>
+  <property name='sample' value='bpmeditor'/>
+  <property name='mxml' location='src/${sample}.mxml'/>
+  <property name='swf' location='${output.dir}/${sample}.swf'/>
+
+  <!-- Properties for the generated HTML wrapper -->
+  <property name='html.title' value='IBM ILOG Elixir Enterprise : BPM Editor'/>
+  <property name='html.width' value='100%'/>
+  <property name='html.height' value='100%'/>
+  <property name='html.bgcolor' value='#869ca7'/>
+  <property name='html.history' value='true'/>
+  <property name='html.version.major' value='10'/>
+  <property name='html.version.minor' value='2'/>
+  <property name='html.version.revision' value='0'/>
+
+  <property name='flexsdkhome' location='${FLEX_HOME}'/>
+  <property name='iloghome' location='${ILOG_HOME}'/>
+  <property name='ilogframeworks' location='${ILOG_HOME}/frameworks'/>
+
+  <target name='init'>
+    <antcall target='check-flex-sdk-home'/>
+    <echo>Using FLEX_HOME ${flexsdkhome}</echo>
+    <antcall target='check-ilog-home'/>
+    <echo>Using ILOG_HOME ${iloghome}</echo>
+    <!-- Where to find the Adobe Ant tasks -->
+    <taskdef resource='flexTasks.tasks'
+             classpath='${flexsdkhome}/ant/lib/flexTasks.jar'/>
+  </target>
+
+  <target name='check-flex-sdk-home' unless='FLEX_HOME'>
+    <fail>
+      Error: the Ant property FLEX_HOME has not been set
+    </fail>
+  </target>
+
+  <target name='check-ilog-home' unless='ILOG_HOME'>
+    <fail>
+      Error: the Ant property ILOG_HOME has not been set
+    </fail>
+  </target>
+
+  <target name='clean'>
+    <delete dir='${output.dir}' quiet='true'/>
+  </target>
+
+  <target name='compile' depends='init'>
+    <mkdir dir='${output.dir}'/>
+    <delete file='${swf}' quiet='true'/>
+    <mxmlc file='${mxml}'
+           output='${swf}'
+           actionscript-file-encoding='UTF-8'
+           keep-generated-actionscript='false'
+           incremental='false'
+           fork='true'>
+      <keep-as3-metadata name="Style"/>
+      <jvmarg value='-Xbootclasspath/p:${flexsdkhome}/lib/xercesImpl.jar'/>
+      <jvmarg value='-Xmx512m'/>
+      <compiler.accessible>true</compiler.accessible>
+      <compiler.locale>en_US</compiler.locale>
+      <compiler.source-path path-element='${basedir}/src'/>
+      <compiler.source-path path-element='${basedir}/locale/{locale}'/>
+      <compiler.library-path dir='${ilogframeworks}' append='true'>
+        <include name='libs'/>
+        <!-- does not work
+        <include name='locale/{locale}'/>
+        -->
+        <include name='locale/en_US'/>
+      </compiler.library-path>
+      <use-network>false</use-network>
+      <static-link-runtime-shared-libraries>true</static-link-runtime-shared-libraries>
+      <debug>false</debug>
+      <optimize>true</optimize>
+      <resource-bundle-list>bpmeditor,elixirsamplebar_enterprise,printutils</resource-bundle-list>
+    </mxmlc>
+
+    <!-- Check that the swf exists as the task does not always fail when it should -->
+    <available property='swf-exists'
+               file='${swf}'
+               type='file'/>
+    <antcall target='fail-no-swf'/>
+  </target>
+
+  <target name='fail-no-swf' unless='swf-exists'>
+    <fail>
+      Error: not able to create the sample SWF file ${swf}
+    </fail>
+  </target>
+
+  <target name='html-wrapper' depends='init'>
+    <mkdir dir='${output.dir}'/>
+    <html-wrapper title='@html.title@'
+                  height='${html.height}'
+                  width='${html.width}'
+                  bgcolor='${html.bgcolor}'
+                  application='${sample}'
+                  swf='${sample}'
+                  version-major='${html.version.major}'
+                  version-minor='${html.version.minor}'
+                  version-revision='${html.version.revision}'
+                  history='${html.history}'
+                  output='${output.dir}'>
+    </html-wrapper>
+    <!-- Due to a bug in html-wrapper that does not -->
+    <!-- support an output encoding and uses the    -->
+    <!-- system encoding instead of UTF-8.          -->
+    <replace file='${output.dir}/index.html'
+             token='@html.title@'
+             value='${html.title}'
+             encoding='UTF-8'/>
+
+    <replace file='${output.dir}/index.html' encoding='UTF-8'>
+      <replacetoken><![CDATA[</head>]]></replacetoken>
+      <replacevalue><![CDATA[<script type="text/javascript">
+  // code added by pht, 06 may 2010
+  function getQueryStringParameter(name)
+  {
+    queryString = window.location.search.substring(1);
+    params = queryString.split("&");
+    for (i=0;i<params.length;i++) {
+      param = params[i].split("=");
+      if (param[0] == name) {
+        return param[1];
+      }
+    }
+  }
+  function isSampleBarVisible()
+  {
+    value = getQueryStringParameter("samplebar");
+        if(value=="false") return false;
+    return true;
+  }
+</script>
+
+
+
+<script type="text/javascript">
+ // script to prevent IE >7 to grab mouse wheel events.
+ var ElixirSample = {
+
+    preventMouseWheel : function (e) {
+      if (!e) e = window.event;
+      if (e.preventDefault)
+        e.preventDefault();
+      e.returnValue = false;
+      return false;
+    },
+
+    initialize : function () {
+      if(window.addEventListener) {
+        window.addEventListener('DOMMouseScroll', this.preventMouseWheel, false);
+      } else {
+        window.onmousewheel = document.onmousewheel = this.preventMouseWheel;
+        if (window.attachEvent) //IE exclusive method for binding an event
+          window.attachEvent("onmousewheel", this.preventMouseWheel);
+      }
+    }
+ };
+</script>
+
+</head>]]></replacevalue>
+    </replace>
+
+
+    <!-- copy the data that is required at runtime -->
+    <available file='${basedir}/data'
+               type='dir'
+               property='data-exists'/>
+    <antcall target='copy-data'/>
+  </target>
+
+  <target name='copy-data' if='data-exists'>
+    <!-- copy the data that is required at runtime -->
+    <copy todir='${output.dir}' verbose='true'>
+      <fileset dir='${basedir}/data'/>
+    </copy>
+  </target>
+
+  <target name='build' depends='compile,html-wrapper'/>
+</project>

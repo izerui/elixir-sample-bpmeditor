@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>AssociationSkin.mxml</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre>&lt;?<span class="MXMLComponent_Tag">xml</span> version=<span class="ActionScriptString">"1.0"</span> encoding=<span class="ActionScriptString">"utf-8"</span>?&gt;
+<span class="ActionScriptComment">&lt;!--</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">--&gt;</span>
+&lt;<span class="MXMLComponent_Tag">s:SparkSkin</span> xmlns:fx=<span class="ActionScriptString">"http://ns.adobe.com/mxml/2009"</span>
+             xmlns:mx=<span class="ActionScriptString">"library://ns.adobe.com/flex/mx"</span>
+             xmlns:s=<span class="ActionScriptString">"library://ns.adobe.com/flex/spark"</span> xmlns:idiag=<span class="ActionScriptString">"http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010"</span>&gt;
+  
+  &lt;<span class="MXMLSpecial_Tag">fx:Metadata</span>&gt;
+    <span class="ActionScriptBracket/Brace">[</span>HostComponent(<span class="ActionScriptString">"bpm.graphic.Association"</span>)<span class="ActionScriptBracket/Brace">]</span>
+  &lt;/<span class="MXMLSpecial_Tag">fx:Metadata</span>&gt; 
+  
+  &lt;<span class="MXMLSpecial_Tag">fx:Script</span>&gt;
+    &lt;![<span class="MXMLComponent_Tag">CDATA</span><span class="ActionScriptBracket/Brace">[</span> 
+      <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">       *  @private</span>
+<span class="ActionScriptASDoc">       */</span>
+      <span class="ActionScriptReserved">override</span> protected <span class="ActionScriptfunction">function</span> updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : <span class="ActionScriptReserved">void</span>
+      <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> cr:Number = getStyle(<span class="ActionScriptString">"strokeColor"</span>);
+        <span class="ActionScriptReserved">if</span> (strokeColor != cr) strokeColor = cr;
+        
+        <span class="ActionScriptvar">var</span> sw:Number = getStyle(<span class="ActionScriptString">"strokeWidth"</span>);
+        <span class="ActionScriptReserved">if</span> (strokeWidth != sw) strokeWidth = sw;
+        
+        <span class="ActionScriptvar">var</span> carc:Number = getStyle(<span class="ActionScriptString">"caretColor"</span>);
+        <span class="ActionScriptReserved">if</span> (caretColor != carc) caretColor = carc;
+        
+        <span class="ActionScriptvar">var</span> ccolor:Number = getStyle(<span class="ActionScriptString">"color"</span>);
+        <span class="ActionScriptReserved">if</span> (color != ccolor) color = ccolor;
+
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+      <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> strokeColor:uint = 0;
+      
+      <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+      <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> strokeWidth:Number = 1;
+
+      <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+      <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> caretColor:uint = 0;
+      
+      <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+      <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> color:uint = 0;
+    <span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">]</span>&gt; 
+  &lt;/<span class="MXMLSpecial_Tag">fx:Script</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">s:states</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"normal"</span> /&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"selected"</span> stateGroups=<span class="ActionScriptString">"Selected"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"normalAndShowsCaret"</span> stateGroups=<span class="ActionScriptString">"ShowsCaret"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"selectedAndShowsCaret"</span> stateGroups=<span class="ActionScriptString">"Selected,ShowsCaret"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"active"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"done"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:states</span>&gt;
+  
+  
+  &lt;!-- <span class="MXMLComponent_Tag">styling</span> objects to stroke and fill main path and arrows --&gt;
+  &lt;<span class="MXMLComponent_Tag">fx:Declarations</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:SolidColorStroke</span> id=<span class="ActionScriptString">"strokecolor"</span> color=<span class="ActionScriptBracket/Brace">"{</span>strokeColor<span class="ActionScriptBracket/Brace">}"</span> color.active=<span class="ActionScriptString">"0xFF8C00"</span> color.done=<span class="ActionScriptString">"0x228B22"</span> weight=<span class="ActionScriptBracket/Brace">"{</span>strokeWidth<span class="ActionScriptBracket/Brace">}"</span> caps=<span class="ActionScriptString">"none"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:SolidColor</span> id=<span class="ActionScriptString">"arrowfill"</span> color=<span class="ActionScriptString">"white"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:SolidColorStroke</span> id=<span class="ActionScriptString">"arrowstroke"</span> color=<span class="ActionScriptBracket/Brace">"{</span>strokeColor<span class="ActionScriptBracket/Brace">}"</span> color.active=<span class="ActionScriptString">"0xFF8C00"</span> color.done=<span class="ActionScriptString">"0x228B22"</span> weight=<span class="ActionScriptString">"1"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">fx:Declarations</span>&gt;
+  
+  &lt;!-- <span class="MXMLComponent_Tag">base</span> is made of a main path and arrows --&gt; 
+  &lt;<span class="MXMLComponent_Tag">s:Group</span> id=<span class="ActionScriptString">"base"</span> includeInLayout=<span class="ActionScriptString">"false"</span>&gt;  
+    
+    &lt;<span class="MXMLComponent_Tag">s:filters</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:GlowFilter</span> includeIn=<span class="ActionScriptString">"ShowsCaret"</span> color=<span class="ActionScriptBracket/Brace">"{</span>caretColor<span class="ActionScriptBracket/Brace">}"</span> alpha=<span class="ActionScriptString">"0.8"</span> blurX=<span class="ActionScriptString">"8"</span> blurY=<span class="ActionScriptString">"8"</span>&gt;
+      &lt;/<span class="MXMLComponent_Tag">s:GlowFilter</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:filters</span>&gt;    
+    
+    &lt;<span class="MXMLComponent_Tag">s:Path</span> id=<span class="ActionScriptString">"path"</span> data=<span class="ActionScriptString">"M 0 0 L 0 0"</span> stroke=<span class="ActionScriptBracket/Brace">"{</span>strokecolor<span class="ActionScriptBracket/Brace">}"</span>/&gt;    
+    
+  &lt;/<span class="MXMLComponent_Tag">s:Group</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">idiag:LinkDecorationsPresenter</span> id=<span class="ActionScriptString">"decorationPresenter"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">idiag:LinkDecoration</span> id=<span class="ActionScriptString">"labelElement"</span> label=<span class="ActionScriptBracket/Brace">"{</span>hostComponent.label<span class="ActionScriptBracket/Brace">}"</span> color=<span class="ActionScriptBracket/Brace">"{</span>color<span class="ActionScriptBracket/Brace">}"</span>
+                          positionType=<span class="ActionScriptString">"absolute-from-middle"</span>
+                          orthogonalAlignment=<span class="ActionScriptString">"left"</span> distance=<span class="ActionScriptString">"2"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">idiag:LinkDecorationsPresenter</span>&gt;
+  
+&lt;/<span class="MXMLComponent_Tag">s:SparkSkin</span>&gt;
+</pre></body></html>

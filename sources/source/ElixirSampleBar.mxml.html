@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>ElixirSampleBar.mxml</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre>&lt;?<span class="MXMLComponent_Tag">xml</span> version=<span class="ActionScriptString">"1.0"</span> encoding=<span class="ActionScriptString">"utf-8"</span>?&gt;
+<span class="ActionScriptComment">&lt;!--</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Y31,5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">--&gt;</span>
+&lt;<span class="MXMLComponent_Tag">s:Group</span> xmlns:fx=<span class="ActionScriptString">"http://ns.adobe.com/mxml/2009"</span> 
+         xmlns:s=<span class="ActionScriptString">"library://ns.adobe.com/flex/spark"</span> 
+         xmlns:local=<span class="ActionScriptString">"*"</span>
+         width=<span class="ActionScriptString">"100%"</span>
+         creationComplete=<span class="ActionScriptString">"group1_creationCompleteHandler(event)"</span>
+         visible=<span class="ActionScriptBracket/Brace">"{</span>_display<span class="ActionScriptBracket/Brace">}"</span>
+         includeInLayout=<span class="ActionScriptBracket/Brace">"{</span>_display<span class="ActionScriptBracket/Brace">}"</span>
+         &gt;
+  &lt;<span class="MXMLSpecial_Tag">fx:Script</span>&gt;
+    &lt;![<span class="MXMLComponent_Tag">CDATA</span><span class="ActionScriptBracket/Brace">[</span>
+      <span class="ActionScriptReserved">import</span> mx.events.FlexEvent;
+      <span class="ActionScriptReserved">import</span> mx.resources.ResourceManager;
+      
+      <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+      <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> _display:Boolean = <span class="ActionScriptReserved">true</span>;
+      
+      <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> getString(key:String):String <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> s:String;
+        try <span class="ActionScriptBracket/Brace">{</span>    
+          s = ResourceManager.getInstance().getString(<span class="ActionScriptString">"elixirsamplebar_enterprise"</span>, <span class="ActionScriptString">"samplebar."</span>+key);
+        <span class="ActionScriptBracket/Brace">}</span> catch (e:Error) <span class="ActionScriptBracket/Brace">{</span>
+          s = <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">return</span> s == <span class="ActionScriptReserved">null</span> ? key : s;
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> goToURL(url:String):<span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+        try <span class="ActionScriptBracket/Brace">{</span>
+          navigateToURL(<span class="ActionScriptReserved">new</span> URLRequest(url), <span class="ActionScriptString">'_self'</span>);
+        <span class="ActionScriptBracket/Brace">}</span> catch (e:SecurityError) <span class="ActionScriptBracket/Brace">{</span>
+          trace(<span class="ActionScriptString">"Cannot navigate to URL "</span>+url);
+        <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptBracket/Brace">}</span>
+
+      <span class="ActionScriptASDoc">/**</span>
+<span class="ActionScriptASDoc">      * When the sample bar is created, check if an existing function available</span>
+<span class="ActionScriptASDoc">      * from ExternalInterface, controls the visibility of the sample bar</span>
+<span class="ActionScriptASDoc">      */</span>
+      protected <span class="ActionScriptfunction">function</span> group1_creationCompleteHandler(event:FlexEvent):<span class="ActionScriptReserved">void</span>
+      <span class="ActionScriptBracket/Brace">{</span>
+        _display = <span class="ActionScriptReserved">true</span>; <span class="ActionScriptComment">// default value</span>
+        <span class="ActionScriptReserved">if</span> (ExternalInterface.available )<span class="ActionScriptBracket/Brace">{</span> 
+          <span class="ActionScriptvar">var</span> res:* = ExternalInterface.call(<span class="ActionScriptString">"isSampleBarVisible"</span>) as Boolean;
+          _display = res!=<span class="ActionScriptReserved">null</span>?res:true; 
+        <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">]</span>&gt;
+  &lt;/<span class="MXMLSpecial_Tag">fx:Script</span>&gt;
+  &lt;<span class="MXMLComponent_Tag">fx:Declarations</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">fx:String</span> id=<span class="ActionScriptString">"label"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">fx:Declarations</span>&gt;
+  &lt;<span class="MXMLSpecial_Tag">fx:Style</span> source=<span class="ActionScriptString">"../resources/elixirsample.css"</span>/&gt;
+  &lt;<span class="MXMLComponent_Tag">s:BitmapImage</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> fillMode=<span class="ActionScriptString">"scale"</span>
+                 source=<span class="ActionScriptString">"@Embed(source='../resources/bannerbg_long.png', scaleGridLeft='3', scaleGridTop='3', scaleGridRight='842', scaleGridBottom='33')"</span>/&gt;
+  &lt;<span class="MXMLComponent_Tag">s:HGroup</span> gap=<span class="ActionScriptString">"3"</span> verticalAlign=<span class="ActionScriptString">"middle"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> paddingLeft=<span class="ActionScriptString">"10"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:BitmapImage</span> source=<span class="ActionScriptString">"@Embed(source='../resources/elixir.png')"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Label</span> text=<span class="ActionScriptString">"@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.productName')"</span>
+             paddingTop=<span class="ActionScriptString">"2"</span> paddingRight=<span class="ActionScriptString">"3"</span> styleName=<span class="ActionScriptString">"productNameStyle"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:BitmapImage</span> source=<span class="ActionScriptString">"@Embed(source='../resources/banner_sep.png')"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Line</span> width=<span class="ActionScriptString">"2"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Label</span> text=<span class="ActionScriptBracket/Brace">"{</span>label<span class="ActionScriptBracket/Brace">}"</span> paddingTop=<span class="ActionScriptString">"4"</span> styleName=<span class="ActionScriptString">"sampleNameStyle"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:HGroup</span> verticalAlign=<span class="ActionScriptString">"middle"</span> width=<span class="ActionScriptString">"100%"</span> horizontalAlign=<span class="ActionScriptString">"right"</span> height=<span class="ActionScriptString">"100%"</span> paddingRight=<span class="ActionScriptString">"2"</span>
+              styleName=<span class="ActionScriptString">"buttonStyle"</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">local:ElixirLinkButton</span> iconClass=<span class="ActionScriptString">"@Embed(source='../resources/viewotherdemos.png')"</span> 
+                              label=<span class="ActionScriptString">"@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.linkdemos')"</span>
+                              click=<span class="ActionScriptBracket/Brace">"{</span>goToURL(getString('demourl'))<span class="ActionScriptBracket/Brace">}"</span>
+                              skinClass=<span class="ActionScriptString">"ElixirLinkButtonSkin"</span>/&gt;
+      &lt;<span class="MXMLComponent_Tag">s:BitmapImage</span> source=<span class="ActionScriptString">"@Embed(source='../resources/banner_sep.png')"</span>/&gt;
+      &lt;<span class="MXMLComponent_Tag">local:ElixirLinkButton</span> iconClass=<span class="ActionScriptString">"@Embed(source='../resources/download.png')"</span> 
+                              label=<span class="ActionScriptString">"@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.download')"</span> 
+                              click=<span class="ActionScriptBracket/Brace">"{</span>ElixirSampleBar.goToURL(getString('downurl'))<span class="ActionScriptBracket/Brace">}"</span>
+                              skinClass=<span class="ActionScriptString">"ElixirLinkButtonSkin"</span>/&gt;
+      &lt;<span class="MXMLComponent_Tag">local:ElixirLinkButton</span> iconClass=<span class="ActionScriptString">"@Embed(source='../resources/ibm_1px.png')"</span> 
+                              skinClass=<span class="ActionScriptString">"ElixirLinkButtonSkin"</span>
+                              click=<span class="ActionScriptString">"goToURL(getString('producturl'))"</span>
+                              toolTip=<span class="ActionScriptString">"@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.gotoelixir')"</span>/&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:HGroup</span>&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:HGroup</span>&gt;
+&lt;/<span class="MXMLComponent_Tag">s:Group</span>&gt;
+</pre></body></html>

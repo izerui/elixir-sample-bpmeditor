@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>OrthogonalPort.as</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre><span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptpackage">package</span> bpm.port
+<span class="ActionScriptBracket/Brace">{</span>
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.Link;
+  <span class="ActionScriptReserved">import</span> com.ibm.ilog.elixir.diagram.PortBase;
+  
+  <span class="ActionScriptReserved">import</span> flash.display.DisplayObject;
+  <span class="ActionScriptReserved">import</span> flash.errors.IllegalOperationError;
+  <span class="ActionScriptReserved">import</span> flash.geom.Point;
+  <span class="ActionScriptReserved">import</span> flash.geom.Rectangle;
+
+  <span class="ActionScriptReserved">public</span> class OrthogonalPort extends PortBase
+  <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> OrthogonalPort()
+    <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> getConnectionPoint(link:Link, referencePoint:Point, targetCoordinateSpace:DisplayObject, connectionPoint:Point, originPoint:Point, origin:Boolean=<span class="ActionScriptReserved">true</span>):<span class="ActionScriptReserved">void</span><span class="ActionScriptBracket/Brace">{</span>
+      
+      <span class="ActionScriptReserved">if</span> (!owner)
+        throw <span class="ActionScriptReserved">new</span> IllegalOperationError(<span class="ActionScriptString">"Cannot compute connection point when owner is null"</span>);
+      
+      <span class="ActionScriptReserved">if</span> (!link)
+        throw <span class="ActionScriptReserved">new</span> ArgumentError(<span class="ActionScriptString">"link must not be null"</span>);
+      
+      <span class="ActionScriptReserved">if</span> (!referencePoint)
+        throw <span class="ActionScriptReserved">new</span> ArgumentError(<span class="ActionScriptString">"referencePoint must not be null"</span>);
+      
+      <span class="ActionScriptReserved">if</span> (!targetCoordinateSpace)
+        throw <span class="ActionScriptReserved">new</span> ArgumentError(<span class="ActionScriptString">"targetCoordinateSpace must not be null"</span>);
+    
+      <span class="ActionScriptReserved">if</span> (!connectionPoint)
+        throw <span class="ActionScriptReserved">new</span> ArgumentError(<span class="ActionScriptString">"connectionPoint must not be null"</span>);
+      
+      <span class="ActionScriptReserved">if</span> (!originPoint)
+        throw <span class="ActionScriptReserved">new</span> ArgumentError(<span class="ActionScriptString">"originPoint must not be null"</span>);
+      
+      <span class="ActionScriptComment">// Get the bounds of the owner object.</span>
+      <span class="ActionScriptComment">//</span>
+      <span class="ActionScriptvar">var</span> bounds:Rectangle = owner.getNodeOrBaseBounds(targetCoordinateSpace);
+      
+
+      <span class="ActionScriptComment">// Determine in which quadrant the reference point is with respect to the owner bounds</span>
+      <span class="ActionScriptComment">//</span>
+      <span class="ActionScriptReserved">if</span> (referencePoint.y &lt; <span class="MXMLComponent_Tag">bounds</span>.y)
+      <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// Reference point is above the object:</span>
+        <span class="ActionScriptComment">// connect on top, keeping the same X position as the reference point.</span>
+        <span class="ActionScriptComment">//</span>
+        connectionPoint.x = Math.max(bounds.x, Math.min(referencePoint.x, bounds.right));
+        connectionPoint.y = bounds.y;
+        originPoint.x = connectionPoint.x;
+        originPoint.y = bounds.y + bounds.height / 2;
+  
+      <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (referencePoint.y &gt; bounds.bottom)
+      <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// Reference point is below the object:</span>
+        <span class="ActionScriptComment">// connect to the bottom, keeping the same X position as the reference point.</span>
+        <span class="ActionScriptComment">//</span>
+        connectionPoint.x = Math.max(bounds.x, Math.min(referencePoint.x, bounds.right));
+        connectionPoint.y = bounds.bottom;
+        originPoint.x = connectionPoint.x;
+        originPoint.y = bounds.y + bounds.height / 2;
+   
+      <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (referencePoint.x &lt; <span class="MXMLComponent_Tag">bounds</span>.x)
+      <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// Reference point is on the left of the object:</span>
+        <span class="ActionScriptComment">// connect to the left, keeping the same Y position as the reference point.</span>
+        <span class="ActionScriptComment">//</span>
+        connectionPoint.x = bounds.x;
+        connectionPoint.y = referencePoint.y;
+        originPoint.x = bounds.x + bounds.width / 2;
+        originPoint.y = referencePoint.y;
+   
+      <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (referencePoint.x &gt; bounds.right)
+      <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// Reference point is on the right of the object:</span>
+        <span class="ActionScriptComment">// connect to the right, keeping the same Y position as the reference point.</span>
+        <span class="ActionScriptComment">//</span>
+        connectionPoint.x = bounds.right;
+        connectionPoint.y = referencePoint.y;
+        originPoint.x = bounds.x + bounds.width / 2;
+        originPoint.y = referencePoint.y;
+  
+      <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> (referencePoint.y &lt; <span class="MXMLComponent_Tag">bounds</span>.y + bounds.height / 2)
+      <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// Reference point is inside the object, in the upper half:</span>
+        <span class="ActionScriptComment">// connect to the top, keeping the same X position as the reference point.</span>
+        <span class="ActionScriptComment">//</span>
+        connectionPoint.x = referencePoint.x;
+        connectionPoint.y = bounds.y;
+        originPoint.x = referencePoint.x;
+        originPoint.y = bounds.y + bounds.height / 2;
+    
+      <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptReserved">else</span>
+      <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// Reference point is inside the object, in the lower half:</span>
+        <span class="ActionScriptComment">// connect to the bottom, keeping the same X position as the reference point.</span>
+        <span class="ActionScriptComment">//</span>
+        connectionPoint.x = referencePoint.x;
+        connectionPoint.y = bounds.bottom;
+        originPoint.x = referencePoint.x;
+        originPoint.y = bounds.y + bounds.height / 2;
+   
+      <span class="ActionScriptBracket/Brace">}</span>
+      
+      
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+  <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body></html>

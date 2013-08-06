@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>ToggleButtonLinkSkin.mxml</title><link rel="stylesheet" type="text/css" href="../SourceStyles.css"/></head><body><pre>&lt;?<span class="MXMLComponent_Tag">xml</span> version=<span class="ActionScriptString">"1.0"</span> encoding=<span class="ActionScriptString">"utf-8"</span>?&gt;
+<span class="ActionScriptComment">&lt;!--</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">// Licensed Materials - Property of IBM</span>
+<span class="ActionScriptComment">// 5724-Z78</span>
+<span class="ActionScriptComment">// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.</span>
+<span class="ActionScriptComment">//</span>
+<span class="ActionScriptComment">// Note to U.S. Government Users Restricted Rights:</span>
+<span class="ActionScriptComment">// Use, duplication or disclosure restricted by GSA ADP Schedule</span>
+<span class="ActionScriptComment">// Contract with IBM Corp.</span>
+<span class="ActionScriptComment">///////////////////////////////////////////////////////////////////////////////</span>
+<span class="ActionScriptComment">--&gt;</span>
+&lt;<span class="MXMLComponent_Tag">s:Skin</span> xmlns:fx=<span class="ActionScriptString">"http://ns.adobe.com/mxml/2009"</span> 
+        xmlns:s=<span class="ActionScriptString">"library://ns.adobe.com/flex/spark"</span> 
+        xmlns:mx=<span class="ActionScriptString">"library://ns.adobe.com/flex/mx"</span>&gt;
+  &lt;!-- <span class="MXMLComponent_Tag">host</span> component --&gt;
+  &lt;<span class="MXMLSpecial_Tag">fx:Metadata</span>&gt;
+    <span class="ActionScriptBracket/Brace">[</span>HostComponent(<span class="ActionScriptString">"spark.components.ToggleButton"</span>)<span class="ActionScriptBracket/Brace">]</span>
+  &lt;/<span class="MXMLSpecial_Tag">fx:Metadata</span>&gt;
+  
+  &lt;!-- <span class="MXMLComponent_Tag">states</span> --&gt;
+  &lt;<span class="MXMLComponent_Tag">s:states</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"disabledAndSelected"</span> stateGroups=<span class="ActionScriptString">"Selected"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"downAndSelected"</span> stateGroups=<span class="ActionScriptString">"Selected"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"overAndSelected"</span> stateGroups=<span class="ActionScriptString">"Selected,Over"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"upAndSelected"</span> stateGroups=<span class="ActionScriptString">"Selected"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"disabled"</span> stateGroups=<span class="ActionScriptString">"Normal"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"down"</span> stateGroups=<span class="ActionScriptString">"Normal"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"over"</span> stateGroups=<span class="ActionScriptString">"Normal,Over"</span>/&gt;
+    &lt;<span class="MXMLComponent_Tag">s:State</span> name=<span class="ActionScriptString">"up"</span> stateGroups=<span class="ActionScriptString">"Normal"</span>/&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:states</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">s:Rect</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:fill</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:SolidColor</span> 
+        color.disabledAndSelected=<span class="ActionScriptString">"0xEEEEEE"</span>
+        color.overAndSelected=<span class="ActionScriptString">"0xEEEEEE"</span>
+        color.upAndSelected=<span class="ActionScriptString">"0xEEEEEE"</span>
+        color.over=<span class="ActionScriptString">"0xEEEEEE"</span>
+        color=<span class="ActionScriptString">"white"</span>
+        /&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:fill</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">s:stroke</span>&gt;
+      &lt;<span class="MXMLComponent_Tag">s:SolidColorStroke</span> weight=<span class="ActionScriptString">"2"</span> color=<span class="ActionScriptString">"white"</span> color.Over=<span class="ActionScriptString">"0xEEEEEE"</span> /&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:stroke</span>&gt;
+  &lt;/<span class="MXMLComponent_Tag">s:Rect</span>&gt;
+  
+  &lt;<span class="MXMLComponent_Tag">s:HGroup</span> verticalAlign=<span class="ActionScriptString">"middle"</span> gap=<span class="ActionScriptString">"4"</span> paddingBottom=<span class="ActionScriptString">"2"</span> paddingLeft=<span class="ActionScriptString">"2"</span> paddingRight=<span class="ActionScriptString">"2"</span> paddingTop=<span class="ActionScriptString">"2"</span>&gt;
+    &lt;<span class="MXMLComponent_Tag">mx:SWFLoader</span> id=<span class="ActionScriptString">"swfAsset"</span> source=<span class="ActionScriptString">"@Embed('assets/question.png')"</span>
+                  cacheAsBitmap=<span class="ActionScriptString">"true"</span> width=<span class="ActionScriptString">"100%"</span> height=<span class="ActionScriptString">"100%"</span> /&gt;
+    &lt;<span class="MXMLComponent_Tag">s:Label</span> id=<span class="ActionScriptString">"labelDisplay"</span> buttonMode=<span class="ActionScriptString">"true"</span>
+             textAlign=<span class="ActionScriptString">"center"</span>
+             verticalAlign=<span class="ActionScriptString">"middle"</span>
+             maxDisplayedLines=<span class="ActionScriptString">"1"</span>
+             horizontalCenter=<span class="ActionScriptString">"0"</span> verticalCenter=<span class="ActionScriptString">"1"</span>
+             left=<span class="ActionScriptString">"1"</span> right=<span class="ActionScriptString">"1"</span>&gt;
+    &lt;/<span class="MXMLComponent_Tag">s:Label</span>&gt;    
+  &lt;/<span class="MXMLComponent_Tag">s:HGroup</span>&gt;
+&lt;/<span class="MXMLComponent_Tag">s:Skin</span>&gt;
+</pre></body></html>

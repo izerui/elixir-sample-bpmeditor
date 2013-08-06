@@ -1,0 +1,13 @@
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+.buttonStyle
+{
+  color: #FFFFFF;
+  font-size: 12;
+}
+
+.sampleNameStyle
+{
+  color: #FFFFFF;
+  font-size: 17;
+}

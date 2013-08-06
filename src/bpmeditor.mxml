@@ -1,0 +1,1429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+///////////////////////////////////////////////////////////////////////////////
+// Licensed Materials - Property of IBM
+// 5724-Z78
+// © Copyright IBM Corporation 2007, 2013. All Rights Reserved.
+//
+// Note to U.S. Government Users Restricted Rights:
+// Use, duplication or disclosure restricted by GSA ADP Schedule
+// Contract with IBM Corp.
+///////////////////////////////////////////////////////////////////////////////
+-->
+<mx:Application 
+    xmlns:fx="http://ns.adobe.com/mxml/2009" 
+    xmlns:s="library://ns.adobe.com/flex/spark" 
+    xmlns:mx="library://ns.adobe.com/flex/mx"
+    xmlns:idiag="http://www.ibm.com/xmlns/prod/ilog/elixir/diagram/2010" 
+    xmlns:bpm="bpm.graphic.*"
+    xmlns:editor="com.ibm.ilog.elixir.diagram.editor.*" 
+    xmlns:local="*"
+    
+    layout="absolute"
+    initialize="initializeHandler(event)"
+    applicationComplete="init()" 
+    xmlns:serialization="serialization.*">
+    
+    <fx:Metadata>
+        [ResourceBundle("bpmeditor")]
+    </fx:Metadata>
+    
+    <fx:Script>
+        <![CDATA[
+          import bpm.graphic.Artifact;
+          import bpm.port.OrthogonalPort;
+          
+          import com.ibm.ilog.elixir.diagram.Graph;
+          import com.ibm.ilog.elixir.diagram.LaneBase;
+          import com.ibm.ilog.elixir.diagram.Link;
+          import com.ibm.ilog.elixir.diagram.LinkShapeType;
+          import com.ibm.ilog.elixir.diagram.Node;
+          import com.ibm.ilog.elixir.diagram.PortBase;
+          import com.ibm.ilog.elixir.diagram.PortPosition;
+          import com.ibm.ilog.elixir.diagram.Renderer;
+          import com.ibm.ilog.elixir.diagram.Subgraph;
+          import com.ibm.ilog.elixir.diagram.graphlayout.GraphLayout;
+          import com.ibm.ilog.elixir.diagram.graphlayout.GraphLayoutEvent;
+          import com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalGroupSpreadConstraint;
+          import com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalLayout;
+          import com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalNodeGroup;
+          import com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalSameLevelConstraint;
+          
+          import mx.collections.IList;
+          import mx.controls.Alert;
+          import mx.events.CloseEvent;
+          import mx.events.FlexEvent;
+          import mx.events.PropertyChangeEvent;
+          import mx.managers.PopUpManager;
+          import mx.utils.StringUtil;
+          
+          import printutils.PrintDialog;
+          
+          import serialization.UndoManager;
+          import serialization.XMLSerializer;
+          
+          import spark.components.RichEditableText;
+          import spark.core.IViewport;
+          import spark.events.IndexChangeEvent;
+          
+          private var file:FileReference;
+          private var currentFileName:String = null;
+          private var _isModified:Boolean;
+          
+          private var popupMenuFactory:DiagramMenuFactory = null;
+          
+          // Accelerators
+          private var connectAcc:uint;
+          private var groupSubAcc:uint;
+          private var ungroupAcc:uint;
+          
+          private var dividerIncreaseAcc:uint;
+          private var dividerReduceAcc:uint;
+          
+          private function init() : void 
+          {
+            diagram.nodeLayout.addEventListener(GraphLayoutEvent.LAYOUT_STEP_PERFORMED, layoutStepPerformed);
+            mainPanel.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler, true);
+            palettePanel.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+            diageditor.addEventListener(KeyboardEvent.KEY_DOWN, editorKeyDownHandler);
+            
+            initAccelerators();
+            
+            popupMenuFactory = new DiagramMenuFactory(resourceManager, diageditor, diagram);
+            diagramBox.contextMenu = popupMenuFactory.getPopupMenu();        
+            diagram.scroller.allowKeyboardScroll = false;
+          }
+          
+          private function initAccelerators():void
+          {
+            var value:String;
+            value = resourceManager.getString("bpmeditor", "bpmeditor.connect.accelerator");
+            if (value && value.length==1)
+              connectAcc = value.charCodeAt(0);
+            value = resourceManager.getString("bpmeditor", "bpmeditor.groupAsSubprocess.accelerator");
+            if (value && value.length==1)
+              groupSubAcc = value.charCodeAt(0);        
+            value = resourceManager.getString("bpmeditor", "bpmeditor.ungroup.accelerator");
+            if (value && value.length==1)
+              ungroupAcc = value.charCodeAt(0);        
+            value = resourceManager.getString("bpmeditor", "bpmeditor.dividerincrease.accelerator");
+            if (value && value.length==1)
+              dividerIncreaseAcc = value.charCodeAt(0);
+            value = resourceManager.getString("bpmeditor", "bpmeditor.dividerreduce.accelerator");
+            if (value && value.length==1)
+              dividerReduceAcc = value.charCodeAt(0);
+          }          
+                    
+          private function linkListChangeHandler(event:IndexChangeEvent) : void
+          {
+            diageditor.linkPrototype = IList(linkList.dataProvider).getItemAt(event.newIndex) as Link;
+          }
+          
+          private function createLink(startNode:Node, startPortPosition:String, 
+                                      endNode:Node, endPortPosition:String) : Link
+          {
+            if(startNode is Artifact || endNode is Artifact)
+              return new Association();
+            if(startNode != null && endNode != null && getPool(startNode) != getPool(endNode))
+              return new MessageFlow();
+            return null;
+          }
+          
+          private function getPool(node:DisplayObject) : LaneBase 
+          {
+            var pool:LaneBase = null;
+            while(node != null){
+              if(node is LaneBase)
+                pool = LaneBase(node);
+              node = node.parent;
+            }
+            return pool;
+          }
+          
+          private function createPort(node:Node, link:Link, position:String, start:Boolean) : PortBase
+          {
+            if(node is LaneBase)
+              return new OrthogonalPort();
+            return null;
+          }
+          
+          /**
+           * Function used to create a subgraph when grouping objects. 
+           */
+          private function createGroup() : Subgraph
+          {
+            var group:SubProcess = new SubProcess();
+            group.label = resourceManager.getString("bpmeditor", "bpmeditor.subprocess.default.label");
+            return group;
+          }
+          
+          /**
+           * Function used to clone objects when doing copy and paste. 
+           */
+          private function cloneFunction(obj:Renderer, clone:Renderer, inCopyPaste:Boolean) : void 
+          {
+            if(!inCopyPaste){
+              if(clone is SubProcess){
+                clone.width = resourceManager.getNumber("bpmeditor", "bpmeditor.subprocess.drop.width");
+                clone.height = resourceManager.getNumber("bpmeditor", "bpmeditor.subprocess.drop.height");
+              } else if(clone is com.ibm.ilog.elixir.diagram.HPool){
+                clone.width = resourceManager.getNumber("bpmeditor", "bpmeditor.hpool.drop.width");
+              } else if(clone is com.ibm.ilog.elixir.diagram.HLane){
+                clone.height = resourceManager.getNumber("bpmeditor", "bpmeditor.hlane.drop.height");
+              } else if(clone is com.ibm.ilog.elixir.diagram.VPool){
+                clone.height = resourceManager.getNumber("bpmeditor", "bpmeditor.vpool.drop.height");
+              } else if(clone is com.ibm.ilog.elixir.diagram.VLane){
+                clone.width = resourceManager.getNumber("bpmeditor", "bpmeditor.vlane.drop.width");
+              } else if(clone is bpm.graphic.ConnectingObject){
+                bpm.graphic.ConnectingObject(clone).label = "";
+              } else if(clone is bpm.graphic.Group){
+                bpm.graphic.Group(clone).clickableInside = false;
+              }
+            }
+            
+            if(clone is SubProcess){
+              if(SubProcess(obj).nodeLayout != null)
+                SubProcess(clone).nodeLayout = SubProcess(obj).nodeLayout.copy();
+            }               
+          }
+          
+          private function moveResizeHandler(event:com.ibm.ilog.elixir.diagram.editor.DiagramEditorEvent) : void 
+          {
+            isModified = true;
+            
+            // reset links to auto style in case a graph layout was performed:
+            var node:Node = event.renderer as Node;
+            if(node){
+              for each (var link:Link in node.getLinks()) {
+                if(!(link is Association))
+                  link.shapeType =  LinkShapeType.ORTHOGONAL;
+              }
+            }
+          }
+          
+          private function modifiedHandler(event:com.ibm.ilog.elixir.diagram.editor.DiagramEditorEvent) : void 
+          {
+            isModified = true;
+          }
+          
+          private function selectionChangedHandler(event:com.ibm.ilog.elixir.diagram.editor.DiagramEditorEvent) : void 
+          {
+            layoutSelectedButton.enabled = getSelectedSubgraph() != null;
+            groupButton.enabled = canGroup;
+          }
+          
+          private function get isModified() : Boolean
+          {
+            return _isModified;
+          }
+          
+          private function set isModified(v:Boolean) : void
+          {
+            _isModified = v;
+            
+            var title:String;
+            if(currentFileName != null)
+              title = currentFileName;
+            else
+              title = resourceManager.getString("bpmeditor", "bpmeditor.default.buffer.title");
+            
+            if(_isModified)
+              title = StringUtil.substitute(resourceManager.getString("bpmeditor", "bpmeditor.modifiedFormat"), title);
+            
+            titlePanel.title = title;
+          }
+          
+          // --------------------
+          // Create a new diagram
+          // --------------------
+          private function newDiagram() : void
+          {
+            if(isModified){
+              Alert.show(resourceManager.getString("bpmeditor", "bpmeditor.diagramModified.text"),
+                resourceManager.getString("bpmeditor", "bpmeditor.diagramModified.title"),
+                Alert.YES|Alert.NO, this, newAlertCloseHandler, null, Alert.NO);
+            } else {
+              doNewDiagram();
+            }
+          }
+          
+          private function newAlertCloseHandler(event:CloseEvent) : void 
+          {
+            if(event.detail == Alert.YES)
+              doNewDiagram();
+          }
+          
+          private function doNewDiagram() : void
+          {
+            diageditor.clear();
+            currentFileName = null;
+            isModified = false;
+            undoManager.clearUndo();
+          }
+          
+          // -----------------------------------------
+          // Save and Load the contents of the diagram
+          // -----------------------------------------
+          private function saveXML() : void 
+          {
+            file = new FileReference();
+            var xml:XML = new XMLSerializer().serialize(diageditor.graph, "diagram");
+            var fileName:String = currentFileName;
+            if(fileName == null)
+              fileName = resourceManager.getString("bpmeditor", "bpmeditor.defaultFileName");
+            file.addEventListener(flash.events.Event.COMPLETE, fileSaved);
+            file.addEventListener(flash.events.IOErrorEvent.IO_ERROR, ioError);
+            file.save(xml, fileName);
+          }
+          
+          private function fileSaved(event:flash.events.Event) : void 
+          {
+            if(file != null){
+              currentFileName = file.name;
+              isModified = false;
+              
+              file = null;
+            }
+          }
+          
+          private function loadXML() : void 
+          {
+            if(isModified){
+              Alert.show(resourceManager.getString("bpmeditor", "bpmeditor.diagramModified.text"),
+                resourceManager.getString("bpmeditor", "bpmeditor.diagramModified.title"),
+                Alert.YES|Alert.NO, this, loadAlertCloseHandler, null, Alert.NO);
+            } else {
+              doLoadXML();
+            }
+          }
+          
+          private function loadAlertCloseHandler(event:CloseEvent) : void 
+          {
+            if(event.detail == Alert.YES)
+              doLoadXML();
+          }
+          
+          private function doLoadXML(): void
+          {
+            file = new FileReference();
+            file.addEventListener(flash.events.Event.SELECT, fileSelectedForLoad);
+            file.browse([ new FileFilter(resourceManager.getString("bpmeditor", "bpmeditor.filefilter.bpm"), "*.idfl"),
+              new FileFilter(resourceManager.getString("bpmeditor", "bpmeditor.filefilter.all"), "*.*")]);
+          }
+          
+          private function fileSelectedForLoad(event:flash.events.Event) : void 
+          {
+            if(file != null){
+              file.addEventListener(flash.events.Event.COMPLETE, fileLoaded);
+              file.addEventListener(flash.events.IOErrorEvent.IO_ERROR, ioError);
+              file.load();
+            }
+          }
+          
+          private function fileLoaded(event:flash.events.Event) : void 
+          {
+            if(file != null){
+              try {
+                var xml:XML = new XML(file.data.toString());
+                if(xml.localName() != "diagram"){
+                  Alert.show(resourceManager.getString("bpmeditor", "bpmeditor.error.not_a_diagram_file"));
+                  return;
+                }
+                diageditor.clear();
+                new XMLSerializer().deserialize(diageditor.graph, xml);
+                currentFileName = file.name;
+                isModified = false;
+                undoManager.clearUndo();
+              } catch(err:Error){
+                Alert.show(err.message);
+              }
+              file = null;
+            }
+          }    
+          
+          private function ioError(event:IOErrorEvent) : void 
+          {
+            var msg:String = resourceManager.getString("bpmeditor", "bpmeditor.save.error", [event.text, file.name]);
+            var title:String = resourceManager.getString("bpmeditor", "bpmeditor.save.title");
+            Alert.show(msg, title, Alert.OK|Alert.CANCEL, null, ioErrorAlertHandler);
+          }
+                    
+          private function ioErrorAlertHandler(event:CloseEvent):void
+          {
+            if (event.detail == Alert.OK)
+              saveXML();        
+          }
+
+          // ----------------
+          // Printing Support
+          // ----------------
+          private var printDialog:PrintDialog;
+          private function showPrintDialog():void
+          {
+            if (!printDialog) {
+              printDialog = new PrintDialog();
+              printDialog.graph = diagram.graph;
+            }
+            PopUpManager.addPopUp(printDialog, this, true);  
+            PopUpManager.centerPopUp(printDialog);  
+            printDialog.setFocus();
+          }
+          
+          // --------------------
+          // Perform Graph Layout
+          // --------------------
+          
+          private function layoutStepPerformed(event:GraphLayoutEvent) : void 
+          {
+            if(event.layoutStarted){
+              prepareForGraphLayout(event.graphLayout);
+            }
+          }
+          
+          private function prepareForGraphLayout(layout:GraphLayout) : void
+          {
+            var hierarchicalLayout:HierarchicalLayout = layout as HierarchicalLayout;
+            for each(var link:Link in hierarchicalLayout.getGraphModel().getLinks()){
+              if(link is Association){
+                layout.setFixed(link, true);
+                layout.preserveFixedLinks = true;
+              } else if(hierarchicalLayout != null && 
+                link.startNode != null && link.endNode != null &&
+                getPool(link.startNode) != getPool(link.endNode)){
+                hierarchicalLayout.addConstraint(new HierarchicalSameLevelConstraint(link.startNode, link.endNode));
+              }
+            }
+            for each(var node:Node in hierarchicalLayout.getGraphModel().getNodes()){
+              if(node is Artifact){
+                layout.setFixed(node, true);
+                layout.preserveFixedNodes = true;
+              }
+            }
+          }
+          
+          public function layoutAll() : void
+          {
+            if(beforeLayout(diagram.graph)){
+              diagram.performGraphLayout(true);
+              isModified = true;
+            }
+          }
+          
+          public function layoutSelectedSubgraph() : void
+          {
+            var subgraph:Subgraph = getSelectedSubgraph();
+            if(subgraph != null && beforeLayout(diagram.graph)){
+              subgraph.performGraphLayout(false);
+              isModified = true;
+            }
+          }
+          
+          private function getSelectedSubgraph() : Subgraph
+          {
+            var selection:Vector.<Renderer> = diageditor.getSelectedObjects();
+            if(selection.length == 1){
+              var subgraph:Subgraph = selection[0] as Subgraph;
+              if(subgraph != null){
+                for(var i:int = 0; i < subgraph.graph.numElements; i++){
+                  if(!(subgraph.graph.getElementAt(i) is LaneBase))
+                    return subgraph;
+                }
+              }
+            }         
+            return null;
+          }
+          
+          /**
+           * Sets the margins on swimlanes, and also checks that
+           * the graph is not empty (except swimlanes).
+           */
+          private function beforeLayout(graph:Graph) : Boolean
+          {
+            var notEmpty:Boolean = false;
+            var hasHorizontalLanes:Boolean = false;
+            var hasVerticalLanes:Boolean = false;
+            for(var i:int = 0; i < graph.numElements; i++){
+              var lane:LaneBase = graph.getElementAt(i) as LaneBase;
+              if(lane != null){
+                
+                if(lane.isHorizontal()){
+                  if(hasVerticalLanes){
+                    Alert.show(resourceManager.getString("bpmeditor", "bpmeditor.mixedpools.error"),
+                               resourceManager.getString("bpmeditor", "bpmeditor.mixedpools.title"));
+                    return false;
+                  }
+                  hasHorizontalLanes = true;
+                } else {
+                  if(hasHorizontalLanes){
+                    Alert.show(resourceManager.getString("bpmeditor", "bpmeditor.mixedpools.error"),
+                               resourceManager.getString("bpmeditor", "bpmeditor.mixedpools.title"));
+                    return false;
+                  }
+                  hasVerticalLanes = true;
+                }
+                
+                lane.poolMarginLeft = 10;
+                lane.poolMarginTop = 10;
+                lane.poolMarginRight = 10;
+                lane.poolMarginBottom = 10;
+                lane.graphMarginLeft = 20;
+                lane.graphMarginTop = 20;
+                lane.graphMarginRight = 20;
+                lane.graphMarginBottom = 20;
+                
+                if(beforeLayout(lane.graph))
+                  notEmpty  = true;
+              } else {
+                notEmpty = true;
+              }
+            }
+            return notEmpty;
+          }
+          
+          // --------------------------------------
+          // Group selected objects as a Subprocess
+          // --------------------------------------
+
+          /**
+           * Indicates whether the selected objects can be grouped
+           * as a subprocess or not. 
+           */
+          public function get canGroup():Boolean
+          {
+            if (diageditor) {
+              var selObjs:Vector.<Renderer> = diageditor.getSelectedObjects();
+              selObjs = selObjs.filter(filterGroupingObjects,this);
+              return (selObjs.length > 0);
+            }
+            return false;
+          }
+          
+          /**
+           * Filter the list of selected objects so that if an object
+           * is selected, but its parent is also selected, then the
+           * object is removed from the list. 
+           */
+          private function filterGroupingObjects(r:Renderer, index:int, 
+                                                 vector:Vector.<Renderer>):Boolean
+          {
+            if (r != null) {
+              // Links should not be part of the list of objects to
+              // be moved from one graph to another. This is automatically
+              // done for all links at the end of group (see reparentIntergraphLinks)
+              if (r is Link) {
+                return false;
+              }
+              
+              // Objects that are selected, but whose parent is also selected
+              // do not need to be moved. The parent will already be moved.
+              if (r is LaneBase) {
+                var rp:DisplayObjectContainer = r.parent;
+                if (rp is Graph) {
+                  var sub:Subgraph = Graph(rp).owningSubgraph;
+                  if (sub is LaneBase)
+                    return false;                
+                }                
+              }
+              
+              return true;
+            }
+            return false;
+          }
+          
+          /**
+           * Groups the selected objects into a subprocess.
+           * 
+           * In this sample, grouping objects means adding the
+           * objects into a subprocess. This operation is not
+           * allowed for lanes that are displayed within a pool.
+           */
+          public function groupObjects(sub:Subgraph=null):void
+          {
+            // Deselect all lanes that are within other lanes, these ones
+            // can not be grouped.
+            var selObjs:Vector.<Renderer> = diageditor.getSelectedObjects();
+            for each (var r:Renderer in selObjs) {
+              if (r is LaneBase) {
+                // Objects that are selected, but whose parent is also selected
+                // do not need to be moved. The parent will already be moved.
+                var rp:DisplayObjectContainer = r.parent;
+                if (rp is Graph) {
+                  if (Graph(rp).owningSubgraph is LaneBase) {
+                    diageditor.setSelected(r,false);
+                  }
+                }
+              }
+            }
+            // If something is still selected, then group it
+            if (diageditor.hasSelection)
+              diageditor.group(sub);
+          }
+          
+          /**
+           * Connects two selected nodes. 
+           * In order to create the link, there must be two selected
+           * objects, and both must be node renderers.
+           * 
+           * <p>This function is called through the popup menu and
+           * accelerator.</p>
+           */
+          public function connectNodes():void
+          {
+            // The menu item is only available when two nodes are selected
+            var selObjs:Vector.<Renderer> = diageditor.getSelectedObjects();
+            if (selObjs.length == 2) {
+              // There must be two nodes selected
+              if ((selObjs[0] is Node) && (selObjs[1] is Node)) {
+                // Get the two nodes and create the link. 
+                // It relies on the DiagramEditor.createLinkFunction or link prototype
+                var link:Link = diageditor.createLink(Node(selObjs[0]), PortPosition.CENTER, 
+                                                      Node(selObjs[1]), PortPosition.CENTER);
+                // If the link was correctly created
+                if (link) {
+                  link.startNode = Node(selObjs[0]);
+                  link.endNode = Node(selObjs[1]);
+                  var linkParent:Graph = DiagramEditor.getLowestCommonGraph(link.startNode, link.endNode);
+                  linkParent.addElement(link);
+                  diageditor.deselectAll();
+                  diageditor.setSelected(link, true);
+                  if(diageditor.allowEditingText && diageditor.allowEditingTextOnCreate)
+                    diageditor.startEditingText(link);
+                }            
+              }
+            }        
+          }
+          
+          // ---------------------------
+          // Support in the Palettes to navigate the palette contents
+          // using the keyboard. When a palette object is selected,
+          // you can press ENTER or SPACE to create the object in the
+          // diagram. Using the mouse the same operation is achieved
+          // by double-clicking the object in the palette.
+          // ---------------------------
+          private function paletteKeyDownHandler(event:KeyboardEvent):void
+          {
+            var obj:Object = event.target;
+            if (obj is DiagramPalette) {
+              if ((event.keyCode == Keyboard.ENTER) || (event.keyCode == Keyboard.SPACE)) { 
+                var pal:DiagramPalette = DiagramPalette(obj);
+                var selObjs:Vector.<Renderer> = pal.getSelectedObjects();
+                if (selObjs.length > 0) {
+                  paletteAddToDiagram(Renderer(selObjs[0]));
+                  event.stopPropagation();
+                }
+              }          
+            }
+          }
+          
+          /**
+           * Create an object from the palette in the diagram using
+           * double-click.
+           */
+          private function paletteMouseDoubleClickHandler(event:MouseEvent):void 
+          {
+            var palette:DiagramPalette = event.currentTarget as DiagramPalette;
+            if (palette) {
+              var hit:Renderer = palette.getHitRenderer(event.target);
+              if (hit)
+                paletteAddToDiagram(hit);
+            }
+          }    
+          
+          private function paletteAddToDiagram(obj:Renderer):void
+          {
+            // Add to the top graph or to the selected subnetwork
+            var parent:Graph = diageditor.graph;
+            var selObjs:Vector.<Renderer> = diageditor.getSelectedObjects();
+            if (selObjs.length == 1) {
+              if (selObjs[0] is Subgraph)
+                parent = Subgraph(selObjs[0]).graph;
+            }
+            
+            var toCopy:Vector.<Renderer> = new Vector.<Renderer>();
+            toCopy.push(obj);
+            diageditor.duplicate(toCopy, parent);        
+            if(diageditor.allowEditingText && diageditor.allowEditingTextOnCreate)
+              diageditor.startEditingText(diageditor.getSelectedObjects()[0]);            
+          }
+          
+          /**
+           * Enables or disables keyboard navigation. 
+           */
+          protected function editorKeyDownHandler(event:KeyboardEvent):void
+          {
+            if (event.keyCode == Keyboard.F7) {
+              if (diageditor.keyboardNavigationPolicy == "none"
+                || diageditor.keyboardNavigationPolicy == "nodesByConnection") {
+                diageditor.keyboardNavigationPolicy = "nodesByHierarchy";
+              } else {
+                diageditor.keyboardNavigationPolicy = "nodesByConnection";
+              }
+              diagram.scroller.allowKeyboardScroll = false;
+              event.stopPropagation();
+              diageditor.graph.setFocus();
+            } else if (event.keyCode == Keyboard.F8) {
+              diageditor.keyboardNavigationPolicy = "none";
+              diagram.scroller.allowKeyboardScroll = true;
+              event.stopPropagation();
+              diageditor.graph.setFocus();
+            }          
+          }
+          
+          /**
+           * Implement custom accelerators for Open, Save, Delete, Group and Ungroup.
+           * As well as keyboard actions to increase and decrease width of palette
+           * and help panels.
+           * 
+           * Predefined keyboard accelerators are:
+           * <ul>
+           * <li>control key + 'J' : Create a link between two selected nodes</li>
+           * <li>control key + 'G' : Group selected objects into a SubProcess</li>
+           * <li>control key + 'U' : Ungroup selected objects</li>
+           * <li>control key + 'S' : Save diagram</li>
+           * <li>control key + 'O' : Open diagram file</li>
+           * <li>control key + 'L' : Layout diagram</li>
+           * <li>shift key and '+' : Increase width of help or palette panels</li>
+           * <li>shift key and '-' : Decrease width of help or palette panels</li>
+           * </ul>
+           */
+          protected override function keyDownHandler(event:KeyboardEvent):void
+          {
+            if (diageditor.getSelectedObjects().length > 0) {
+              if (event.keyCode == Keyboard.DELETE || event.keyCode == Keyboard.BACKSPACE) {
+                // Event occurred in a text field, so it's delecting characters
+                var eventTarget:Object = event.target;
+                if (event.target is TextField || eventTarget is RichEditableText)
+                  return;
+                diageditor.deleteSelection();
+                event.stopPropagation();
+                return;
+              } else {
+                if (event.ctrlKey) {
+                  if (event.charCode == connectAcc) {
+                    connectNodes();
+                    event.stopPropagation();
+                    return;
+                  } else if (event.charCode == ungroupAcc) {
+                    diageditor.ungroup();
+                    event.stopPropagation();
+                    return;
+                  } else if (event.charCode == groupSubAcc) {
+                    groupObjects();
+                    event.stopPropagation();
+                    return;
+                  }
+                }
+              }
+            }
+            
+            if (event.currentTarget == palettePanel) {
+              if (event.shiftKey) {
+                if (event.charCode == dividerIncreaseAcc) {
+                  if (event.currentTarget.width < event.currentTarget.maxWidth){
+                    event.currentTarget.width++;
+                    event.stopPropagation();
+                    return;
+                  }
+                } else if (event.charCode == dividerReduceAcc) {
+                  if (event.currentTarget.width > event.currentTarget.minWidth) {
+                    event.currentTarget.width--;
+                    event.stopPropagation();
+                    return;
+                  }
+                }          
+              }
+            }
+                        
+            super.keyDownHandler(event);
+          }
+          
+          /**
+           * Remove caret on focus out event. 
+           */
+          private function paletteFocusOutHandler(event:FocusEvent):void
+          {
+            var palette:DiagramPalette = event.currentTarget as DiagramPalette;
+            if (palette) {
+              for each (var n:Node in palette.getNodes()) {
+                n.showsCaret = false;
+                n.selected = false;
+              }
+            }
+          }
+          
+          /**
+           * This function is responsible for scrolling the palette when
+           * the caret renderer changes. This occurs when navigating in
+           * the objects using the keyboard.
+           * 
+           * @param event An event that indicates that the renderer that
+           * currently has the focus changed
+           * @param pscroller Palette scroller 
+           */
+          public function caretChangeHandler(event:PropertyChangeEvent, pscroller:Scroller):void
+          {
+            if (event.property == "caretRenderer") {
+              var ren:Renderer = event.newValue as Renderer;
+              if (ren) {
+                var viewport:IViewport = pscroller.viewport;
+                var bounds:Rectangle = ren.getBounds(viewport as DisplayObject);
+                // We only care here with vertical scroll bar since
+                // the palettes are configured to have only one column
+                if (pscroller.verticalScrollBar) {
+                  var vsPos:Number = viewport.verticalScrollPosition;
+                  var lastYCoord:Number = viewport.height + vsPos;
+                  
+                  if (bounds.y < vsPos) {
+                    viewport.verticalScrollPosition = bounds.y;
+                  } else if( (bounds.y+bounds.height)-lastYCoord > 0 ) {
+                    var newPos:Number = Math.min(pscroller.verticalScrollBar.maximum, 
+                      vsPos + (bounds.y+bounds.height-lastYCoord));
+                    viewport.verticalScrollPosition = newPos;
+                  }              
+                }
+              }
+            }
+          }
+
+          protected function initializeHandler(event:FlexEvent):void
+          {
+            if (ExternalInterface.available) 
+              ExternalInterface.call("ElixirSample.initialize"); 
+          }
+          
+          protected function showHelp():void
+          {
+            helpview.visible = !helpview.visible;
+          }
+
+        ]]>
+    </fx:Script>
+
+    <fx:Style source="../resources/bpmgraphic.css"/>
+    <fx:Style source="../resources/printutils.css"/> 
+    
+    <fx:Style>
+        @namespace s "library://ns.adobe.com/flex/spark";
+        @namespace mx "library://ns.adobe.com/flex/mx";
+        
+        mx|Panel {
+            header-height: 30;
+        }
+        
+        mx|Button
+        {
+            base-color: #d0d0d0;
+        }
+        
+        s|List {
+            skinClass: ClassReference("skins.BorderlessListSkin");
+        }
+        
+    </fx:Style>
+  
+  <fx:Declarations>
+    <serialization:UndoManager id="undoManager" editor="{diageditor}"/>
+    <s:Resize id="showHelpEffect" widthFrom="0" widthTo="350" duration="200"/>
+    <s:Resize id="hideHelpEffect" widthFrom="350" widthTo="0" duration="200"/>
+  </fx:Declarations>
+    
+    <s:VGroup width="100%" height="100%" left="5" right="5" top="5" bottom="5" 
+              clipAndEnableScrolling="true" styleName="bpmeditor" >   
+        <local:ElixirSampleBar id="sbar" 
+                             width="100%"
+                             label="@Resource(key='bpmeditor.application.title', bundle='bpmeditor')">
+        </local:ElixirSampleBar>
+      
+      <mx:HDividedBox id="mainPanel" width="100%" height="100%" 
+                      hasFocusableChildren="true" focusEnabled="true">
+          
+          <s:Panel id="palettePanel" 
+                   title="@Resource(key='bpmeditor.elements.palette.title', bundle='bpmeditor')"
+                   width="200" height="100%"
+                   hasFocusableChildren="true" focusEnabled="true">
+            <mx:Accordion openDuration="250" minWidth="0" width="100%" height="100%" 
+                          selectedIndex="1" creationPolicy="all">
+              <mx:VBox label="@Resource(key='bpmeditor.tasks.category.label', bundle='bpmeditor')" 
+                       focusEnabled="false" hasFocusableChildren="true" 
+                       width="100%" >
+                <s:Scroller id="paletteTasksScroller" width="100%" height="100%" 
+                            focusEnabled="true" hasFocusableChildren="true" 
+                            horizontalScrollPolicy="auto" verticalScrollPolicy="auto">
+                  <s:VGroup minWidth="0" maxWidth="200" 
+                            paddingBottom="10" paddingTop="10">
+                    <editor:DiagramPalette width="100%" height="300" 
+                                           clipAndEnableScrolling="true"
+                                           keyboardNavigationPolicy="nodesByHierarchy"
+                                           doubleClickEnabled="true"
+                                           focusOut="{paletteFocusOutHandler(event)}"
+                                           keyDown="{paletteKeyDownHandler(event)}"
+                                           doubleClick="{paletteMouseDoubleClickHandler(event)}"
+                                           caretChange="{caretChangeHandler(event, paletteTasksScroller)}">
+                      <editor:layout>
+                        <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
+                                          horizontalAlign="center" />
+                      </editor:layout>
+                      <bpm:Task label="@Resource(key='bpmeditor.task.default.label', bundle='bpmeditor')"/>
+                      <bpm:Task label="@Resource(key='bpmeditor.task.looping.label', bundle='bpmeditor')" 
+                                loop="true"/>
+                      <bpm:Task label="@Resource(key='bpmeditor.task.multiinstance.label', bundle='bpmeditor')" 
+                                multiInstance="true"/>
+                      <bpm:Task label="@Resource(key='bpmeditor.task.compensation.label', bundle='bpmeditor')" 
+                                compensation="true"/>
+                    </editor:DiagramPalette>
+                  </s:VGroup>
+                </s:Scroller>                
+              </mx:VBox>
+              <mx:VBox label="@Resource(key='bpmeditor.startevents.category.label', bundle='bpmeditor')" 
+                       width="100%"  horizontalAlign="center">
+                <s:Scroller id="paletteStartEventsScroller" width="100%" height="100%" 
+                            focusEnabled="true" hasFocusableChildren="true" 
+                            horizontalScrollPolicy="auto" verticalScrollPolicy="auto">
+                  <s:VGroup minWidth="0" maxWidth="200" 
+                            paddingBottom="10" paddingTop="10">
+                    <editor:DiagramPalette width="100%" height="450"
+                                           clipAndEnableScrolling="true"
+                                           keyboardNavigationPolicy="nodesByHierarchy"
+                                           doubleClickEnabled="true"
+                                           focusOut="{paletteFocusOutHandler(event)}"
+                                           keyDown="{paletteKeyDownHandler(event)}"
+                                           doubleClick="{paletteMouseDoubleClickHandler(event)}"
+                                           caretChange="{caretChangeHandler(event, paletteStartEventsScroller)}">
+                      <editor:layout>
+                        <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="5" 
+                                          horizontalAlign="center" />
+                      </editor:layout>
+                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.default.label', bundle='bpmeditor')"/>
+                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.message.label', bundle='bpmeditor')" 
+                                      trigger="Message"/>
+                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.timer.label', bundle='bpmeditor')" 
+                                      trigger="Timer"/>
+                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.error.label', bundle='bpmeditor')" 
+                                      trigger="Error"/>
+                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.compensation.label', bundle='bpmeditor')" 
+                                      trigger="Compensation"/>
+                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.conditional.label', bundle='bpmeditor')" 
+                                      trigger="Rule"/>
+                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.multiple.label', bundle='bpmeditor')" 
+                                      trigger="Multiple"/>
+                    </editor:DiagramPalette>
+                  </s:VGroup>
+                </s:Scroller>
+              </mx:VBox>
+              <mx:VBox label="@Resource(key='bpmeditor.endevents.category.label', bundle='bpmeditor')" 
+                       width="100%" horizontalAlign="center" >
+                <s:Scroller id="paletteEndEventsScroller" width="100%" height="100%" 
+                            focusEnabled="true" hasFocusableChildren="true" 
+                            horizontalScrollPolicy="auto" verticalScrollPolicy="auto">
+                  <s:VGroup minWidth="0" maxWidth="200" 
+                            paddingBottom="10" paddingTop="10">
+                    <editor:DiagramPalette width="100%" height="450"
+                                           clipAndEnableScrolling="true"
+                                           keyboardNavigationPolicy="nodesByHierarchy"
+                                           doubleClickEnabled="true"
+                                           focusOut="{paletteFocusOutHandler(event)}"
+                                           keyDown="{paletteKeyDownHandler(event)}"
+                                           doubleClick="{paletteMouseDoubleClickHandler(event)}"
+                                           caretChange="{caretChangeHandler(event, paletteEndEventsScroller)}">
+                      <editor:layout>
+                        <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="5" 
+                                          horizontalAlign="center" />
+                      </editor:layout>
+                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.default.label', bundle='bpmeditor')"/>
+                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.message.label', bundle='bpmeditor')" 
+                                    trigger="Message"/>
+                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.error.label', bundle='bpmeditor')" 
+                                    trigger="Error"/>
+                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.cancel.label', bundle='bpmeditor')" 
+                                    trigger="Cancel"/>
+                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.compensation.label', bundle='bpmeditor')" 
+                                    trigger="Compensation"/>
+                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.terminate.label', bundle='bpmeditor')" 
+                                    trigger="Terminate"/>
+                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.multiple.label', bundle='bpmeditor')" 
+                                    trigger="Multiple"/>
+                    </editor:DiagramPalette>
+                  </s:VGroup>
+                </s:Scroller>
+              </mx:VBox>
+              <mx:VBox label="@Resource(key='bpmeditor.intermediateevents.category.label', bundle='bpmeditor')" 
+                       width="100%" horizontalAlign="center" >
+                <s:Scroller id="paletteIntermediateEventsScroller" width="100%" height="100%" 
+                            focusEnabled="true" hasFocusableChildren="true" 
+                            horizontalScrollPolicy="auto" verticalScrollPolicy="auto">
+                  <s:VGroup minWidth="0" maxWidth="200" 
+                            paddingBottom="10" paddingTop="10">
+                    <editor:DiagramPalette width="100%" height="550" 
+                                           clipAndEnableScrolling="true"
+                                           keyboardNavigationPolicy="nodesByHierarchy"
+                                           doubleClickEnabled="true"
+                                           focusOut="{paletteFocusOutHandler(event)}"
+                                           keyDown="{paletteKeyDownHandler(event)}"
+                                           doubleClick="{paletteMouseDoubleClickHandler(event)}"
+                                           caretChange="{caretChangeHandler(event, paletteIntermediateEventsScroller)}">
+                      <editor:layout>
+                        <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="5" 
+                                          horizontalAlign="center" />
+                      </editor:layout>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.default.label', bundle='bpmeditor')"/>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.message.label', bundle='bpmeditor')" 
+                                             trigger="Message"/>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.timer.label', bundle='bpmeditor')" 
+                                             trigger="Timer"/>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.error.label', bundle='bpmeditor')" 
+                                             trigger="Error"/>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.cancel.label', bundle='bpmeditor')" 
+                                             trigger="Cancel"/>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.compensation.label', bundle='bpmeditor')" 
+                                             trigger="Compensation"/>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.conditional.label', bundle='bpmeditor')" 
+                                             trigger="Rule"/>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.link.label', bundle='bpmeditor')" 
+                                             trigger="Link"/>
+                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.multiple.label', bundle='bpmeditor')" 
+                                             trigger="Multiple"/>
+                    </editor:DiagramPalette>
+                  </s:VGroup>
+                </s:Scroller>
+              </mx:VBox>
+              <mx:VBox label="@Resource(key='bpmeditor.gateways.category.label', bundle='bpmeditor')" 
+                       width="100%" >
+                <s:Scroller id="paletteGatewaysEventsScroller" width="100%" height="100%" 
+                            focusEnabled="true" hasFocusableChildren="true" 
+                            horizontalScrollPolicy="auto" verticalScrollPolicy="auto">
+                  <s:VGroup minWidth="0" maxWidth="200" 
+                            paddingBottom="10" paddingTop="10">
+                    <editor:DiagramPalette width="100%" 
+                                           clipAndEnableScrolling="true"
+                                           keyboardNavigationPolicy="nodesByHierarchy"
+                                           doubleClickEnabled="true"
+                                           focusOut="{paletteFocusOutHandler(event)}"
+                                           keyDown="{paletteKeyDownHandler(event)}"
+                                           doubleClick="{paletteMouseDoubleClickHandler(event)}"
+                                           caretChange="{caretChangeHandler(event, paletteGatewaysEventsScroller)}">
+                      <editor:layout>
+                        <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
+                                          horizontalAlign="center" />
+                      </editor:layout>
+                      <bpm:Gateway label="@Resource(key='bpmeditor.gateway.exclusive.label', bundle='bpmeditor')"/>
+                      <bpm:Gateway label="@Resource(key='bpmeditor.gateway.parallel.label', bundle='bpmeditor')" 
+                                   gatewayType="AND"/>
+                      <bpm:Gateway label="@Resource(key='bpmeditor.gateway.inclusive.label', bundle='bpmeditor')" 
+                                   gatewayType="OR"/>
+                      <bpm:Gateway label="@Resource(key='bpmeditor.gateway.complex.label', bundle='bpmeditor')" 
+                                   gatewayType="Complex"/>
+                    </editor:DiagramPalette>
+                  </s:VGroup>
+                </s:Scroller>
+              </mx:VBox>
+              <mx:VBox label="@Resource(key='bpmeditor.subprocesses.category.label', bundle='bpmeditor')" 
+                       width="100%" >
+                <s:Scroller id="paletteSubprocessesScroller" width="100%" height="100%" 
+                            focusEnabled="true" hasFocusableChildren="true" 
+                            horizontalScrollPolicy="auto" verticalScrollPolicy="auto">
+                  <s:VGroup minWidth="0" maxWidth="200" 
+                            paddingBottom="10" paddingTop="10">
+                    <editor:DiagramPalette width="100%" 
+                                           clipAndEnableScrolling="true"
+                                           keyboardNavigationPolicy="nodesByHierarchy"
+                                           doubleClickEnabled="true"
+                                           focusOut="{paletteFocusOutHandler(event)}"
+                                           keyDown="{paletteKeyDownHandler(event)}"
+                                           doubleClick="{paletteMouseDoubleClickHandler(event)}"
+                                           caretChange="{caretChangeHandler(event, paletteSubprocessesScroller)}">
+                      <editor:layout>
+                        <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
+                                          horizontalAlign="center" />
+                      </editor:layout>
+                      <bpm:SubProcess label="@Resource(key='bpmeditor.subprocess.default.label', bundle='bpmeditor')" 
+                                      width="@Resource(key='bpmeditor.subprocess.default.width', bundle='bpmeditor')" 
+                                      height="@Resource(key='bpmeditor.subprocess.default.height', bundle='bpmeditor')">
+                      </bpm:SubProcess>
+                      <bpm:SubProcess label="@Resource(key='bpmeditor.subprocess.adhoc.label', bundle='bpmeditor')" 
+                                      adHoc="true" 
+                                      width="@Resource(key='bpmeditor.subprocess.adhoc.width', bundle='bpmeditor')" 
+                                      height="@Resource(key='bpmeditor.subprocess.adhoc.height', bundle='bpmeditor')">
+                      </bpm:SubProcess>
+                    </editor:DiagramPalette>
+                  </s:VGroup>
+                </s:Scroller>
+              </mx:VBox>
+              <mx:VBox label="@Resource(key='bpmeditor.poolslanes.category.label', bundle='bpmeditor')" 
+                       width="100%" >
+                <s:Scroller id="palettePoolsLanesScroller" width="100%" height="100%" 
+                            focusEnabled="true" hasFocusableChildren="true" 
+                            horizontalScrollPolicy="auto" verticalScrollPolicy="auto">
+                  <s:VGroup minWidth="0" maxWidth="200" 
+                            paddingBottom="10" paddingTop="10">
+                    <editor:DiagramPalette width="100%" 
+                                           clipAndEnableScrolling="true"
+                                           keyboardNavigationPolicy="nodesByHierarchy"
+                                           doubleClickEnabled="true"
+                                           focusOut="{paletteFocusOutHandler(event)}"
+                                           keyDown="{paletteKeyDownHandler(event)}"
+                                           doubleClick="{paletteMouseDoubleClickHandler(event)}"
+                                           caretChange="{caretChangeHandler(event, palettePoolsLanesScroller)}">
+                      <editor:layout>
+                        <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
+                                          horizontalAlign="center" />
+                      </editor:layout>
+                      <bpm:HPool width="@Resource(key='bpmeditor.hpool.width', bundle='bpmeditor')" 
+                                   label="@Resource(key='bpmeditor.hpool.label', bundle='bpmeditor')">
+                        <bpm:HLane height="@Resource(key='bpmeditor.hlane.height', bundle='bpmeditor')" 
+                                     label="@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"/>
+                        <bpm:HLane height="@Resource(key='bpmeditor.hlane.height', bundle='bpmeditor')" 
+                                     label="@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"/>
+                      </bpm:HPool>
+                      <bpm:VPool height="@Resource(key='bpmeditor.vpool.height', bundle='bpmeditor')" 
+                                   label="@Resource(key='bpmeditor.vpool.label', bundle='bpmeditor')">
+                        <bpm:VLane width="@Resource(key='bpmeditor.vlane.width', bundle='bpmeditor')"
+                                     label="@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"/>
+                        <bpm:VLane width="@Resource(key='bpmeditor.vlane.width', bundle='bpmeditor')" 
+                                     label="@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"/>
+                      </bpm:VPool>
+                    </editor:DiagramPalette>
+                  </s:VGroup>
+                </s:Scroller>
+              </mx:VBox>
+              <mx:VBox label="@Resource(key='bpmeditor.artifacts.category.label', bundle='bpmeditor')" 
+                       width="100%" >
+                <s:Scroller id="paletteArtifactsScroller" width="100%" height="100%" 
+                            focusEnabled="true" hasFocusableChildren="true" 
+                            horizontalScrollPolicy="auto" verticalScrollPolicy="auto">
+                  <s:VGroup minWidth="0" maxWidth="200" 
+                            paddingBottom="10" paddingTop="10">
+                    <editor:DiagramPalette width="100%" 
+                                           clipAndEnableScrolling="true"
+                                           keyboardNavigationPolicy="nodesByHierarchy"
+                                           doubleClickEnabled="true"
+                                           focusOut="{paletteFocusOutHandler(event)}"
+                                           keyDown="{paletteKeyDownHandler(event)}"
+                                           doubleClick="{paletteMouseDoubleClickHandler(event)}"
+                                           caretChange="{caretChangeHandler(event, paletteArtifactsScroller)}">
+                      <editor:layout>
+                        <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
+                                          horizontalAlign="center" />
+                      </editor:layout>
+                      <bpm:DataObject label="@Resource(key='bpmeditor.dataobject.label', bundle='bpmeditor')"/>
+                      <bpm:Group label="@Resource(key='bpmeditor.group.label', bundle='bpmeditor')" 
+                                 clickableInside="true"/>
+                      <bpm:TextAnnotation label="@Resource(key='bpmeditor.textannotation.label', bundle='bpmeditor')"/>
+                      <bpm:TextAnnotation label="@Resource(key='bpmeditor.textannotation.label', bundle='bpmeditor')" 
+                                          bracketOnRight="true"/>
+                    </editor:DiagramPalette>
+                  </s:VGroup>
+                </s:Scroller>
+              </mx:VBox>
+              <mx:VBox label="@Resource(key='bpmeditor.links.category.label', bundle='bpmeditor')" width="100%">
+                <s:Group width="100%">
+                  <s:Label horizontalCenter="0" paddingTop="5" paddingBottom="5"
+                           textAlign="center"
+                           text="@Resource(key='bpmeditor.links.palette.message', bundle='bpmeditor')"
+                           fontStyle="italic"
+                           alpha="0.5"
+                           maxWidth="@Resource(key='bpmeditor.links.palette.message.maxwidth', bundle='bpmeditor')"/>
+                </s:Group>
+                <s:List id="linkList" width="100%" height="100%"
+                        change="linkListChangeHandler(event);"
+                        selectedIndex="0">
+                  <s:itemRenderer>
+                    <fx:Component>
+                      <s:ItemRenderer height="30">
+                        <s:states>
+                          <s:State name="normal" />
+                          <s:State name="hovered" />
+                          <s:State name="selected" />
+                        </s:states>
+                        <s:Rect left="0" right="0" top="0" bottom="0">
+                          <s:fill>
+                            <s:SolidColor color="0x999999" alpha="0" alpha.hovered="0.2"
+                                          alpha.selected="0.6" />
+                          </s:fill>
+                        </s:Rect>
+                        <editor:DiagramPalette data="{data}" left="10" top="10"/>
+                      </s:ItemRenderer>
+                    </fx:Component>
+                  </s:itemRenderer>
+                  <s:dataProvider>
+                    <s:ArrayList>
+                      <bpm:SequenceFlow 
+                                        label="@Resource(key='bpmeditor.sequenceflow.label', bundle='bpmeditor')" 
+                                        fallbackStartPoint="{new Point(10,10)}" 
+                                        fallbackEndPoint="{new Point(170,10)}"/>
+                      <bpm:MessageFlow 
+                                       label="@Resource(key='bpmeditor.messageflow.label', bundle='bpmeditor')" 
+                                       fallbackStartPoint="{new Point(10,10)}" 
+                                       fallbackEndPoint="{new Point(170,10)}"/>
+                      <bpm:Association 
+                                       label="@Resource(key='bpmeditor.association.label', bundle='bpmeditor')" 
+                                       fallbackStartPoint="{new Point(10,10)}" 
+                                       fallbackEndPoint="{new Point(170,10)}"/>
+                    </s:ArrayList>
+                  </s:dataProvider>
+                </s:List>
+              </mx:VBox>
+            </mx:Accordion>
+          </s:Panel>
+          
+          <mx:Canvas width="100%" height="100%" hasFocusableChildren="true">
+            <mx:VBox id="diagramBox" width="100%" height="100%" 
+                     hasFocusableChildren="true" focusEnabled="false">
+              <s:HGroup gap="5" hasFocusableChildren="true" width="100%" 
+                        clipAndEnableScrolling="true">
+                <mx:Button
+                  icon="@Embed(source='../resources/new.png')"
+                  toolTip="@Resource(key='bpmeditor.new.tooltip', bundle='bpmeditor')"
+                  width="36" height="24"  click="newDiagram();" 
+                  />
+                <mx:Button
+                  icon="@Embed(source='../resources/open.png')"
+                  toolTip="@Resource(key='bpmeditor.open.tooltip', bundle='bpmeditor')"
+                  width="36" height="24"  click="loadXML();" 
+                  />
+                <mx:Button
+                  icon="@Embed(source='../resources/save.png')"
+                  toolTip="@Resource(key='bpmeditor.save.tooltip', bundle='bpmeditor')"
+                  width="36" height="24"  click="saveXML();" 
+                  />
+                <mx:Button
+                  icon="@Embed(source='../resources/print.png')"
+                  toolTip="@Resource(key='bpmeditor.print.tooltip', bundle='bpmeditor')"
+                  width="36" height="24"  click="showPrintDialog();" 
+                  />
+                <mx:Spacer width="6"/>
+                <mx:Button id="cutButton" enabled="{diageditor.canCopy}"
+                           icon="@Embed(source='../resources/cut.png')"
+                           toolTip="@Resource(key='bpmeditor.cut.tooltip', bundle='bpmeditor')"
+                           width="36" height="24"  click="diageditor.cut();" 
+                           />
+                <mx:Button id="copyButton" enabled="{diageditor.canCopy}"
+                           icon="@Embed(source='../resources/copy.png')"
+                           toolTip="@Resource(key='bpmeditor.copy.tooltip', bundle='bpmeditor')"
+                           width="36" height="24"  click="diageditor.copy();" 
+                           />
+                <mx:Button id="pasteButton" enabled="{diageditor.canPaste}"
+                           icon="@Embed(source='../resources/paste.png')"
+                           toolTip="@Resource(key='bpmeditor.paste.tooltip', bundle='bpmeditor')"
+                           width="36" height="24"  click="diageditor.paste();" 
+                           />
+                <mx:Spacer width="6"
+                           />
+                <mx:Button enabled="{undoManager.canUndo}"
+                           icon="@Embed(source='../resources/undo.png')"
+                           toolTip="@Resource(key='bpmeditor.undo.tooltip', bundle='bpmeditor')"
+                           width="36" height="24"  click="undoManager.undo();" 
+                           />
+                <mx:Button enabled="{undoManager.canRedo}"
+                           icon="@Embed(source='../resources/redo.png')"
+                           toolTip="@Resource(key='bpmeditor.redo.tooltip', bundle='bpmeditor')"
+                           width="36" height="24"  click="undoManager.redo();" 
+                           />
+                <mx:Spacer width="6"/>
+                <mx:Button id="groupButton" enabled="false"
+                           icon="@Embed(source='../resources/group.png')"
+                           toolTip="@Resource(key='bpmeditor.group.tooltip', bundle='bpmeditor')"
+                           width="36" height="24"  click="groupObjects();" 
+                           />
+                <mx:Button id="ungroupButton" enabled="{diageditor.canUngroup}"
+                           icon="@Embed(source='../resources/ungroup.png')"
+                           toolTip="@Resource(key='bpmeditor.ungroup.tooltip', bundle='bpmeditor')"
+                           width="36" height="24"  click="diageditor.ungroup();" 
+                           />
+                <mx:Spacer width="6"/>
+                <mx:Button
+                  icon="@Embed(source='../resources/zoom.png')"
+                  toolTip="@Resource(key='bpmeditor.zoomin.tooltip', bundle='bpmeditor')"
+                  width="36" height="24"  click="diagram.zoom *= diagram.zoomFactor;" 
+                  />
+                <mx:Button
+                  icon="@Embed(source='../resources/unzoom.png')"
+                  toolTip="@Resource(key='bpmeditor.zoomout.tooltip', bundle='bpmeditor')"
+                  width="36" height="24"  click="diagram.zoom /= diagram.zoomFactor;" 
+                  />
+                <mx:Button
+                  icon="@Embed(source='../resources/resetzoom.png')"
+                  toolTip="@Resource(key='bpmeditor.resetzoom.tooltip', bundle='bpmeditor')"
+                  width="36" height="24"  click="diagram.zoom = 1;" 
+                  />
+                <mx:Button
+                  icon="@Embed(source='../resources/zoomfit.png')"
+                  toolTip="@Resource(key='bpmeditor.showall.tooltip', bundle='bpmeditor')"
+                  width="36" height="24"  click="if(diagram.graph.numElements > 0) diagram.fitContent(false);" 
+                  />
+                <mx:Spacer width="6"/>
+                <mx:Button
+                  icon="@Embed(source='../resources/showgrid.png')"
+                  toolTip="@Resource(key='bpmeditor.showgrid.tooltip', bundle='bpmeditor')"
+                  toggle="true" selected="true"
+                  width="36" height="24"  click="diageditor.gridVisible = !diageditor.gridVisible;" 
+                  />
+                
+            </s:HGroup>
+              <s:HGroup width="100%" clipAndEnableScrolling="true" hasFocusableChildren="true">
+                <s:HGroup gap="5" paddingLeft="2" paddingBottom="2" paddingTop="2" 
+                          hasFocusableChildren="true" width="95%" clipAndEnableScrolling="true">
+                  <mx:Button
+                    icon="@Embed(source='../resources/bringtofront.png')"
+                    enabled="{diageditor.hasSelection}"
+                    toolTip="@Resource(key='bpmeditor.bringToFront.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.bringToFront();" 
+                    />
+                  <mx:Button
+                    icon="@Embed(source='../resources/bringforward.png')"
+                    enabled="{diageditor.hasSelection}"
+                    toolTip="@Resource(key='bpmeditor.bringForward.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.bringForward();" 
+                    />
+                  <mx:Button
+                    icon="@Embed(source='../resources/sendtoback.png')"
+                    enabled="{diageditor.hasSelection}"
+                    toolTip="@Resource(key='bpmeditor.sendToBack.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.sendToBack();" 
+                    />
+                  <mx:Button
+                    icon="@Embed(source='../resources/sendbackward.png')"
+                    enabled="{diageditor.hasSelection}"
+                    toolTip="@Resource(key='bpmeditor.sendBackward.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.sendBackward();" 
+                    />
+                  
+                  <mx:Spacer width="6"/>
+                  <mx:Button
+                    icon="@Embed(source='../resources/alignleft.png')"
+                    enabled="{diageditor.canAlign}"
+                    toolTip="@Resource(key='bpmeditor.alignLeft.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.alignLeft();" 
+                    />
+                  <mx:Button
+                    icon="@Embed(source='../resources/alignhcenter.png')"
+                    enabled="{diageditor.canAlign}"
+                    toolTip="@Resource(key='bpmeditor.alignHorizontalCenter.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.alignHorizontalCenter();" 
+                    />
+                  <mx:Button
+                    icon="@Embed(source='../resources/alignright.png')"
+                    enabled="{diageditor.canAlign}"
+                    toolTip="@Resource(key='bpmeditor.alignRight.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.alignRight();" 
+                    />
+                  <mx:Button
+                    icon="@Embed(source='../resources/aligntop.png')"
+                    enabled="{diageditor.canAlign}"
+                    toolTip="@Resource(key='bpmeditor.alignTop.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.alignTop();" 
+                    />
+                  <mx:Button
+                    icon="@Embed(source='../resources/alignvcenter.png')"
+                    enabled="{diageditor.canAlign}"
+                    toolTip="@Resource(key='bpmeditor.alignVerticalCenter.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.alignVerticalCenter();" 
+                    />
+                  <mx:Button
+                    icon="@Embed(source='../resources/alignbottom.png')"
+                    enabled="{diageditor.canAlign}"
+                    toolTip="@Resource(key='bpmeditor.alignBottom.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="diageditor.alignBottom();" 
+                    />
+                  
+                  <mx:Spacer width="6"/>
+                  <mx:Button
+                    icon="@Embed(source='../resources/layout.png')"
+                    toolTip="@Resource(key='bpmeditor.layout.tooltip', bundle='bpmeditor')"
+                    width="36" height="24"  click="layoutAll();" 
+                    />
+                  <mx:Button id="layoutSelectedButton" enabled="false"
+                             icon="@Embed(source='../resources/layoutsel.png')"
+                             toolTip="@Resource(key='bpmeditor.layoutsel.tooltip', bundle='bpmeditor')"
+                             width="36" height="24"  click="layoutSelectedSubgraph();" 
+                             />
+                  
+                </s:HGroup>
+                <s:Group width="5%">
+                  <s:ToggleButton right="2" top="2"
+                                  label="@Resource(key='bpmeditor.help.title', bundle='bpmeditor')"
+                                  toolTip="@Resource(key='bpmeditor.help.tooltip', bundle='bpmeditor')"
+                                  selected="false"
+                                  skinClass="skins.ToggleButtonLinkSkin"
+                                  click="{showHelp()}"
+                                  />
+                </s:Group>
+              </s:HGroup>
+              
+              <s:Panel id="titlePanel" title="@Resource(key='bpmeditor.default.buffer.title', bundle='bpmeditor')"
+                       hasFocusableChildren="true" focusEnabled="false"
+                       width="100%" height="100%">
+                <s:VGroup width="100%" height="100%">
+                  <editor:DiagramEditor id="diageditor" width="100%" height="100%"
+                                        focusEnabled="true"
+                                        cloneFunction="cloneFunction"
+                                        editorMove="{moveResizeHandler(event)}"
+                                        editorResize="{moveResizeHandler(event)}"
+                                        editorChangeZOrder="{modifiedHandler(event)}"
+                                        editorConnectLink="{modifiedHandler(event)}"
+                                        editorCreate="{modifiedHandler(event)}"
+                                        editorDelete="{modifiedHandler(event)}"
+                                        editorReparent="{modifiedHandler(event)}"
+                                        editorSelectionChanged="{selectionChangedHandler(event)}"
+                                        createLinkFunction="createLink"
+                                        createPortFunction="createPort"
+                                        createGroupFunction="createGroup"
+                                        keyboardMoveNodesModifierKey="shift"
+                                        confirmDelete="false"
+                                        >
+                    <editor:linkPrototype>
+                      <bpm:SequenceFlow label="@Resource(key='bpmeditor.sequenceflow.label', bundle='bpmeditor')"/>
+                    </editor:linkPrototype>
+                    <idiag:Diagram id="diagram" width="100%" height="100%" 
+                                   selectionMode="multiple" automaticGraphLayout="false">
+                      <idiag:nodeLayout>
+                        <idiag:HierarchicalLayout flowDirection="right" globalLinkStyle="orthogonal" 
+                                                  intergraphConnectivityMode="true">
+                          <idiag:position>
+                            <mx:Point x="100" y="50"/>
+                          </idiag:position>
+                        </idiag:HierarchicalLayout>
+                      </idiag:nodeLayout>
+                    </idiag:Diagram>
+                    <!--
+                    <idiag:Graph width="100%" height="100%">
+                    </idiag:Graph>
+                    <idiag:GraphScroller width="100%" height="100%">
+                    <s:Group>
+                    <idiag:Graph>
+                    </idiag:Graph>
+                    </s:Group>
+                    </idiag:GraphScroller>
+                    -->
+                  </editor:DiagramEditor>                
+                </s:VGroup>
+                <!--
+                - Help Panel
+                -->
+                <!-- help view -->
+                <s:Group top="-20" right="0" bottom="0" 
+                         id="helpview" visible="false" 
+                         showEffect="showHelpEffect" hideEffect="hideHelpEffect">
+                  <s:Rect top="0" left="0" bottom="0" right="0" 
+                          bottomLeftRadiusX="10" bottomLeftRadiusY="10" 
+                          bottomRightRadiusX="10" bottomRightRadiusY="10" 
+                          topLeftRadiusX="10" topLeftRadiusY="10" 
+                          topRightRadiusX="10" topRightRadiusY="10">
+                    <s:fill>
+                      <s:SolidColor color="#e5e5e5" alpha="0.9">
+                      </s:SolidColor>
+                    </s:fill>
+                  </s:Rect>
+                  <s:TextArea top="10" left="10" bottom="10" right="10"
+                              color="black"
+                              contentBackgroundAlpha="0"
+                              editable="false"
+                              text="@Resource(key='bpmeditor.help.text', bundle='bpmeditor')"
+                              />
+                </s:Group>  
+              </s:Panel>
+            </mx:VBox>
+          </mx:Canvas>                
+      </mx:HDividedBox>
+    </s:VGroup>
+    
+</mx:Application>
