@@ -16,12 +16,17 @@
          width="100%"
          creationComplete="group1_creationCompleteHandler(event)"
          visible="{_display}"
-         includeInLayout="{_display}"
+         includeInLayout="{_display}" xmlns:mx="library://ns.adobe.com/flex/mx"
          >
+	
+	<fx:Metadata>
+		[ResourceBundle("elixirsamplebar_enterprise")]
+	</fx:Metadata>
+	
   <fx:Script>
     <![CDATA[
-      import mx.events.FlexEvent;
-      import mx.resources.ResourceManager;
+		import mx.events.FlexEvent;
+		import mx.resources.ResourceManager;
       
       [Bindable]
       private var _display:Boolean = true;
@@ -57,7 +62,18 @@
         }
       }
 
-    ]]>
+		protected function i18nButton_clickHandler(event:MouseEvent):void
+		{
+			if(resourceManager.localeChain[0]=="zh_CN"){
+				resourceManager.localeChain = ["en_US"]; 
+				i18nButton.label = "中文";
+			}else if(resourceManager.localeChain[0]=="en_US"){
+				resourceManager.localeChain = ["zh_CN"]; 
+				i18nButton.label = "ENGLISH";
+			}
+		}
+		
+	]]>
   </fx:Script>
   <fx:Declarations>
     <fx:String id="label"/>
@@ -66,27 +82,29 @@
   <s:BitmapImage width="100%" height="100%" fillMode="scale"
                  source="@Embed(source='../resources/bannerbg_long.png', scaleGridLeft='3', scaleGridTop='3', scaleGridRight='842', scaleGridBottom='33')"/>
   <s:HGroup gap="3" verticalAlign="middle" width="100%" height="100%" paddingLeft="10">
-    <s:BitmapImage source="@Embed(source='../resources/elixir.png')"/>
-    <s:Label text="@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.productName')"
+    <s:BitmapImage source="@Embed(source='../resources/elixir-1.png')"/>
+    <s:Label text="{resourceManager.getString('elixirsamplebar_enterprise','samplebar.productName')}"
              paddingTop="2" paddingRight="3" styleName="productNameStyle"/>
     <s:BitmapImage source="@Embed(source='../resources/banner_sep.png')"/>
     <s:Line width="2"/>
     <s:Label text="{label}" paddingTop="4" styleName="sampleNameStyle"/>
     <s:HGroup verticalAlign="middle" width="100%" horizontalAlign="right" height="100%" paddingRight="2"
               styleName="buttonStyle">
+		<!--
       <local:ElixirLinkButton iconClass="@Embed(source='../resources/viewotherdemos.png')" 
-                              label="@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.linkdemos')"
+                              label="{resourceManager.getString('elixirsamplebar_enterprise','samplebar.linkdemos')}"
                               click="{goToURL(getString('demourl'))}"
                               skinClass="ElixirLinkButtonSkin"/>
       <s:BitmapImage source="@Embed(source='../resources/banner_sep.png')"/>
       <local:ElixirLinkButton iconClass="@Embed(source='../resources/download.png')" 
-                              label="@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.download')" 
+                              label="{resourceManager.getString('elixirsamplebar_enterprise','samplebar.download')}" 
                               click="{ElixirSampleBar.goToURL(getString('downurl'))}"
                               skinClass="ElixirLinkButtonSkin"/>
       <local:ElixirLinkButton iconClass="@Embed(source='../resources/ibm_1px.png')" 
                               skinClass="ElixirLinkButtonSkin"
                               click="goToURL(getString('producturl'))"
-                              toolTip="@Resource(bundle='elixirsamplebar_enterprise',key='samplebar.gotoelixir')"/>
+                              toolTip="{resourceManager.getString('elixirsamplebar_enterprise','samplebar.gotoelixir')}"/>-->
+		<mx:Button id="i18nButton" label="ENGLISH" click="i18nButton_clickHandler(event)"/>
     </s:HGroup>
   </s:HGroup>
 </s:Group>

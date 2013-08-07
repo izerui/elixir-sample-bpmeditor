@@ -44,9 +44,7 @@
           import com.ibm.ilog.elixir.diagram.Subgraph;
           import com.ibm.ilog.elixir.diagram.graphlayout.GraphLayout;
           import com.ibm.ilog.elixir.diagram.graphlayout.GraphLayoutEvent;
-          import com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalGroupSpreadConstraint;
           import com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalLayout;
-          import com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalNodeGroup;
           import com.ibm.ilog.elixir.diagram.graphlayout.hierarchical.HierarchicalSameLevelConstraint;
           
           import mx.collections.IList;
@@ -831,19 +829,19 @@
               clipAndEnableScrolling="true" styleName="bpmeditor" >   
         <local:ElixirSampleBar id="sbar" 
                              width="100%"
-                             label="@Resource(key='bpmeditor.application.title', bundle='bpmeditor')">
+                             label="{resourceManager.getString('bpmeditor', 'bpmeditor.application.title')}">
         </local:ElixirSampleBar>
       
       <mx:HDividedBox id="mainPanel" width="100%" height="100%" 
                       hasFocusableChildren="true" focusEnabled="true">
           
           <s:Panel id="palettePanel" 
-                   title="@Resource(key='bpmeditor.elements.palette.title', bundle='bpmeditor')"
+                   title="{resourceManager.getString('bpmeditor', 'bpmeditor.elements.palette.title')}"
                    width="200" height="100%"
                    hasFocusableChildren="true" focusEnabled="true">
             <mx:Accordion openDuration="250" minWidth="0" width="100%" height="100%" 
                           selectedIndex="1" creationPolicy="all">
-              <mx:VBox label="@Resource(key='bpmeditor.tasks.category.label', bundle='bpmeditor')" 
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.tasks.category.label')}" 
                        focusEnabled="false" hasFocusableChildren="true" 
                        width="100%" >
                 <s:Scroller id="paletteTasksScroller" width="100%" height="100%" 
@@ -863,18 +861,18 @@
                         <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
                                           horizontalAlign="center" />
                       </editor:layout>
-                      <bpm:Task label="@Resource(key='bpmeditor.task.default.label', bundle='bpmeditor')"/>
-                      <bpm:Task label="@Resource(key='bpmeditor.task.looping.label', bundle='bpmeditor')" 
+                      <bpm:Task label="{resourceManager.getString('bpmeditor', 'bpmeditor.task.default.label')}"/>
+                      <bpm:Task label="{resourceManager.getString('bpmeditor', 'bpmeditor.task.looping.label')}" 
                                 loop="true"/>
-                      <bpm:Task label="@Resource(key='bpmeditor.task.multiinstance.label', bundle='bpmeditor')" 
+                      <bpm:Task label="{resourceManager.getString('bpmeditor', 'bpmeditor.task.multiinstance.label')}" 
                                 multiInstance="true"/>
-                      <bpm:Task label="@Resource(key='bpmeditor.task.compensation.label', bundle='bpmeditor')" 
+                      <bpm:Task label="{resourceManager.getString('bpmeditor', 'bpmeditor.task.compensation.label')}" 
                                 compensation="true"/>
                     </editor:DiagramPalette>
                   </s:VGroup>
                 </s:Scroller>                
               </mx:VBox>
-              <mx:VBox label="@Resource(key='bpmeditor.startevents.category.label', bundle='bpmeditor')" 
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.startevents.category.label')}" 
                        width="100%"  horizontalAlign="center">
                 <s:Scroller id="paletteStartEventsScroller" width="100%" height="100%" 
                             focusEnabled="true" hasFocusableChildren="true" 
@@ -893,24 +891,24 @@
                         <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="5" 
                                           horizontalAlign="center" />
                       </editor:layout>
-                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.default.label', bundle='bpmeditor')"/>
-                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.message.label', bundle='bpmeditor')" 
+                      <bpm:StartEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.startevent.default.label')}"/>
+                      <bpm:StartEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.startevent.message.label')}" 
                                       trigger="Message"/>
-                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.timer.label', bundle='bpmeditor')" 
+                      <bpm:StartEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.startevent.timer.label')}" 
                                       trigger="Timer"/>
-                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.error.label', bundle='bpmeditor')" 
+                      <bpm:StartEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.startevent.error.label')}" 
                                       trigger="Error"/>
-                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.compensation.label', bundle='bpmeditor')" 
+                      <bpm:StartEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.startevent.compensation.label')}" 
                                       trigger="Compensation"/>
-                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.conditional.label', bundle='bpmeditor')" 
+                      <bpm:StartEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.startevent.conditional.label')}" 
                                       trigger="Rule"/>
-                      <bpm:StartEvent label="@Resource(key='bpmeditor.startevent.multiple.label', bundle='bpmeditor')" 
+                      <bpm:StartEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.startevent.multiple.label')}" 
                                       trigger="Multiple"/>
                     </editor:DiagramPalette>
                   </s:VGroup>
                 </s:Scroller>
               </mx:VBox>
-              <mx:VBox label="@Resource(key='bpmeditor.endevents.category.label', bundle='bpmeditor')" 
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.endevents.category.label')}" 
                        width="100%" horizontalAlign="center" >
                 <s:Scroller id="paletteEndEventsScroller" width="100%" height="100%" 
                             focusEnabled="true" hasFocusableChildren="true" 
@@ -929,24 +927,24 @@
                         <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="5" 
                                           horizontalAlign="center" />
                       </editor:layout>
-                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.default.label', bundle='bpmeditor')"/>
-                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.message.label', bundle='bpmeditor')" 
+                      <bpm:EndEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.endevent.default.label')}"/>
+                      <bpm:EndEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.endevent.message.label')}" 
                                     trigger="Message"/>
-                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.error.label', bundle='bpmeditor')" 
+                      <bpm:EndEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.endevent.error.label')}" 
                                     trigger="Error"/>
-                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.cancel.label', bundle='bpmeditor')" 
+                      <bpm:EndEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.endevent.cancel.label')}" 
                                     trigger="Cancel"/>
-                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.compensation.label', bundle='bpmeditor')" 
+                      <bpm:EndEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.endevent.compensation.label')}" 
                                     trigger="Compensation"/>
-                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.terminate.label', bundle='bpmeditor')" 
+                      <bpm:EndEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.endevent.terminate.label')}" 
                                     trigger="Terminate"/>
-                      <bpm:EndEvent label="@Resource(key='bpmeditor.endevent.multiple.label', bundle='bpmeditor')" 
+                      <bpm:EndEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.endevent.multiple.label')}" 
                                     trigger="Multiple"/>
                     </editor:DiagramPalette>
                   </s:VGroup>
                 </s:Scroller>
               </mx:VBox>
-              <mx:VBox label="@Resource(key='bpmeditor.intermediateevents.category.label', bundle='bpmeditor')" 
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevents.category.label')}" 
                        width="100%" horizontalAlign="center" >
                 <s:Scroller id="paletteIntermediateEventsScroller" width="100%" height="100%" 
                             focusEnabled="true" hasFocusableChildren="true" 
@@ -965,28 +963,28 @@
                         <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="5" 
                                           horizontalAlign="center" />
                       </editor:layout>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.default.label', bundle='bpmeditor')"/>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.message.label', bundle='bpmeditor')" 
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.default.label')}"/>
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.message.label')}" 
                                              trigger="Message"/>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.timer.label', bundle='bpmeditor')" 
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.timer.label')}" 
                                              trigger="Timer"/>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.error.label', bundle='bpmeditor')" 
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.error.label')}" 
                                              trigger="Error"/>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.cancel.label', bundle='bpmeditor')" 
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.cancel.label')}" 
                                              trigger="Cancel"/>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.compensation.label', bundle='bpmeditor')" 
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.compensation.label')}" 
                                              trigger="Compensation"/>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.conditional.label', bundle='bpmeditor')" 
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.conditional.label')}" 
                                              trigger="Rule"/>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.link.label', bundle='bpmeditor')" 
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.link.label')}" 
                                              trigger="Link"/>
-                      <bpm:IntermediateEvent label="@Resource(key='bpmeditor.intermediateevent.multiple.label', bundle='bpmeditor')" 
+                      <bpm:IntermediateEvent label="{resourceManager.getString('bpmeditor', 'bpmeditor.intermediateevent.multiple.label')}" 
                                              trigger="Multiple"/>
                     </editor:DiagramPalette>
                   </s:VGroup>
                 </s:Scroller>
               </mx:VBox>
-              <mx:VBox label="@Resource(key='bpmeditor.gateways.category.label', bundle='bpmeditor')" 
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.gateways.category.label')}" 
                        width="100%" >
                 <s:Scroller id="paletteGatewaysEventsScroller" width="100%" height="100%" 
                             focusEnabled="true" hasFocusableChildren="true" 
@@ -1005,18 +1003,18 @@
                         <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
                                           horizontalAlign="center" />
                       </editor:layout>
-                      <bpm:Gateway label="@Resource(key='bpmeditor.gateway.exclusive.label', bundle='bpmeditor')"/>
-                      <bpm:Gateway label="@Resource(key='bpmeditor.gateway.parallel.label', bundle='bpmeditor')" 
+                      <bpm:Gateway label="{resourceManager.getString('bpmeditor', 'bpmeditor.gateway.exclusive.label')}"/>
+                      <bpm:Gateway label="{resourceManager.getString('bpmeditor', 'bpmeditor.gateway.parallel.label')}" 
                                    gatewayType="AND"/>
-                      <bpm:Gateway label="@Resource(key='bpmeditor.gateway.inclusive.label', bundle='bpmeditor')" 
+                      <bpm:Gateway label="{resourceManager.getString('bpmeditor', 'bpmeditor.gateway.inclusive.label')}" 
                                    gatewayType="OR"/>
-                      <bpm:Gateway label="@Resource(key='bpmeditor.gateway.complex.label', bundle='bpmeditor')" 
+                      <bpm:Gateway label="{resourceManager.getString('bpmeditor', 'bpmeditor.gateway.complex.label')}" 
                                    gatewayType="Complex"/>
                     </editor:DiagramPalette>
                   </s:VGroup>
                 </s:Scroller>
               </mx:VBox>
-              <mx:VBox label="@Resource(key='bpmeditor.subprocesses.category.label', bundle='bpmeditor')" 
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.subprocesses.category.label')}" 
                        width="100%" >
                 <s:Scroller id="paletteSubprocessesScroller" width="100%" height="100%" 
                             focusEnabled="true" hasFocusableChildren="true" 
@@ -1035,20 +1033,20 @@
                         <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
                                           horizontalAlign="center" />
                       </editor:layout>
-                      <bpm:SubProcess label="@Resource(key='bpmeditor.subprocess.default.label', bundle='bpmeditor')" 
-                                      width="@Resource(key='bpmeditor.subprocess.default.width', bundle='bpmeditor')" 
-                                      height="@Resource(key='bpmeditor.subprocess.default.height', bundle='bpmeditor')">
+                      <bpm:SubProcess label="{resourceManager.getString('bpmeditor', 'bpmeditor.subprocess.default.label')}" 
+                                      width="{resourceManager.getNumber('bpmeditor', 'bpmeditor.subprocess.default.width')}" 
+                                      height="{resourceManager.getNumber('bpmeditor', 'bpmeditor.subprocess.default.height')}">
                       </bpm:SubProcess>
-                      <bpm:SubProcess label="@Resource(key='bpmeditor.subprocess.adhoc.label', bundle='bpmeditor')" 
+                      <bpm:SubProcess label="{resourceManager.getString('bpmeditor', 'bpmeditor.subprocess.adhoc.label')}" 
                                       adHoc="true" 
-                                      width="@Resource(key='bpmeditor.subprocess.adhoc.width', bundle='bpmeditor')" 
-                                      height="@Resource(key='bpmeditor.subprocess.adhoc.height', bundle='bpmeditor')">
+                                      width="{resourceManager.getNumber('bpmeditor', 'bpmeditor.subprocess.adhoc.width')}" 
+                                      height="{resourceManager.getNumber('bpmeditor', 'bpmeditor.subprocess.adhoc.height')}">
                       </bpm:SubProcess>
                     </editor:DiagramPalette>
                   </s:VGroup>
                 </s:Scroller>
               </mx:VBox>
-              <mx:VBox label="@Resource(key='bpmeditor.poolslanes.category.label', bundle='bpmeditor')" 
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.poolslanes.category.label')}" 
                        width="100%" >
                 <s:Scroller id="palettePoolsLanesScroller" width="100%" height="100%" 
                             focusEnabled="true" hasFocusableChildren="true" 
@@ -1067,25 +1065,25 @@
                         <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
                                           horizontalAlign="center" />
                       </editor:layout>
-                      <bpm:HPool width="@Resource(key='bpmeditor.hpool.width', bundle='bpmeditor')" 
-                                   label="@Resource(key='bpmeditor.hpool.label', bundle='bpmeditor')">
-                        <bpm:HLane height="@Resource(key='bpmeditor.hlane.height', bundle='bpmeditor')" 
-                                     label="@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"/>
-                        <bpm:HLane height="@Resource(key='bpmeditor.hlane.height', bundle='bpmeditor')" 
-                                     label="@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"/>
+                      <bpm:HPool width="{resourceManager.getNumber('bpmeditor', 'bpmeditor.hpool.width')}" 
+                                   label="{resourceManager.getString('bpmeditor', 'bpmeditor.hpool.label')}">
+                        <bpm:HLane height="{resourceManager.getNumber('bpmeditor', 'bpmeditor.hlane.height')}" 
+                                     label="{resourceManager.getString('bpmeditor', 'bpmeditor.lane.label')}"/>
+                        <bpm:HLane height="{resourceManager.getNumber('bpmeditor', 'bpmeditor.hlane.height')}" 
+                                     label="{resourceManager.getString('bpmeditor', 'bpmeditor.lane.label')}"/>
                       </bpm:HPool>
-                      <bpm:VPool height="@Resource(key='bpmeditor.vpool.height', bundle='bpmeditor')" 
-                                   label="@Resource(key='bpmeditor.vpool.label', bundle='bpmeditor')">
-                        <bpm:VLane width="@Resource(key='bpmeditor.vlane.width', bundle='bpmeditor')"
-                                     label="@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"/>
-                        <bpm:VLane width="@Resource(key='bpmeditor.vlane.width', bundle='bpmeditor')" 
-                                     label="@Resource(key='bpmeditor.lane.label', bundle='bpmeditor')"/>
+                      <bpm:VPool height="{resourceManager.getNumber('bpmeditor', 'bpmeditor.vpool.height')}" 
+                                   label="{resourceManager.getString('bpmeditor', 'bpmeditor.vpool.label')}">
+                        <bpm:VLane width="{resourceManager.getNumber('bpmeditor', 'bpmeditor.vlane.width')}"
+                                     label="{resourceManager.getString('bpmeditor', 'bpmeditor.lane.label')}"/>
+                        <bpm:VLane width="{resourceManager.getNumber('bpmeditor', 'bpmeditor.vlane.width')}" 
+                                     label="{resourceManager.getString('bpmeditor', 'bpmeditor.lane.label')}"/>
                       </bpm:VPool>
                     </editor:DiagramPalette>
                   </s:VGroup>
                 </s:Scroller>
               </mx:VBox>
-              <mx:VBox label="@Resource(key='bpmeditor.artifacts.category.label', bundle='bpmeditor')" 
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.artifacts.category.label')}" 
                        width="100%" >
                 <s:Scroller id="paletteArtifactsScroller" width="100%" height="100%" 
                             focusEnabled="true" hasFocusableChildren="true" 
@@ -1104,24 +1102,24 @@
                         <s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="20" gap="15" 
                                           horizontalAlign="center" />
                       </editor:layout>
-                      <bpm:DataObject label="@Resource(key='bpmeditor.dataobject.label', bundle='bpmeditor')"/>
-                      <bpm:Group label="@Resource(key='bpmeditor.group.label', bundle='bpmeditor')" 
+                      <bpm:DataObject label="{resourceManager.getString('bpmeditor', 'bpmeditor.dataobject.label')}"/>
+                      <bpm:Group label="{resourceManager.getString('bpmeditor', 'bpmeditor.group.label')}" 
                                  clickableInside="true"/>
-                      <bpm:TextAnnotation label="@Resource(key='bpmeditor.textannotation.label', bundle='bpmeditor')"/>
-                      <bpm:TextAnnotation label="@Resource(key='bpmeditor.textannotation.label', bundle='bpmeditor')" 
+                      <bpm:TextAnnotation label="{resourceManager.getString('bpmeditor', 'bpmeditor.textannotation.label')}"/>
+                      <bpm:TextAnnotation label="{resourceManager.getString('bpmeditor', 'bpmeditor.textannotation.label')}" 
                                           bracketOnRight="true"/>
                     </editor:DiagramPalette>
                   </s:VGroup>
                 </s:Scroller>
               </mx:VBox>
-              <mx:VBox label="@Resource(key='bpmeditor.links.category.label', bundle='bpmeditor')" width="100%">
+              <mx:VBox label="{resourceManager.getString('bpmeditor', 'bpmeditor.links.category.label')}" width="100%">
                 <s:Group width="100%">
                   <s:Label horizontalCenter="0" paddingTop="5" paddingBottom="5"
                            textAlign="center"
-                           text="@Resource(key='bpmeditor.links.palette.message', bundle='bpmeditor')"
+                           text="{resourceManager.getString('bpmeditor', 'bpmeditor.links.palette.message')}"
                            fontStyle="italic"
                            alpha="0.5"
-                           maxWidth="@Resource(key='bpmeditor.links.palette.message.maxwidth', bundle='bpmeditor')"/>
+                           maxWidth="{resourceManager.getNumber('bpmeditor', 'bpmeditor.links.palette.message.maxwidth')}"/>
                 </s:Group>
                 <s:List id="linkList" width="100%" height="100%"
                         change="linkListChangeHandler(event);"
@@ -1147,15 +1145,15 @@
                   <s:dataProvider>
                     <s:ArrayList>
                       <bpm:SequenceFlow 
-                                        label="@Resource(key='bpmeditor.sequenceflow.label', bundle='bpmeditor')" 
+                                        label="{resourceManager.getString('bpmeditor', 'bpmeditor.sequenceflow.label')}" 
                                         fallbackStartPoint="{new Point(10,10)}" 
                                         fallbackEndPoint="{new Point(170,10)}"/>
                       <bpm:MessageFlow 
-                                       label="@Resource(key='bpmeditor.messageflow.label', bundle='bpmeditor')" 
+                                       label="{resourceManager.getString('bpmeditor', 'bpmeditor.messageflow.label')}" 
                                        fallbackStartPoint="{new Point(10,10)}" 
                                        fallbackEndPoint="{new Point(170,10)}"/>
                       <bpm:Association 
-                                       label="@Resource(key='bpmeditor.association.label', bundle='bpmeditor')" 
+                                       label="{resourceManager.getString('bpmeditor', 'bpmeditor.association.label')}" 
                                        fallbackStartPoint="{new Point(10,10)}" 
                                        fallbackEndPoint="{new Point(170,10)}"/>
                     </s:ArrayList>
@@ -1169,91 +1167,91 @@
             <mx:VBox id="diagramBox" width="100%" height="100%" 
                      hasFocusableChildren="true" focusEnabled="false">
               <s:HGroup gap="5" hasFocusableChildren="true" width="100%" 
-                        clipAndEnableScrolling="true">
+                        clipAndEnableScrolling="true"><!--{resourceManager.getString('bpmeditor.new.tooltip', 'bpmeditor')}-->
                 <mx:Button
                   icon="@Embed(source='../resources/new.png')"
-                  toolTip="@Resource(key='bpmeditor.new.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor','bpmeditor.new.tooltip')}"
                   width="36" height="24"  click="newDiagram();" 
                   />
                 <mx:Button
                   icon="@Embed(source='../resources/open.png')"
-                  toolTip="@Resource(key='bpmeditor.open.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.open.tooltip')}"
                   width="36" height="24"  click="loadXML();" 
                   />
                 <mx:Button
                   icon="@Embed(source='../resources/save.png')"
-                  toolTip="@Resource(key='bpmeditor.save.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.save.tooltip')}"
                   width="36" height="24"  click="saveXML();" 
                   />
                 <mx:Button
                   icon="@Embed(source='../resources/print.png')"
-                  toolTip="@Resource(key='bpmeditor.print.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.print.tooltip')}"
                   width="36" height="24"  click="showPrintDialog();" 
                   />
                 <mx:Spacer width="6"/>
                 <mx:Button id="cutButton" enabled="{diageditor.canCopy}"
                            icon="@Embed(source='../resources/cut.png')"
-                           toolTip="@Resource(key='bpmeditor.cut.tooltip', bundle='bpmeditor')"
+                           toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.cut.tooltip')}"
                            width="36" height="24"  click="diageditor.cut();" 
                            />
                 <mx:Button id="copyButton" enabled="{diageditor.canCopy}"
                            icon="@Embed(source='../resources/copy.png')"
-                           toolTip="@Resource(key='bpmeditor.copy.tooltip', bundle='bpmeditor')"
+                           toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.copy.tooltip')}"
                            width="36" height="24"  click="diageditor.copy();" 
                            />
                 <mx:Button id="pasteButton" enabled="{diageditor.canPaste}"
                            icon="@Embed(source='../resources/paste.png')"
-                           toolTip="@Resource(key='bpmeditor.paste.tooltip', bundle='bpmeditor')"
+                           toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.paste.tooltip')}"
                            width="36" height="24"  click="diageditor.paste();" 
                            />
                 <mx:Spacer width="6"
                            />
                 <mx:Button enabled="{undoManager.canUndo}"
                            icon="@Embed(source='../resources/undo.png')"
-                           toolTip="@Resource(key='bpmeditor.undo.tooltip', bundle='bpmeditor')"
+                           toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.undo.tooltip')}"
                            width="36" height="24"  click="undoManager.undo();" 
                            />
                 <mx:Button enabled="{undoManager.canRedo}"
                            icon="@Embed(source='../resources/redo.png')"
-                           toolTip="@Resource(key='bpmeditor.redo.tooltip', bundle='bpmeditor')"
+                           toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.redo.tooltip')}"
                            width="36" height="24"  click="undoManager.redo();" 
                            />
                 <mx:Spacer width="6"/>
                 <mx:Button id="groupButton" enabled="false"
                            icon="@Embed(source='../resources/group.png')"
-                           toolTip="@Resource(key='bpmeditor.group.tooltip', bundle='bpmeditor')"
+                           toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.group.tooltip')}"
                            width="36" height="24"  click="groupObjects();" 
                            />
                 <mx:Button id="ungroupButton" enabled="{diageditor.canUngroup}"
                            icon="@Embed(source='../resources/ungroup.png')"
-                           toolTip="@Resource(key='bpmeditor.ungroup.tooltip', bundle='bpmeditor')"
+                           toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.ungroup.tooltip')}"
                            width="36" height="24"  click="diageditor.ungroup();" 
                            />
                 <mx:Spacer width="6"/>
                 <mx:Button
                   icon="@Embed(source='../resources/zoom.png')"
-                  toolTip="@Resource(key='bpmeditor.zoomin.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.zoomin.tooltip')}"
                   width="36" height="24"  click="diagram.zoom *= diagram.zoomFactor;" 
                   />
                 <mx:Button
                   icon="@Embed(source='../resources/unzoom.png')"
-                  toolTip="@Resource(key='bpmeditor.zoomout.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.zoomout.tooltip')}"
                   width="36" height="24"  click="diagram.zoom /= diagram.zoomFactor;" 
                   />
                 <mx:Button
                   icon="@Embed(source='../resources/resetzoom.png')"
-                  toolTip="@Resource(key='bpmeditor.resetzoom.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.resetzoom.tooltip')}"
                   width="36" height="24"  click="diagram.zoom = 1;" 
                   />
                 <mx:Button
                   icon="@Embed(source='../resources/zoomfit.png')"
-                  toolTip="@Resource(key='bpmeditor.showall.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.showall.tooltip')}"
                   width="36" height="24"  click="if(diagram.graph.numElements > 0) diagram.fitContent(false);" 
                   />
                 <mx:Spacer width="6"/>
                 <mx:Button
                   icon="@Embed(source='../resources/showgrid.png')"
-                  toolTip="@Resource(key='bpmeditor.showgrid.tooltip', bundle='bpmeditor')"
+                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.showgrid.tooltip')}"
                   toggle="true" selected="true"
                   width="36" height="24"  click="diageditor.gridVisible = !diageditor.gridVisible;" 
                   />
@@ -1265,25 +1263,25 @@
                   <mx:Button
                     icon="@Embed(source='../resources/bringtofront.png')"
                     enabled="{diageditor.hasSelection}"
-                    toolTip="@Resource(key='bpmeditor.bringToFront.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.bringToFront.tooltip')}"
                     width="36" height="24"  click="diageditor.bringToFront();" 
                     />
                   <mx:Button
                     icon="@Embed(source='../resources/bringforward.png')"
                     enabled="{diageditor.hasSelection}"
-                    toolTip="@Resource(key='bpmeditor.bringForward.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.bringForward.tooltip')}"
                     width="36" height="24"  click="diageditor.bringForward();" 
                     />
                   <mx:Button
                     icon="@Embed(source='../resources/sendtoback.png')"
                     enabled="{diageditor.hasSelection}"
-                    toolTip="@Resource(key='bpmeditor.sendToBack.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.sendToBack.tooltip')}"
                     width="36" height="24"  click="diageditor.sendToBack();" 
                     />
                   <mx:Button
                     icon="@Embed(source='../resources/sendbackward.png')"
                     enabled="{diageditor.hasSelection}"
-                    toolTip="@Resource(key='bpmeditor.sendBackward.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.sendBackward.tooltip')}"
                     width="36" height="24"  click="diageditor.sendBackward();" 
                     />
                   
@@ -1291,57 +1289,57 @@
                   <mx:Button
                     icon="@Embed(source='../resources/alignleft.png')"
                     enabled="{diageditor.canAlign}"
-                    toolTip="@Resource(key='bpmeditor.alignLeft.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.alignLeft.tooltip')}"
                     width="36" height="24"  click="diageditor.alignLeft();" 
                     />
                   <mx:Button
                     icon="@Embed(source='../resources/alignhcenter.png')"
                     enabled="{diageditor.canAlign}"
-                    toolTip="@Resource(key='bpmeditor.alignHorizontalCenter.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.alignHorizontalCenter.tooltip')}"
                     width="36" height="24"  click="diageditor.alignHorizontalCenter();" 
                     />
                   <mx:Button
                     icon="@Embed(source='../resources/alignright.png')"
                     enabled="{diageditor.canAlign}"
-                    toolTip="@Resource(key='bpmeditor.alignRight.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.alignRight.tooltip')}"
                     width="36" height="24"  click="diageditor.alignRight();" 
                     />
                   <mx:Button
                     icon="@Embed(source='../resources/aligntop.png')"
                     enabled="{diageditor.canAlign}"
-                    toolTip="@Resource(key='bpmeditor.alignTop.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.alignTop.tooltip')}"
                     width="36" height="24"  click="diageditor.alignTop();" 
                     />
                   <mx:Button
                     icon="@Embed(source='../resources/alignvcenter.png')"
                     enabled="{diageditor.canAlign}"
-                    toolTip="@Resource(key='bpmeditor.alignVerticalCenter.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.alignVerticalCenter.tooltip')}"
                     width="36" height="24"  click="diageditor.alignVerticalCenter();" 
                     />
                   <mx:Button
                     icon="@Embed(source='../resources/alignbottom.png')"
                     enabled="{diageditor.canAlign}"
-                    toolTip="@Resource(key='bpmeditor.alignBottom.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.alignBottom.tooltip')}"
                     width="36" height="24"  click="diageditor.alignBottom();" 
                     />
                   
                   <mx:Spacer width="6"/>
                   <mx:Button
                     icon="@Embed(source='../resources/layout.png')"
-                    toolTip="@Resource(key='bpmeditor.layout.tooltip', bundle='bpmeditor')"
+                    toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.layout.tooltip')}"
                     width="36" height="24"  click="layoutAll();" 
                     />
                   <mx:Button id="layoutSelectedButton" enabled="false"
                              icon="@Embed(source='../resources/layoutsel.png')"
-                             toolTip="@Resource(key='bpmeditor.layoutsel.tooltip', bundle='bpmeditor')"
+                             toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.layoutsel.tooltip')}"
                              width="36" height="24"  click="layoutSelectedSubgraph();" 
                              />
                   
                 </s:HGroup>
                 <s:Group width="5%">
                   <s:ToggleButton right="2" top="2"
-                                  label="@Resource(key='bpmeditor.help.title', bundle='bpmeditor')"
-                                  toolTip="@Resource(key='bpmeditor.help.tooltip', bundle='bpmeditor')"
+                                  label="{resourceManager.getString('bpmeditor', 'bpmeditor.help.title')}"
+                                  toolTip="{resourceManager.getString('bpmeditor', 'bpmeditor.help.tooltip')}"
                                   selected="false"
                                   skinClass="skins.ToggleButtonLinkSkin"
                                   click="{showHelp()}"
@@ -1349,7 +1347,7 @@
                 </s:Group>
               </s:HGroup>
               
-              <s:Panel id="titlePanel" title="@Resource(key='bpmeditor.default.buffer.title', bundle='bpmeditor')"
+              <s:Panel id="titlePanel" title="{resourceManager.getString('bpmeditor', 'bpmeditor.default.buffer.title')}"
                        hasFocusableChildren="true" focusEnabled="false"
                        width="100%" height="100%">
                 <s:VGroup width="100%" height="100%">
@@ -1371,7 +1369,7 @@
                                         confirmDelete="false"
                                         >
                     <editor:linkPrototype>
-                      <bpm:SequenceFlow label="@Resource(key='bpmeditor.sequenceflow.label', bundle='bpmeditor')"/>
+                      <bpm:SequenceFlow label="{resourceManager.getString('bpmeditor', 'bpmeditor.sequenceflow.label')}"/>
                     </editor:linkPrototype>
                     <idiag:Diagram id="diagram" width="100%" height="100%" 
                                    selectionMode="multiple" automaticGraphLayout="false">
@@ -1417,7 +1415,7 @@
                               color="black"
                               contentBackgroundAlpha="0"
                               editable="false"
-                              text="@Resource(key='bpmeditor.help.text', bundle='bpmeditor')"
+                              text="{resourceManager.getString('bpmeditor', 'bpmeditor.help.text')}"
                               />
                 </s:Group>  
               </s:Panel>

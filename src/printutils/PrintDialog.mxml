@@ -12,7 +12,7 @@
 -->
 <mx:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
           xmlns:fx="http://ns.adobe.com/mxml/2009" 
-          title="@Resource(key='printutils.PrintDialogTitle', bundle='printutils')"
+          title="{resourceManager.getString('printutils','printutils.PrintDialogTitle')}"
           verticalScrollPolicy="off" horizontalScrollPolicy="off" creationComplete="init()">
   
   <fx:Metadata>
@@ -150,7 +150,7 @@
 
   
   <mx:Form width="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" >   
-    <mx:FormItem label="@Resource(bundle='printutils', key='printutils.PrintAsBitmap')" width="100%">
+    <mx:FormItem label="{resourceManager.getString('printutils','printutils.PrintAsBitmap')}" width="100%">
       <mx:CheckBox id="printAsBitmapCheckbox" selected="false" />
     </mx:FormItem>
     <mx:FormItem label="@Resource(bundle='printutils', key='printutils.Margin')" width="100%">
