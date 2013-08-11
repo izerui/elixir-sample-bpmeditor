@@ -50,8 +50,9 @@ package serialization
     }
     
     /**
-     * Register a set of properties for the root element. These
+     * <li>Register a set of properties for the root element. These
      * properties are always serialized. 
+	 * <li>将多个属性set进根元素,这些属性将会被序列化(作为Xml节点的属性保存起来)
      */
     public function set rootConfiguration(properties:Array):void
     {
@@ -59,11 +60,12 @@ package serialization
     }
     
     /**
-     * Register a set of style properties to be serialized for a given class.
+     * <li>Register a set of style properties to be serialized for a given class.
      * When serialization of style properties is required, specify the list
      * of properties that will be serialized using this method. And also register
-     * a default object initialization function, to initialize the style values
-     * in the default object so that their type is correctly specified.
+     * a default object initialization function, to initialize the style values in the default object so that their type is correctly specified.
+	 * <li>对给定的类set样式属性,只有当这些属性需要被序列化的情况下.这个指定的属性列表
+	 * 通过这个方法将会被序列化. 通过默认的初始化方法,来正确的初始化样式属性值.
      * 
      */
     public function registerStyleProperties(className:String, properties:Array):void
@@ -85,9 +87,10 @@ package serialization
     }
     
     /**
-     * Retrieve a default object which will be used to indicated
+     * <li>Retrieve a default object which will be used to indicated
      * when a parameter or style value has to be serialized. It
      * is also used to know the value type for the attribute or style.
+	 * <li>获取将要被序列化的样式属性的默认值,并且可以获取这个值的属性或者样式
      */
     private function getDefaultObject(className:String):Object {
       var defaultObject:Object = defaults[className];
@@ -111,9 +114,9 @@ package serialization
     // ---------------------------------------------------------------------
     
     /**
-     * Serialize the given object with the tag and all its children.
+     * <li>Serialize the given object with the tag and all its children.
      * It includes the root properties that have been configured.
-     * 
+     * <li>序列化给定元素和该元素包含的属性列表和其子项
      * @see #deserializeTree()
      */
     public function serializeTree(object:Object, rootTag:String) : XML
@@ -122,15 +125,17 @@ package serialization
       
       var root:XML = new XML("<"+rootTag+"></"+rootTag+">");
       // Add top level attributes
+	  // 给元素添加属性
       serializeConfiguration(object, root);
       // Add children nodes and links
+	  // 给元素添加子项或者关联项
       serializeChildren(object, root, root);
       return root;
     }
 
     /**
      * Serialize the given object with the tag. 
-     * 
+     * <li>序列化给定的节点对象
      */
     public function serialize(object:Object, rootTag:String, childrenOnly:Boolean = true) : XML
     {
@@ -384,9 +389,10 @@ package serialization
     }
     
     /**
-     * Serialize the style information for the given object.
+     * <li>Serialize the style information for the given object.
      * The style information required must have been previously
      * registered for the object class.
+	 * <li>序列化给定对象的样式属性列表,前提该列表必须已经注册进这个对象中
      */
     private function serializeStyle(object:Object, defaultObject:Object, parent:XML, root:XML): void
     {
@@ -440,11 +446,12 @@ package serialization
     }
 
     // ---------------------------------------------------------
-    // Deserialize
+    // Deserialize 反序列化
     // ---------------------------------------------------------
     
     /**
-     * Deserialize the given object with its configuration and all its children.
+     * <li>Deserialize the given object with its configuration and all its children.
+	 * <li>凡序列化给定的对象包括属性及其子项
      * @see #serializeTree()
      */
     public function deserializeTree(object:Object, xml:XML) : Object
@@ -680,6 +687,7 @@ package serialization
     /**
      * Deserialize attributes and children elements from the 
      * <code>styles</code> element. 
+	 * 通过<code>styles</code>节点反序列化属性和子项
      */
     private function deserializeStyle(object:Object, xml:XML):void
     {
@@ -697,6 +705,7 @@ package serialization
       }
       
       // String values are serialized as separate elements.
+	  // 字符串值将会被序列化成单独的节点
       for each(var child:XML in xml.children()){
         try {
           name = child.localName();

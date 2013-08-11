@@ -22,25 +22,34 @@ package serialization
   import mx.events.SandboxMouseEvent;
   
   /**
-   * The UndoManager class implements a simple undo/redo mechanism for a DiagramEditor.
+   * <li>The UndoManager class implements a simple undo/redo mechanism for a DiagramEditor.
    * 
    * The undo manager must be attached to a DiagramEditor instance by setting the editor property.
    * The graph is serialized (using an XMLSerializer object) when changes
    * have been done in the editor. The undo() and redo() methods restore the previous
    * state by deserializing the serialized graph.
+   * 
+   * <li>UndoManager 针对流程编辑器，实现了 撤消/重做 流程结构信息的功能。
+   * UndoManager 作为一个property属性被设置在编辑器中，
+   * 图形会被序列化（通过 XMLSerializer 对象）当编辑器发生修改后。
+   * 撤消和重做会恢复到序列化/反序列化之前的状态。
    */
   public class UndoManager extends UIComponent
   {
     // The diagram editor to which to undo manager is attached
+	// 加载流程编辑器对象
     private var _editor:DiagramEditor;
     
     // Contains the successive states of the graph.
+	// 包含图形元素的持续性更改状态，撤消/重做需要使用上
     private var _states:Vector.<Object> = new Vector.<Object>();
     
     // Index of the current state.
+	// 当前状态的index值
     private var _currentState:int = -1;
     
     // Was the graph modified since the last state change?
+	// 较上次状态，该图形是否被更改过
     private var _modified:Boolean = false;
     
     private var _mouseDown:Boolean = false;
@@ -52,7 +61,8 @@ package serialization
     protected var _serializer:XMLSerializer = new XMLSerializer();
         
     /**
-     * The Graph instance being modified. 
+     * <li>The Graph instance being modified. 
+	 * <li>被更改过的图形对象
      */
     public function get graph(): Graph
     {
@@ -60,7 +70,8 @@ package serialization
     }
 
     /**
-     * The DiagramEditor instance to which this undo manager is attached.
+     * <li>The DiagramEditor instance to which this undo manager is attached.
+	 * <li>撤消管理器所包含的编辑器对象
      */
     public function get editor() : DiagramEditor
     {
@@ -110,7 +121,8 @@ package serialization
     
     [Bindable]
     /**
-     * Enables or disables undo/redo for this editor.
+     * <li>Enables or disables undo/redo for this editor.
+	 * <li>开启或关闭 撤消功能
      */
     public function get undoEnabled() : Boolean
     {
@@ -130,7 +142,8 @@ package serialization
     }
     
     /**
-     * The maximum number of changes that can be undone.
+     * <li>The maximum number of changes that can be undone.
+	 * <li>可以被撤消的最大限制数量
      */
     public function get undoLimit() : uint
     {
@@ -152,8 +165,8 @@ package serialization
     }
     
     /**
-     * Undoes the last changes in the editor.
-     * 
+     * <li>Undoes the last changes in the editor.
+     * <li>撤消编辑器最后一次的修改
      * @see #redo()
      * @see #canUndo
      * @see #canRedo
@@ -172,8 +185,8 @@ package serialization
     }
     
     /**
-     * Redoes the last undone changes in the editor.
-     * 
+     * <li>Redoes the last undone changes in the editor.
+     * <li>恢复到撤消之前的状态
      * @see #undo()
      * @see #canUndo
      * @see #canRedo
@@ -193,16 +206,16 @@ package serialization
     
     [Bindable]
     /**
-     * Indicates whether any changes can be undone.
-     * 
+     * <li>Indicates whether any changes can be undone.
+     * <li>是否可以撤消的标志
      * @see #undo()
      */
     public var canUndo:Boolean = false;
     
     [Bindable]
     /**
-     * Indicates whether any undone changes can be redone.
-     * 
+     * <li>Indicates whether any undone changes can be redone.
+     * <li>是否可以重做的标志
      * @see #redo()
      */
     public var canRedo:Boolean = false;
@@ -214,7 +227,8 @@ package serialization
     } 
     
     /**
-     * Clears the undo stack.
+     * <li>Clears the undo stack.
+	 * <li>清除撤消队列,将持续性更改状态重置
      */
     public function clearUndo() : void
     {
@@ -226,9 +240,12 @@ package serialization
     }
     
     /**
-     * Causes the editor to record its state so that a change can be undone.
+     * <li>Causes the editor to record its state so that a change can be undone.
      * This function should be called after external changes to the graph have been done
      * (like performing a graph layout for example), to allow the changes to be undone.
+	 * 
+	 * <li>恢复编辑器记录的变化状态。
+	 * 执行此功能后,应该调用外部图形更改后的完成api(例如: 执行图形布局),并且允许回滚撤消更改.
      */
     public function recordUndo() : void
     {
@@ -237,6 +254,7 @@ package serialization
     }
     
     // Called whenever something changes in the editor
+	// 每当编辑器发生修改,都会触发该事件
     private function handleEventForUndo(event:DiagramEditorEvent) : void
     {
       if(event.isDefaultPrevented())
