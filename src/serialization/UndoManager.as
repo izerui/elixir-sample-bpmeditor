@@ -16,7 +16,8 @@ package serialization
   import com.ibm.ilog.elixir.diagram.editor.DiagramEditorEvent;
   
   import flash.display.DisplayObject;
-  import flash.events.MouseEvent;
+import flash.events.Event;
+import flash.events.MouseEvent;
   
   import mx.core.UIComponent;
   import mx.events.SandboxMouseEvent;
@@ -294,7 +295,7 @@ package serialization
       sandboxRoot.removeEventListener(SandboxMouseEvent.MOUSE_UP_SOMEWHERE, mouseUpHandler, true);
     }
     
-    private function enterFrameHandler(event:Event) : void 
+    private function enterFrameHandler(event:Event) : void
     {
       if(!_mouseDown && _modified && _undoEnabled){
         
